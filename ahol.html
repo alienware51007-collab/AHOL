@@ -28,25 +28,33 @@
       color: #0f0;
       border: 1px solid #0f0;
     }
+
+    /* FIXED BUTTON POSITION */
     #baseButton {
-  background: #000;
-  color: #fff;
-  border: 1px solid #fff;
-  padding: 10px 20px;
-  font-family: monospace;
-  cursor: pointer;
-}
-#baseButton:hover {
-  background: #fff;
-  color: #000;
-}
+      position: absolute;
+      left: 20px;
+      top: 20px;
+      background: #000;
+      color: #fff;
+      border: 1px solid #fff;
+      padding: 10px 20px;
+      font-family: monospace;
+      cursor: pointer;
+    }
+
+    #baseButton:hover {
+      background: #fff;
+      color: #000;
+    }
   </style>
 </head>
 
 <body>
 
-  <h2>AHOL Chatbot</h2>
+  <!-- FIXED BUTTON LOCATION -->
   <button id="baseButton" onclick="goToBase()">.BASE.</button>
+
+  <h2>AHOL Chatbot</h2>
 
   <div id="chatOutput"></div>
 
@@ -54,12 +62,16 @@
 
   <script>
     // ---------------------------
-    // Engine
+    // Navigation Button
     // ---------------------------
     function goToBase() {
-  window.location.href = "https://htmlpreview.github.io/?https://github.com/alienware51007-collab/AHOL/blob/main/globe.html";
-}
+      window.location.href =
+        "https://htmlpreview.github.io/?https://github.com/alienware51007-collab/AHOL/blob/main/globe.html";
+    }
 
+    // ---------------------------
+    // Engine
+    // ---------------------------
     const ChatBot = {
       speakQueue: [],
       active: false,
@@ -94,7 +106,7 @@
     };
 
     // ---------------------------
-    // ChatScript (What the bot says)
+    // ChatScript
     // ---------------------------
     const ChatScript = [
       "AHOL system initializing...",
