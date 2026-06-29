@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>DreamTech Globe</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <style>
+    body {
+      margin: 0;
+      background: #000;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+    canvas {
+      background: #000;
+    }
+  </style>
+</head>
+
+<body>
+
+  <canvas id="globeCanvas" width="400" height="400"></canvas>
+
+  <script>
+    const canvas = document.getElementById("globeCanvas");
+    const ctx = canvas.getContext("2d");
+
+    const cx = canvas.width / 2;
+    const cy = canvas.height / 2;
+    const r = 150;
+
+    let tick = 0; // geo-master counter
+
+    function drawGlobe() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      // subtle movement pulse
+      const pulse = Math.sin(tick / 10) * 4;
+
+      // red sphere
+      ctx.fillStyle = "red";
+      ctx.beginPath();
+      ctx.arc(cx + pulse, cy + pulse, r, 0, Math.PI * 2);
+      ctx.fill();
+
+      // white globe-like lines
+      ctx.strokeStyle = "white";
+      ctx.lineWidth = 1;
+
+      // vertical-ish lines
+      for (let i = -3; i <= 3; i++) {
+        const offset = (i / 3) * r * 0.8;
+        ctx.beginPath();
+        ctx.ellipse(cx + offset + pulse, cy + pulse, r * 0.9, r, 0, 0, Math.PI * 2);
+        ctx.stroke();
+      }
+
+      // horizontal-ish lines
+      for (let j = -3; j <= 3; j++) {
+        const offset = (j / 3) * r * 0.8;
+        ctx.beginPath();
+        ctx.ellipse(cx + pulse, cy + offset + pulse, r, r * 0.9, 0, 0, Math.PI * 2);
+        ctx.stroke();
+      }
+
+      tick++;
+    }
+
+    // GEO-MASTER LOOP — redraw every 0.4 seconds
+    setInterval(drawGlobe, 400);
+
+    // initial draw
+    drawGlobe();
+  </script>
+
+</body>
+</html>
