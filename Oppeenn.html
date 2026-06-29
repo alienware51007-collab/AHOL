@@ -1,1 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>AHOL Globe</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body {
+      margin: 0;
+      background: #000;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+    canvas {
+      background: #000;
+    }
+  </style>
+</head>
+<body>
 
+  <canvas id="globeCanvas" width="400" height="400"></canvas>
+
+  <script>
+    const canvas = document.getElementById("globeCanvas");
+    const ctx = canvas.getContext("2d");
+    const cx = canvas.width / 2;
+    const cy = canvas.height / 2;
+    const r = 150;
+
+    // Red sphere
+    ctx.fillStyle = "red";
+    ctx.beginPath();
+    ctx.arc(cx, cy, r, 0, Math.PI * 2);
+    ctx.fill();
+
+    // White "random" globe-like lines
+    ctx.strokeStyle = "white";
+    ctx.lineWidth = 1;
+
+    // Vertical-ish lines
+    for (let i = -3; i <= 3; i++) {
+      const offset = (i / 3) * r * 0.8;
+      ctx.beginPath();
+      ctx.ellipse(cx + offset, cy, r * 0.9, r, 0, 0, Math.PI * 2);
+      ctx.stroke();
+    }
+
+    // Horizontal-ish lines
+    for (let j = -3; j <= 3; j++) {
+      const offset = (j / 3) * r * 0.8;
+      ctx.beginPath();
+      ctx.ellipse(cx, cy + offset, r, r * 0.9, 0, 0, Math.PI * 2);
+      ctx.stroke();
+    }
+  </script>
+
+</body>
+</html>
