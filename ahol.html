@@ -29,15 +29,13 @@
       border: 1px solid #0f0;
     }
 
-    /* FIXED BUTTON POSITION */
+    /* INLINE BUTTON STYLE */
     #baseButton {
-      position: absolute;
-      left: 20px;
-      top: 20px;
+      margin-left: 10px;
       background: #000;
       color: #fff;
       border: 1px solid #fff;
-      padding: 10px 20px;
+      padding: 5px 12px;
       font-family: monospace;
       cursor: pointer;
     }
@@ -51,11 +49,11 @@
 
 <body>
 
-  <!-- FIXED BUTTON LOCATION -->
- 
-
-  <h2>AHOL Chatbot</h2>
-  <button id="baseButton" onclick="goToBase()">.BASE.</button>
+  <!-- BUTTON MOVED INSIDE THE TITLE -->
+  <h2>
+    AHOL Chatbot
+    <button id="baseButton" onclick="goToBase()">.BASE.</button>
+  </h2>
 
   <div id="chatOutput"></div>
 
