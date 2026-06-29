@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>AHOL Chatbot</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <style>
+    body {
+      background: #111;
+      color: #0f0;
+      font-family: monospace;
+      padding: 20px;
+    }
+
+    #chatOutput {
+      border: 1px solid #0f0;
+      padding: 10px;
+      min-height: 150px;
+      max-width: 600px;
+    }
+
+    #userInput {
+      margin-top: 20px;
+      padding: 10px;
+      width: 300px;
+      background: #222;
+      color: #0f0;
+      border: 1px solid #0f0;
+    }
+  </style>
+</head>
+
+<body>
+
+  <h2>AHOL Chatbot</h2>
+
+  <div id="chatOutput"></div>
+
+  <input id="userInput" placeholder="Type anything to activate AHOL...">
+
+  <script>
+    // ---------------------------
+    // ChatBot Engine
+    // ---------------------------
+    const ChatBot = {
+      speakQueue: [],
+      active: false,
+
+      loadScript(lines) {
+        this.speakQueue.push(...lines);
+        if (!this.active) this.run();
+      },
+
+      run() {
+        this.active = true;
+
+        if (this.speakQueue.length === 0) {
+          this.active = false;
+          return;
+        }
+
+        const line = this.speakQueue.shift();
+        this.output(line);
+
+        setTimeout(() => this.run(), 1200);
+      },
+
+      output(text) {
+        const box = document.getElementById("chatOutput");
+        if (box) {
+          const p = document.createElement("p");
+          p.textContent = text;
+          box.appendChild(p);
+        }
+      }
+    };
+
+    // ---------------------------
+    // ChatScript (What the bot says)
+    // ---------------------------
+    const ChatScript = [
+      "AHOL system initializing...",
+      "Boot sequence complete.",
+      "DreamTech interface online.",
+      "Monitoring environment...",
+      "Standing by for next directive."
+    ];
+
+    // ---------------------------
+    // Activation Control
+    // ---------------------------
+    let chatbotEnabled = false;
+
+    function activateChatBot() {
+      if (!chatbotEnabled) {
+        chatbotEnabled = true;
+        ChatBot.loadScript(ChatScript);
+      }
+    }
+
+    // ---------------------------
+    // User Input Activation
+    // ---------------------------
+    const inputBox = document.getElementById("userInput");
+
+    inputBox.addEventListener("input", () => {
+      activateChatBot();
+    });
+  </script>
+
+</body>
+</html>
