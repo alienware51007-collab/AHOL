@@ -2,194 +2,130 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>AHOL Chatbot</title>
+  <title>DreamTech Globe</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <style>
     body {
+      margin: 0;
       background: #000;
-      color: #fff;
-      font-family: monospace;
-      padding: 20px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
     }
-
-    #chatOutput {
-      border: 1px solid #fff;
-      padding: 10px;
-      min-height: 150px;
-      max-width: 600px;
-    }
-
-    #userInput {
-      margin-top: 20px;
-      padding: 10px;
-      width: 300px;
-      background: #222;
-      color: #0f0;
-      border: 1px solid #0f0;
-    }
-
-    /* INLINE BUTTON STYLE */
-    #baseButton {
-      margin-left: 10px;
+    canvas {
       background: #000;
-      color: #fff;
-      border: 1px solid #fff;
-      padding: 5px 12px;
-      font-family: monospace;
-      cursor: pointer;
-    }
-
-    #baseButton:hover {
-      background: #fff;
-      color: #000;
     }
   </style>
 </head>
 
 <body>
 
-  <!-- BUTTON MOVED INSIDE THE TITLE -->
-  <h2>
-    AHOL Chatbot
-    <button id="baseButton" onclick="goToBase()">.BASE.</button>
-  </h2>
-
-  <div id="chatOutput"></div>
-
-  <input id="userInput" placeholder="Type to activate AHOL...">
+  <canvas id="globeCanvas" width="400" height="400"></canvas>
 
   <script>
-    // ---------------------------
-    // Navigation Button
-    // ---------------------------
-    function goToBase() {
-      window.location.href =
-        "https://htmlpreview.github.io/?https://github.com/alienware51007-collab/AHOL/blob/main/globe.html";
-    }
+    const canvas = document.getElementById("globeCanvas");
+    const ctx = canvas.getContext("2d");
+
+    const cx = canvas.width / 2;
+    const cy = canvas.height / 2;
+    const r = 150;
+
+    let tick = 0;
 
     // ---------------------------
-    // Engine
+    // 007 POINT SYSTEM
     // ---------------------------
-    const ChatBot = {
-      speakQueue: [],
-      active: false,
-
-      loadScript(lines) {
-        this.speakQueue.push(...lines);
-        if (!this.active) this.run();
-      },
-
-      run() {
-        this.active = true;
-
-        if (this.speakQueue.length === 0) {
-          this.active = false;
-          return;
-        }
-
-        const line = this.speakQueue.shift();
-        this.output(line);
-
-        setTimeout(() => this.run(), 1200);
-      },
-
-      output(text) {
-        const box = document.getElementById("chatOutput");
-        if (box) {
-          const p = document.createElement("p");
-          p.textContent = text;
-          box.appendChild(p);
-        }
-      }
-    };
-
-    // ---------------------------
-    // ChatScript
-    // ---------------------------
-    const ChatScript = [
-      "AHOL system initializing...",
-      "Boot sequence complete.",
-      "DreamTech interface online.",
-      "Monitoring environment...",
-      "Standing by for next directive."
+    const points007 = [
+      { x: 42,  y: 88  },
+      { x: 120, y: 140 },
+      { x: 200, y: 60  },
+      { x: 310, y: 180 },
+      { x: 260, y: 300 },
+      { x: 150, y: 250 },
+      { x: 80,  y: 200 },
+      { x: 330, y: 330 },
+      { x: 50,  y: 310 },
+      { x: 210, y: 210 }
     ];
 
-    // ---------------------------
-    // Activation Control
-    // ---------------------------
-    let chatbotEnabled = false;
+    function draw007Points() {
+      points007.forEach(pt => {
+        ctx.fillStyle = "black";
+        ctx.beginPath();
+        ctx.arc(pt.x, pt.y, 4, 0, Math.PI * 2);
+        ctx.fill();
+      });
+    }
 
-    function activateChatBot() {
-      if (!chatbotEnabled) {
-        chatbotEnabled = true;
-        ChatBot.loadScript(ChatScript);
+    // ---------------------------
+    // Globe Drawing
+    // ---------------------------
+    function drawGlobe() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      const pulse = Math.sin(tick / 10) * 4;
+
+      // red sphere
+      ctx.fillStyle = "red";
+      ctx.beginPath();
+      ctx.arc(cx + pulse, cy + pulse, r, 0, Math.PI * 2);
+      ctx.fill();
+
+      // white globe-like lines
+      ctx.strokeStyle = "white";
+      ctx.lineWidth = 1;
+
+      for (let i = -3; i <= 3; i++) {
+        const offset = (i / 3) * r * 0.8;
+        ctx.beginPath();
+        ctx.ellipse(cx + offset + pulse, cy + pulse, r * 0.9, r, 0, 0, Math.PI * 2);
+        ctx.stroke();
       }
+
+      for (let j = -3; j <= 3; j++) {
+        const offset = (j / 3) * r * 0.8;
+        ctx.beginPath();
+        ctx.ellipse(cx + pulse, cy + offset + pulse, r, r * 0.9, 0, 0, Math.PI * 2);
+        ctx.stroke();
+      }
+
+      // ⭐ Draw 007 points every frame
+      draw007Points();
+
+      tick++;
     }
 
     // ---------------------------
-    // User Input Activation
+    // Hover Detection
     // ---------------------------
-    const inputBox = document.getElementById("userInput");
+    canvas.addEventListener("mousemove", (e) => {
+      const rect = canvas.getBoundingClientRect();
+      const mx = e.clientX - rect.left;
+      const my = e.clientY - rect.top;
 
-    inputBox.addEventListener("input", () => {
-      activateChatBot();
+      drawGlobe();
+
+      points007.forEach(pt => {
+        const dx = mx - pt.x;
+        const dy = my - pt.y;
+        const dist = Math.sqrt(dx*dx + dy*dy);
+
+        if (dist < 8) {
+          ctx.fillStyle = "white";
+          ctx.font = "14px monospace";
+          ctx.fillText(`(${pt.x}, ${pt.y})`, pt.x + 10, pt.y - 10);
+        }
+      });
     });
+
     // ---------------------------
-// 007 POINT SYSTEM
-// ---------------------------
+    // Animation Loop
+    // ---------------------------
+    setInterval(drawGlobe, 400);
 
-// 10 random points inside the 400x400 canvas
-const points007 = [
-  { x: 42,  y: 88  },
-  { x: 120, y: 140 },
-  { x: 200, y: 60  },
-  { x: 310, y: 180 },
-  { x: 260, y: 300 },
-  { x: 150, y: 250 },
-  { x: 80,  y: 200 },
-  { x: 330, y: 330 },
-  { x: 50,  y: 310 },
-  { x: 210, y: 210 }
-];
-
-// Draw small black dots
-function draw007Points() {
-  points007.forEach(pt => {
-    ctx.fillStyle = "black";
-    ctx.beginPath();
-    ctx.arc(pt.x, pt.y, 4, 0, Math.PI * 2);
-    ctx.fill();
-  });
-}
-
-// Hover detection
-canvas.addEventListener("mousemove", (e) => {
-  const rect = canvas.getBoundingClientRect();
-  const mx = e.clientX - rect.left;
-  const my = e.clientY - rect.top;
-
-  // Clear hover text area
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-  drawGlobe();
-  draw007Points();
-
-  // Check each point
-  points007.forEach(pt => {
-    const dx = mx - pt.x;
-    const dy = my - pt.y;
-    const dist = Math.sqrt(dx*dx + dy*dy);
-
-    if (dist < 8) {
-      ctx.fillStyle = "white";
-      ctx.font = "14px monospace";
-      ctx.fillText(`(${pt.x}, ${pt.y})`, pt.x + 10, pt.y - 10);
-    }
-  });
-});
-
-// Draw points initially
-draw007Points();
+    drawGlobe();
   </script>
 
 </body>
