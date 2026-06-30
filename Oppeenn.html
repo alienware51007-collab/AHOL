@@ -46,9 +46,9 @@
       ctx.save();
       ctx.globalAlpha = 0.31; // 69% transparent
 
-      const size = 120; // enlarged
-      const x = canvas.width - size - 10; // right side
-      const y = 10; // top
+      const size = 120;
+      const x = canvas.width - size - 10;
+      const y = 10;
 
       ctx.drawImage(faceImg, x, y, size, size);
 
@@ -58,20 +58,19 @@
     // ---------------------------
     // 007 POINT SYSTEM
     // ---------------------------
-const points007 = [
-  { x: 42,  y: 88,  active: false, locked: false },   // ACTIVE
-  { x: 120, y: 140, active: false, locked: false },   // ACTIVE
-  { x: 200, y: 60,  active: false, locked: false },   // ACTIVE
+    const points007 = [
+      { x: 42,  y: 88,  active: false, locked: false },
+      { x: 120, y: 140, active: false, locked: false },
+      { x: 200, y: 60,  active: false, locked: false },
 
-  { x: 310, y: 180, active: false, locked: true },    // LOCKED
-  { x: 260, y: 300, active: false, locked: true },    // LOCKED
-  { x: 150, y: 250, active: false, locked: true },    // LOCKED
-  { x: 80,  y: 200, active: false, locked: true },    // LOCKED
-  { x: 330, y: 330, active: false, locked: true },    // LOCKED
-  { x: 50,  y: 310, active: false, locked: true },    // LOCKED
-  { x: 210, y: 210, active: false, locked: true }     // LOCKED
-];
-
+      { x: 310, y: 180, active: false, locked: true },
+      { x: 260, y: 300, active: false, locked: true },
+      { x: 150, y: 250, active: false, locked: true },
+      { x: 80,  y: 200, active: false, locked: true },
+      { x: 330, y: 330, active: false, locked: true },
+      { x: 50,  y: 310, active: false, locked: true },
+      { x: 210, y: 210, active: false, locked: true }
+    ];
 
     function dropFace(pt) {
       pt.active = true;
@@ -121,13 +120,13 @@ const points007 = [
       }
 
       draw007Points();
-      drawDampenerFace(); // ⭐ always visible
+      drawDampenerFace();
 
       tick++;
     }
 
     // ---------------------------
-    // Hover Detection
+    // Hover Detection (FIXED)
     // ---------------------------
     canvas.addEventListener("mousemove", (e) => {
       const rect = canvas.getBoundingClientRect();
@@ -141,9 +140,11 @@ const points007 = [
         const dy = my - pt.y;
         const dist = Math.sqrt(dx*dx + dy*dy);
 
-        if (dist < 8 && !pt.locked) {
-          dropFace(pt);
-        }
+        if (dist < 8) {
+
+          if (!pt.locked) {
+            dropFace(pt);
+          }
 
           ctx.fillStyle = "white";
           ctx.font = "14px monospace";
