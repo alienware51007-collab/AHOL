@@ -33,27 +33,49 @@
     let tick = 0;
 
     // ---------------------------
+    // Load face image
+    // ---------------------------
+    const faceImg = new Image();
+    faceImg.src = "https://raw.githubusercontent.com/alienware51007-collab/AHOL/main/jr.png";
+
+    // ---------------------------
     // 007 POINT SYSTEM
     // ---------------------------
     const points007 = [
-      { x: 42,  y: 88  },
-      { x: 120, y: 140 },
-      { x: 200, y: 60  },
-      { x: 310, y: 180 },
-      { x: 260, y: 300 },
-      { x: 150, y: 250 },
-      { x: 80,  y: 200 },
-      { x: 330, y: 330 },
-      { x: 50,  y: 310 },
-      { x: 210, y: 210 }
+      { x: 42,  y: 88,  active: false },
+      { x: 120, y: 140, active: false },
+      { x: 200, y: 60,  active: false },
+      { x: 310, y: 180, active: false },
+      { x: 260, y: 300, active: false },
+      { x: 150, y: 250, active: false },
+      { x: 80,  y: 200, active: false },
+      { x: 330, y: 330, active: false },
+      { x: 50,  y: 310, active: false },
+      { x: 210, y: 210, active: false }
     ];
 
+    // ---------------------------
+    // Drop & Display Activation
+    // ---------------------------
+    function dropFace(pt) {
+      pt.active = true;
+    }
+
+    // ---------------------------
+    // Draw 007 Points
+    // ---------------------------
     function draw007Points() {
       points007.forEach(pt => {
-        ctx.fillStyle = "black";
-        ctx.beginPath();
-        ctx.arc(pt.x, pt.y, 4, 0, Math.PI * 2);
-        ctx.fill();
+        if (pt.active) {
+          // Draw face image at point
+          ctx.drawImage(faceImg, pt.x - 20, pt.y - 20, 40, 40);
+        } else {
+          // Draw default dot
+          ctx.fillStyle = "black";
+          ctx.beginPath();
+          ctx.arc(pt.x, pt.y, 4, 0, Math.PI * 2);
+          ctx.fill();
+        }
       });
     }
 
@@ -111,6 +133,10 @@
         const dist = Math.sqrt(dx*dx + dy*dy);
 
         if (dist < 8) {
+          // Activate face drop
+          dropFace(pt);
+
+          // Show coordinates
           ctx.fillStyle = "white";
           ctx.font = "14px monospace";
           ctx.fillText(`(${pt.x}, ${pt.y})`, pt.x + 10, pt.y - 10);
