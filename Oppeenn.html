@@ -18,6 +18,7 @@
     }
   </style>
 </head>
+
 <body>
 
   <canvas id="globeCanvas" width="400" height="400"></canvas>
@@ -33,10 +34,26 @@
     let tick = 0;
 
     // ---------------------------
-    // Load face image
+    // Load face image (jr.png)
     // ---------------------------
     const faceImg = new Image();
     faceImg.src = "https://raw.githubusercontent.com/alienware51007-collab/AHOL/main/jr.png";
+
+    // ---------------------------
+    // Dampener Face (upper-right)
+    // ---------------------------
+    function drawDampenerFace() {
+      ctx.save();
+      ctx.globalAlpha = 0.31; // 69% transparent
+
+      const size = 120; // enlarged
+      const x = canvas.width - size - 10; // right side
+      const y = 10; // top
+
+      ctx.drawImage(faceImg, x, y, size, size);
+
+      ctx.restore();
+    }
 
     // ---------------------------
     // 007 POINT SYSTEM
@@ -54,23 +71,15 @@
       { x: 210, y: 210, active: false }
     ];
 
-    // ---------------------------
-    // Drop & Display Activation
-    // ---------------------------
     function dropFace(pt) {
       pt.active = true;
     }
 
-    // ---------------------------
-    // Draw 007 Points
-    // ---------------------------
     function draw007Points() {
       points007.forEach(pt => {
         if (pt.active) {
-          // Draw face image at point
           ctx.drawImage(faceImg, pt.x - 20, pt.y - 20, 40, 40);
         } else {
-          // Draw default dot
           ctx.fillStyle = "black";
           ctx.beginPath();
           ctx.arc(pt.x, pt.y, 4, 0, Math.PI * 2);
@@ -87,13 +96,11 @@
 
       const pulse = Math.sin(tick / 10) * 4;
 
-      // red sphere
       ctx.fillStyle = "red";
       ctx.beginPath();
       ctx.arc(cx + pulse, cy + pulse, r, 0, Math.PI * 2);
       ctx.fill();
 
-      // white globe-like lines
       ctx.strokeStyle = "white";
       ctx.lineWidth = 1;
 
@@ -111,8 +118,8 @@
         ctx.stroke();
       }
 
-      // ⭐ Draw 007 points every frame
       draw007Points();
+      drawDampenerFace(); // ⭐ always visible
 
       tick++;
     }
@@ -133,10 +140,8 @@
         const dist = Math.sqrt(dx*dx + dy*dy);
 
         if (dist < 8) {
-          // Activate face drop
           dropFace(pt);
 
-          // Show coordinates
           ctx.fillStyle = "white";
           ctx.font = "14px monospace";
           ctx.fillText(`(${pt.x}, ${pt.y})`, pt.x + 10, pt.y - 10);
@@ -148,7 +153,6 @@
     // Animation Loop
     // ---------------------------
     setInterval(drawGlobe, 400);
-
     drawGlobe();
   </script>
 
