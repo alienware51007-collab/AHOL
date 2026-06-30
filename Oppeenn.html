@@ -34,24 +34,59 @@
     let tick = 0;
 
     // ---------------------------
-    // Load face image (jr.png)
+    // Load jr.png (normal activation)
     // ---------------------------
     const faceImg = new Image();
     faceImg.src = "https://raw.githubusercontent.com/alienware51007-collab/AHOL/main/jr.png";
+
+    // ---------------------------
+    // Load jrxxyy.png (full-screen activation)
+    // ---------------------------
+    const fullImg = new Image();
+    fullImg.src = "https://raw.githubusercontent.com/alienware51007-collab/AHOL/main/jrxxyy.png";
+
+    // ---------------------------
+    // Full-screen activation function (ONLY jrxxyy.png)
+    // ---------------------------
+    function activateFullScreenImage() {
+      const overlay = document.createElement("div");
+      overlay.style.position = "fixed";
+      overlay.style.top = "0";
+      overlay.style.left = "0";
+      overlay.style.width = "100vw";
+      overlay.style.height = "100vh";
+      overlay.style.background = "black";
+      overlay.style.display = "flex";
+      overlay.style.justifyContent = "center";
+      overlay.style.alignItems = "center";
+      overlay.style.zIndex = "9999";
+
+      const img = document.createElement("img");
+      img.src = fullImg.src;   // ⭐ jrxxyy.png only
+      img.style.width = "100%";
+      img.style.height = "100%";
+      img.style.objectFit = "contain";
+
+      overlay.appendChild(img);
+
+      overlay.addEventListener("click", () => overlay.remove());
+      overlay.addEventListener("touchstart", () => overlay.remove());
+
+      document.body.appendChild(overlay);
+    }
 
     // ---------------------------
     // Dampener Face (upper-right)
     // ---------------------------
     function drawDampenerFace() {
       ctx.save();
-      ctx.globalAlpha = 0.31; // 69% transparent
+      ctx.globalAlpha = 0.31;
 
       const size = 120;
       const x = canvas.width - size - 10;
       const y = 10;
 
       ctx.drawImage(faceImg, x, y, size, size);
-
       ctx.restore();
     }
 
@@ -67,7 +102,10 @@
       { x: 260, y: 300, active: false, locked: true },
       { x: 150, y: 250, active: false, locked: true },
       { x: 80,  y: 200, active: false, locked: true },
+
+      // ⭐ bottom-most point (full-screen trigger)
       { x: 330, y: 330, active: false, locked: true },
+
       { x: 50,  y: 310, active: false, locked: true },
       { x: 210, y: 210, active: false, locked: true }
     ];
@@ -126,7 +164,7 @@
     }
 
     // ---------------------------
-    // Hover Detection (FIXED)
+    // Hover Detection + Full-screen trigger
     // ---------------------------
     canvas.addEventListener("mousemove", (e) => {
       const rect = canvas.getBoundingClientRect();
@@ -142,6 +180,12 @@
 
         if (dist < 8) {
 
+          // ⭐ Full-screen trigger ONLY for (330, 330)
+          if (pt.x === 330 && pt.y === 330) {
+            activateFullScreenImage();
+          }
+
+          // Normal jr.png activation
           if (!pt.locked) {
             dropFace(pt);
           }
@@ -149,6 +193,25 @@
           ctx.fillStyle = "white";
           ctx.font = "14px monospace";
           ctx.fillText(`(${pt.x}, ${pt.y})`, pt.x + 10, pt.y - 10);
+        }
+      });
+    });
+
+    // ---------------------------
+    // Mobile Tap Support
+    // ---------------------------
+    canvas.addEventListener("click", (e) => {
+      const rect = canvas.getBoundingClientRect();
+      const mx = e.clientX - rect.left;
+      const my = e.clientY - rect.top;
+
+      points007.forEach(pt => {
+        const dx = mx - pt.x;
+        const dy = my - pt.y;
+        const dist = Math.sqrt(dx*dx + dy*dy);
+
+        if (dist < 8 && pt.x === 330 && pt.y === 330) {
+          activateFullScreenImage();
         }
       });
     });
