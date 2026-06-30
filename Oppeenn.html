@@ -141,8 +141,9 @@ const points007 = [
         const dy = my - pt.y;
         const dist = Math.sqrt(dx*dx + dy*dy);
 
-        if (dist < 8) {
+        if (dist < 8 && !pt.locked) {
           dropFace(pt);
+        }
 
           ctx.fillStyle = "white";
           ctx.font = "14px monospace";
