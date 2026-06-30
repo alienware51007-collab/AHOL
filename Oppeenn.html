@@ -30,12 +30,39 @@
     const cy = canvas.height / 2;
     const r = 150;
 
-    let tick = 0; // geo-master counter
+    let tick = 0;
 
+    // ---------------------------
+    // 007 POINT SYSTEM
+    // ---------------------------
+    const points007 = [
+      { x: 42,  y: 88  },
+      { x: 120, y: 140 },
+      { x: 200, y: 60  },
+      { x: 310, y: 180 },
+      { x: 260, y: 300 },
+      { x: 150, y: 250 },
+      { x: 80,  y: 200 },
+      { x: 330, y: 330 },
+      { x: 50,  y: 310 },
+      { x: 210, y: 210 }
+    ];
+
+    function draw007Points() {
+      points007.forEach(pt => {
+        ctx.fillStyle = "black";
+        ctx.beginPath();
+        ctx.arc(pt.x, pt.y, 4, 0, Math.PI * 2);
+        ctx.fill();
+      });
+    }
+
+    // ---------------------------
+    // Globe Drawing
+    // ---------------------------
     function drawGlobe() {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-      // slight movement pulse
       const pulse = Math.sin(tick / 10) * 4;
 
       // red sphere
@@ -48,7 +75,6 @@
       ctx.strokeStyle = "white";
       ctx.lineWidth = 1;
 
-      // vertical-ish lines
       for (let i = -3; i <= 3; i++) {
         const offset = (i / 3) * r * 0.8;
         ctx.beginPath();
@@ -56,7 +82,6 @@
         ctx.stroke();
       }
 
-      // horizontal-ish lines
       for (let j = -3; j <= 3; j++) {
         const offset = (j / 3) * r * 0.8;
         ctx.beginPath();
@@ -64,13 +89,40 @@
         ctx.stroke();
       }
 
+      // ⭐ Draw 007 points every frame
+      draw007Points();
+
       tick++;
     }
 
-    // GEO-MASTER LOOP — redraw every 0.4 seconds
+    // ---------------------------
+    // Hover Detection
+    // ---------------------------
+    canvas.addEventListener("mousemove", (e) => {
+      const rect = canvas.getBoundingClientRect();
+      const mx = e.clientX - rect.left;
+      const my = e.clientY - rect.top;
+
+      drawGlobe();
+
+      points007.forEach(pt => {
+        const dx = mx - pt.x;
+        const dy = my - pt.y;
+        const dist = Math.sqrt(dx*dx + dy*dy);
+
+        if (dist < 8) {
+          ctx.fillStyle = "white";
+          ctx.font = "14px monospace";
+          ctx.fillText(`(${pt.x}, ${pt.y})`, pt.x + 10, pt.y - 10);
+        }
+      });
+    });
+
+    // ---------------------------
+    // Animation Loop
+    // ---------------------------
     setInterval(drawGlobe, 400);
 
-    // initial draw
     drawGlobe();
   </script>
 
