@@ -58,18 +58,20 @@
     // ---------------------------
     // 007 POINT SYSTEM
     // ---------------------------
-    const points007 = [
-      { x: 42,  y: 88,  active: false },
-      { x: 120, y: 140, active: false },
-      { x: 200, y: 60,  active: false },
-      { x: 310, y: 180, active: false },
-      { x: 260, y: 300, active: false },
-      { x: 150, y: 250, active: false },
-      { x: 80,  y: 200, active: false },
-      { x: 330, y: 330, active: false },
-      { x: 50,  y: 310, active: false },
-      { x: 210, y: 210, active: false }
-    ];
+const points007 = [
+  { x: 42,  y: 88,  active: false, locked: false },   // ACTIVE
+  { x: 120, y: 140, active: false, locked: false },   // ACTIVE
+  { x: 200, y: 60,  active: false, locked: false },   // ACTIVE
+
+  { x: 310, y: 180, active: false, locked: true },    // LOCKED
+  { x: 260, y: 300, active: false, locked: true },    // LOCKED
+  { x: 150, y: 250, active: false, locked: true },    // LOCKED
+  { x: 80,  y: 200, active: false, locked: true },    // LOCKED
+  { x: 330, y: 330, active: false, locked: true },    // LOCKED
+  { x: 50,  y: 310, active: false, locked: true },    // LOCKED
+  { x: 210, y: 210, active: false, locked: true }     // LOCKED
+];
+
 
     function dropFace(pt) {
       pt.active = true;
