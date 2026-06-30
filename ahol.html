@@ -135,6 +135,61 @@
     inputBox.addEventListener("input", () => {
       activateChatBot();
     });
+    // ---------------------------
+// 007 POINT SYSTEM
+// ---------------------------
+
+// 10 random points inside the 400x400 canvas
+const points007 = [
+  { x: 42,  y: 88  },
+  { x: 120, y: 140 },
+  { x: 200, y: 60  },
+  { x: 310, y: 180 },
+  { x: 260, y: 300 },
+  { x: 150, y: 250 },
+  { x: 80,  y: 200 },
+  { x: 330, y: 330 },
+  { x: 50,  y: 310 },
+  { x: 210, y: 210 }
+];
+
+// Draw small black dots
+function draw007Points() {
+  points007.forEach(pt => {
+    ctx.fillStyle = "black";
+    ctx.beginPath();
+    ctx.arc(pt.x, pt.y, 4, 0, Math.PI * 2);
+    ctx.fill();
+  });
+}
+
+// Hover detection
+canvas.addEventListener("mousemove", (e) => {
+  const rect = canvas.getBoundingClientRect();
+  const mx = e.clientX - rect.left;
+  const my = e.clientY - rect.top;
+
+  // Clear hover text area
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  drawGlobe();
+  draw007Points();
+
+  // Check each point
+  points007.forEach(pt => {
+    const dx = mx - pt.x;
+    const dy = my - pt.y;
+    const dist = Math.sqrt(dx*dx + dy*dy);
+
+    if (dist < 8) {
+      ctx.fillStyle = "white";
+      ctx.font = "14px monospace";
+      ctx.fillText(`(${pt.x}, ${pt.y})`, pt.x + 10, pt.y - 10);
+    }
+  });
+});
+
+// Draw points initially
+draw007Points();
   </script>
 
 </body>
