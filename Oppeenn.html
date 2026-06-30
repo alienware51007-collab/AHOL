@@ -62,7 +62,7 @@
       overlay.style.zIndex = "9999";
 
       const img = document.createElement("img");
-      img.src = fullImg.src;   // ⭐ jrxxyy.png only
+      img.src = fullImg.src;
       img.style.width = "100%";
       img.style.height = "100%";
       img.style.objectFit = "contain";
@@ -178,18 +178,17 @@
         const dy = my - pt.y;
         const dist = Math.sqrt(dx*dx + dy*dy);
 
+        // ⭐ Full-screen trigger for bottom-most point
+        if (dist < 12 && pt.x === 330 && pt.y === 330) {
+          activateFullScreenImage();
+        }
+
+        // Normal jr.png activation
+        if (dist < 8 && !pt.locked) {
+          dropFace(pt);
+        }
+
         if (dist < 8) {
-
-          // ⭐ Full-screen trigger ONLY for (330, 330)
-          if (pt.x === 330 && pt.y === 330) {
-            activateFullScreenImage();
-          }
-
-          // Normal jr.png activation
-          if (!pt.locked) {
-            dropFace(pt);
-          }
-
           ctx.fillStyle = "white";
           ctx.font = "14px monospace";
           ctx.fillText(`(${pt.x}, ${pt.y})`, pt.x + 10, pt.y - 10);
@@ -210,7 +209,7 @@
         const dy = my - pt.y;
         const dist = Math.sqrt(dx*dx + dy*dy);
 
-        if (dist < 8 && pt.x === 330 && pt.y === 330) {
+        if (dist < 12 && pt.x === 330 && pt.y === 330) {
           activateFullScreenImage();
         }
       });
