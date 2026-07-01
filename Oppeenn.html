@@ -124,6 +124,10 @@
     }
 
     function drawSplineOnOverlay(sctx) {
+
+      // ⭐ Make canvas fully transparent ⭐
+      sctx.clearRect(0, 0, splineCanvas.width, splineCanvas.height);
+
       const splinePoints = [
         { x: 100, y: 600 },
         { x: 300, y: 300 },
@@ -134,7 +138,7 @@
 
       const spline = curveNaturalNeonGreen(splinePoints);
 
-      sctx.strokeStyle = "#39FF14";
+      sctx.strokeStyle = "#39FF14"; // neon green
       sctx.lineWidth = 4;
       sctx.beginPath();
 
@@ -171,24 +175,31 @@
       overlay.style.alignItems = "center";
       overlay.style.zIndex = "9999";
 
+      // ⭐ jr.xxyy image ABOVE the spline ⭐
       const img = document.createElement("img");
       img.src = fullImg.src;
       img.style.width = "100%";
       img.style.height = "100%";
       img.style.objectFit = "contain";
+      img.style.position = "absolute";
+      img.style.zIndex = "10001";  // ⭐ Image on top
+      img.style.opacity = "0.75";  // ⭐ Slight transparency
       overlay.appendChild(img);
 
-      // ⭐ NEW: Canvas for spline on jr.xxyy page ⭐
+      // ⭐ Transparent canvas BELOW the image ⭐
       const splineCanvas = document.createElement("canvas");
       splineCanvas.width = window.innerWidth;
       splineCanvas.height = window.innerHeight;
       splineCanvas.style.position = "absolute";
       splineCanvas.style.top = "0";
       splineCanvas.style.left = "0";
-      splineCanvas.style.zIndex = "10000";
+      splineCanvas.style.zIndex = "10000"; // ⭐ Spline underneath
+      splineCanvas.style.background = "transparent";
       overlay.appendChild(splineCanvas);
 
       const sctx = splineCanvas.getContext("2d");
+
+      // ⭐ Draw neon spline under the image ⭐
       drawSplineOnOverlay(sctx);
 
       overlay.addEventListener("click", () => overlay.remove());
