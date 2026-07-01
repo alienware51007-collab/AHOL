@@ -231,37 +231,47 @@
     // ---------------------------
     // Globe Drawing
     // ---------------------------
-    function drawGlobe() {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      const pulse = Math.sin(tick / 10) * 4;
+function drawGlobe() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  const pulse = Math.sin(tick / 10) * 4;
 
-      ctx.fillStyle = globeColor;
-      ctx.beginPath();
-      ctx.arc(cx + pulse, cy + pulse, r, 0, Math.PI * 2);
-      ctx.fill();
+  // Globe
+  ctx.fillStyle = globeColor;
+  ctx.beginPath();
+  ctx.arc(cx + pulse, cy + pulse, r, 0, Math.PI * 2);
+  ctx.fill();
 
-      ctx.strokeStyle = "white";
-      ctx.lineWidth = 1;
+  ctx.strokeStyle = "white";
+  ctx.lineWidth = 1;
 
-      for (let i = -3; i <= 3; i++) {
-        const offset = (i / 3) * r * 0.8;
-        ctx.beginPath();
-        ctx.ellipse(cx + offset + pulse, cy + pulse, r * 0.9, r, 0, 0, Math.PI * 2);
-        ctx.stroke();
-      }
+  for (let i = -3; i <= 3; i++) {
+    const offset = (i / 3) * r * 0.8;
+    ctx.beginPath();
+    ctx.ellipse(cx + offset + pulse, cy + pulse, r * 0.9, r, 0, 0, Math.PI * 2);
+    ctx.stroke();
+  }
 
-      for (let j = -3; j <= 3; j++) {
-        const offset = (j / 3) * r * 0.8;
-        ctx.beginPath();
-        ctx.ellipse(cx + pulse, cy + offset + pulse, r, r * 0.9, 0, 0, Math.PI * 2);
-        ctx.stroke();
-      }
+  for (let j = -3; j <= 3; j++) {
+    const offset = (j / 3) * r * 0.8;
+    ctx.beginPath();
+    ctx.ellipse(cx + pulse, cy + offset + pulse, r, r * 0.9, 0, 0, Math.PI * 2);
+    ctx.stroke();
+  }
 
-      draw007Points();
-      drawDampenerFace();
-      tick++;
-    }
+  // ⭐ ALWAYS DRAW NEON GREEN SPLINE ⭐
+  const splinePoints = [
+    { x: 50, y: 300 },
+    { x: 120, y: 200 },
+    { x: 200, y: 260 },
+    { x: 280, y: 180 },
+    { x: 350, y: 320 }
+  ];
+  drawNaturalSplineNeonGreen(splinePoints);
 
+  draw007Points();
+  drawDampenerFace();
+  tick++;
+}
     // ---------------------------
     // Hover Detection
     // ---------------------------
