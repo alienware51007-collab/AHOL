@@ -33,21 +33,12 @@
 
     let tick = 0;
 
-    // ---------------------------
-    // Load jr.png (normal activation)
-    // ---------------------------
     const faceImg = new Image();
     faceImg.src = "https://raw.githubusercontent.com/alienware51007-collab/AHOL/main/jr.png";
 
-    // ---------------------------
-    // Load jrxxyy.png (full-screen activation)
-    // ---------------------------
     const fullImg = new Image();
     fullImg.src = "https://raw.githubusercontent.com/alienware51007-collab/AHOL/main/jrxxyy.png";
 
-    // ---------------------------
-    // Full-screen activation function (ONLY jrxxyy.png)
-    // ---------------------------
     function activateFullScreenImage() {
       const overlay = document.createElement("div");
       overlay.style.position = "fixed";
@@ -75,9 +66,6 @@
       document.body.appendChild(overlay);
     }
 
-    // ---------------------------
-    // Dampener Face (upper-right)
-    // ---------------------------
     function drawDampenerFace() {
       ctx.save();
       ctx.globalAlpha = 0.31;
@@ -90,9 +78,6 @@
       ctx.restore();
     }
 
-    // ---------------------------
-    // 007 POINT SYSTEM
-    // ---------------------------
     const points007 = [
       { x: 42,  y: 88,  active: false, locked: false },
       { x: 120, y: 140, active: false, locked: false },
@@ -103,8 +88,7 @@
       { x: 150, y: 250, active: false, locked: true },
       { x: 80,  y: 200, active: false, locked: true },
 
-      // ⭐ bottom-most point (full-screen trigger)
-      { x: 330, y: 330, active: false, locked: true },
+      { x: 330, y: 330, active: false, locked: true }, // ⭐ full-screen trigger
 
       { x: 50,  y: 310, active: false, locked: true },
       { x: 210, y: 210, active: false, locked: true }
@@ -127,9 +111,6 @@
       });
     }
 
-    // ---------------------------
-    // Globe Drawing
-    // ---------------------------
     function drawGlobe() {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
@@ -163,9 +144,7 @@
       tick++;
     }
 
-    // ---------------------------
-    // Hover Detection + Full-screen trigger
-    // ---------------------------
+    // ⭐ UPDATED: Reliable full-screen trigger
     canvas.addEventListener("mousemove", (e) => {
       const rect = canvas.getBoundingClientRect();
       const mx = e.clientX - rect.left;
@@ -178,27 +157,17 @@
         const dy = my - pt.y;
         const dist = Math.sqrt(dx*dx + dy*dy);
 
-        // ⭐ Full-screen trigger for bottom-most point
-        if (dist < 12 && pt.x === 330 && pt.y === 330) {
+        // ⭐ Full-screen trigger (distance only)
+        if (dist < 15 && pt === points007[7]) {
           activateFullScreenImage();
         }
 
-        // Normal jr.png activation
         if (dist < 8 && !pt.locked) {
           dropFace(pt);
-        }
-
-        if (dist < 8) {
-          ctx.fillStyle = "white";
-          ctx.font = "14px monospace";
-          ctx.fillText(`(${pt.x}, ${pt.y})`, pt.x + 10, pt.y - 10);
         }
       });
     });
 
-    // ---------------------------
-    // Mobile Tap Support
-    // ---------------------------
     canvas.addEventListener("click", (e) => {
       const rect = canvas.getBoundingClientRect();
       const mx = e.clientX - rect.left;
@@ -209,15 +178,12 @@
         const dy = my - pt.y;
         const dist = Math.sqrt(dx*dx + dy*dy);
 
-        if (dist < 12 && pt.x === 330 && pt.y === 330) {
+        if (dist < 15 && pt === points007[7]) {
           activateFullScreenImage();
         }
       });
     });
 
-    // ---------------------------
-    // Animation Loop
-    // ---------------------------
     setInterval(drawGlobe, 400);
     drawGlobe();
   </script>
