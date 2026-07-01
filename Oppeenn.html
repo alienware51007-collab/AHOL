@@ -24,15 +24,15 @@
       position: fixed;
       bottom: 10px;
       left: 10px;
-      width: 300px;
-      height: 500;
+      width: 120px;
+      height: auto;
       z-index: 9998;
     }
 
     #bottomLeftPhoto img {
       width: 100%;
       height: auto;
-      opacity: 40;
+      opacity: 0.10;
     }
   </style>
 </head>
@@ -43,6 +43,9 @@
   <div id="bottomLeftPhoto">
     <img src="https://raw.githubusercontent.com/alienware51007-collab/AHOL/main/zxcv.png">
   </div>
+
+  <!-- Hidden canvas for image analysis -->
+  <canvas id="analysisCanvas" width="400" height="400" style="display:none;"></canvas>
 
   <canvas id="globeCanvas" width="400" height="400"></canvas>
 
@@ -55,13 +58,85 @@
     const r = 150;
     let tick = 0;
 
+    let globeColor = "red"; // dynamic color based on image analysis
+
+    // ---------------------------
+    // Load Images
+    // ---------------------------
     const faceImg = new Image();
     faceImg.src = "https://raw.githubusercontent.com/alienware51007-collab/AHOL/main/jr.png";
 
     const fullImg = new Image();
     fullImg.src = "https://raw.githubusercontent.com/alienware51007-collab/AHOL/main/jrxxyy.png";
 
+    // --------------------------------------
+    // MATLAB-STYLE IMAGE ANALYSIS FUNCTIONS
+    // --------------------------------------
+
+    function matlabLoadImageForAnalysis(img) {
+      const ac = document.getElementById("analysisCanvas");
+      const actx = ac.getContext("2d");
+
+      actx.drawImage(img, 0, 0, ac.width, ac.height);
+      return actx.getImageData(0, 0, ac.width, ac.height);
+    }
+
+    function matlabComputeBrightness(imageData) {
+      let sum = 0;
+      for (let i = 0; i < imageData.data.length; i += 4) {
+        const r = imageData.data[i];
+        const g = imageData.data[i + 1];
+        const b = imageData.data[i + 2];
+        sum += (r + g + b) / 3;
+      }
+      return sum / (imageData.data.length / 4);
+    }
+
+    function matlabDominantColor(imageData) {
+      let rSum = 0, gSum = 0, bSum = 0;
+      const total = imageData.data.length / 4;
+
+      for (let i = 0; i < imageData.data.length; i += 4) {
+        rSum += imageData.data[i];
+        gSum += imageData.data[i + 1];
+        bSum += imageData.data[i + 2];
+      }
+
+      return {
+        r: Math.round(rSum / total),
+        g: Math.round(gSum / total),
+        b: Math.round(bSum / total)
+      };
+    }
+
+    function matlabRuntimeInteraction(brightness, color) {
+      console.log("Brightness:", brightness);
+      console.log("Dominant Color:", color);
+
+      if (brightness < 80) {
+        globeColor = "darkred";
+      } else if (brightness < 150) {
+        globeColor = "purple";
+      } else {
+        globeColor = "cyan";
+      }
+
+      console.log("Globe color changed to:", globeColor);
+    }
+
+    // ---------------------------
+    // Full-screen activation + analysis
+    // ---------------------------
     function activateFullScreenImage() {
+
+      // Run MATLAB-style analysis
+      const analysisData = matlabLoadImageForAnalysis(fullImg);
+      const brightness = matlabComputeBrightness(analysisData);
+      const color = matlabDominantColor(analysisData);
+
+      matlabRuntimeInteraction(brightness, color);
+
+      // Full-screen overlay
       const overlay = document.createElement("div");
       overlay.style.position = "fixed";
       overlay.style.top = "0";
@@ -88,6 +163,9 @@
       document.body.appendChild(overlay);
     }
 
+    // ---------------------------
+    // Dampener Face (upper-right)
+    // ---------------------------
     function drawDampenerFace() {
       ctx.save();
       ctx.globalAlpha = 0.10;
@@ -98,6 +176,9 @@
       ctx.restore();
     }
 
+    // ---------------------------
+    // 007 POINT SYSTEM
+    // ---------------------------
     const points007 = [
       { x: 42,  y: 88,  active: false, locked: false },
       { x: 120, y: 140, active: false, locked: false },
@@ -128,11 +209,14 @@
       });
     }
 
+    // ---------------------------
+    // Globe Drawing
+    // ---------------------------
     function drawGlobe() {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       const pulse = Math.sin(tick / 10) * 4;
 
-      ctx.fillStyle = "red";
+      ctx.fillStyle = globeColor;
       ctx.beginPath();
       ctx.arc(cx + pulse, cy + pulse, r, 0, Math.PI * 2);
       ctx.fill();
@@ -159,6 +243,9 @@
       tick++;
     }
 
+    // ---------------------------
+    // Hover Detection
+    // ---------------------------
     canvas.addEventListener("mousemove", (e) => {
       const rect = canvas.getBoundingClientRect();
       const mx = e.clientX - rect.left;
@@ -179,6 +266,9 @@
       });
     });
 
+    // ---------------------------
+    // Clickable Event for Full‑Screen Photo
+    // ---------------------------
     canvas.addEventListener("click", (e) => {
       const rect = canvas.getBoundingClientRect();
       const mx = e.clientX - rect.left;
@@ -195,6 +285,9 @@
       });
     });
 
+    // ---------------------------
+    // Animation Loop
+    // ---------------------------
     setInterval(drawGlobe, 400);
     drawGlobe();
   </script>
