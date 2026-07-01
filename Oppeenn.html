@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <title>AHOL Globe Motion</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
   <style>
     body {
       margin: 0;
@@ -13,13 +14,35 @@
       align-items: center;
       height: 100vh;
     }
+
     canvas {
       background: #000;
+    }
+
+    /* Bottom-left photo */
+    #bottomLeftPhoto {
+      position: fixed;
+      bottom: 10px;
+      left: 10px;
+      width: 120px;
+      height: auto;
+      z-index: 9998;
+    }
+
+    #bottomLeftPhoto img {
+      width: 100%;
+      height: auto;
+      opacity: 0.10;
     }
   </style>
 </head>
 
 <body>
+
+  <!-- Bottom-left photo -->
+  <div id="bottomLeftPhoto">
+    <img src="https://raw.githubusercontent.com/alienware51007-collab/AHOL/main/zxcv.png">
+  </div>
 
   <canvas id="globeCanvas" width="400" height="400"></canvas>
 
@@ -32,18 +55,12 @@
     const r = 150;
     let tick = 0;
 
-    // ---------------------------
-    // Load Images
-    // ---------------------------
     const faceImg = new Image();
     faceImg.src = "https://raw.githubusercontent.com/alienware51007-collab/AHOL/main/jr.png";
 
     const fullImg = new Image();
     fullImg.src = "https://raw.githubusercontent.com/alienware51007-collab/AHOL/main/jrxxyy.png";
 
-    // ---------------------------
-    // Full-screen activation
-    // ---------------------------
     function activateFullScreenImage() {
       const overlay = document.createElement("div");
       overlay.style.position = "fixed";
@@ -71,12 +88,9 @@
       document.body.appendChild(overlay);
     }
 
-    // ---------------------------
-    // Dampener Face (upper-right)
-    // ---------------------------
     function drawDampenerFace() {
       ctx.save();
-      ctx.globalAlpha = 0.10;   // 10% transparency
+      ctx.globalAlpha = 0.10;
       const size = 120;
       const x = canvas.width - size - 10;
       const y = 10;
@@ -84,9 +98,6 @@
       ctx.restore();
     }
 
-    // ---------------------------
-    // 007 POINT SYSTEM
-    // ---------------------------
     const points007 = [
       { x: 42,  y: 88,  active: false, locked: false },
       { x: 120, y: 140, active: false, locked: false },
@@ -95,10 +106,7 @@
       { x: 260, y: 300, active: false, locked: true },
       { x: 150, y: 250, active: false, locked: true },
       { x: 80,  y: 200, active: false, locked: true },
-
-      // ⭐ bottom-most point (click trigger)
       { x: 330, y: 330, active: false, locked: true },
-
       { x: 50,  y: 310, active: false, locked: true },
       { x: 210, y: 210, active: false, locked: true }
     ];
@@ -112,7 +120,7 @@
         if (pt.active) {
           ctx.drawImage(faceImg, pt.x - 20, pt.y - 20, 40, 40);
         } else {
-          ctx.fillStyle = "yellow";   // make visible even under globe
+          ctx.fillStyle = "yellow";
           ctx.beginPath();
           ctx.arc(pt.x, pt.y, 5, 0, Math.PI * 2);
           ctx.fill();
@@ -120,9 +128,6 @@
       });
     }
 
-    // ---------------------------
-    // Globe Drawing
-    // ---------------------------
     function drawGlobe() {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       const pulse = Math.sin(tick / 10) * 4;
@@ -154,9 +159,6 @@
       tick++;
     }
 
-    // ---------------------------
-    // Hover Detection
-    // ---------------------------
     canvas.addEventListener("mousemove", (e) => {
       const rect = canvas.getBoundingClientRect();
       const mx = e.clientX - rect.left;
@@ -167,9 +169,7 @@
         const dy = my - pt.y;
         const dist = Math.sqrt(dx*dx + dy*dy);
 
-        if (dist < 8 && !pt.locked) {
-          dropFace(pt);
-        }
+        if (dist < 8 && !pt.locked) dropFace(pt);
 
         if (dist < 8) {
           ctx.fillStyle = "white";
@@ -179,9 +179,6 @@
       });
     });
 
-    // ---------------------------
-    // Clickable Event for Full‑Screen Photo
-    // ---------------------------
     canvas.addEventListener("click", (e) => {
       const rect = canvas.getBoundingClientRect();
       const mx = e.clientX - rect.left;
@@ -198,9 +195,6 @@
       });
     });
 
-    // ---------------------------
-    // Animation Loop
-    // ---------------------------
     setInterval(drawGlobe, 400);
     drawGlobe();
   </script>
