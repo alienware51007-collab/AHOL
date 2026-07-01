@@ -123,18 +123,27 @@
       return result;
     }
 
-    function drawNaturalSplineNeonGreen(points) {
-      const spline = curveNaturalNeonGreen(points);
-      ctx.save();
-      ctx.strokeStyle = "#39FF14";
-      ctx.lineWidth = 3;
-      ctx.beginPath();
+    function drawSplineOnOverlay(sctx) {
+      const splinePoints = [
+        { x: 100, y: 600 },
+        { x: 300, y: 300 },
+        { x: 600, y: 500 },
+        { x: 900, y: 250 },
+        { x: 1200, y: 700 }
+      ];
+
+      const spline = curveNaturalNeonGreen(splinePoints);
+
+      sctx.strokeStyle = "#39FF14";
+      sctx.lineWidth = 4;
+      sctx.beginPath();
+
       spline.forEach((pt, index) => {
-        if (index === 0) ctx.moveTo(pt.x, pt.y);
-        else ctx.lineTo(pt.x, pt.y);
+        if (index === 0) sctx.moveTo(pt.x, pt.y);
+        else sctx.lineTo(pt.x, pt.y);
       });
-      ctx.stroke();
-      ctx.restore();
+
+      sctx.stroke();
     }
 
     // ---------------------------
@@ -148,18 +157,6 @@
         const color = matlabDominantColor(analysisData);
 
         matlabRuntimeInteraction(brightness, color);
-
-        // Draw neon spline
-        const splinePoints = [
-          { x: 50, y: 300 },
-          { x: 120, y: 200 },
-          { x: 200, y: 260 },
-          { x: 280, y: 180 },
-          { x: 350, y: 320 }
-        ];
-
-        drawNaturalSplineNeonGreen(splinePoints);
-        drawGlobe();
       };
 
       const overlay = document.createElement("div");
@@ -179,10 +176,24 @@
       img.style.width = "100%";
       img.style.height = "100%";
       img.style.objectFit = "contain";
-
       overlay.appendChild(img);
+
+      // ⭐ NEW: Canvas for spline on jr.xxyy page ⭐
+      const splineCanvas = document.createElement("canvas");
+      splineCanvas.width = window.innerWidth;
+      splineCanvas.height = window.innerHeight;
+      splineCanvas.style.position = "absolute";
+      splineCanvas.style.top = "0";
+      splineCanvas.style.left = "0";
+      splineCanvas.style.zIndex = "10000";
+      overlay.appendChild(splineCanvas);
+
+      const sctx = splineCanvas.getContext("2d");
+      drawSplineOnOverlay(sctx);
+
       overlay.addEventListener("click", () => overlay.remove());
       overlay.addEventListener("touchstart", () => overlay.remove());
+
       document.body.appendChild(overlay);
     }
 
@@ -231,47 +242,37 @@
     // ---------------------------
     // Globe Drawing
     // ---------------------------
-function drawGlobe() {
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-  const pulse = Math.sin(tick / 10) * 4;
+    function drawGlobe() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      const pulse = Math.sin(tick / 10) * 4;
 
-  // Globe
-  ctx.fillStyle = globeColor;
-  ctx.beginPath();
-  ctx.arc(cx + pulse, cy + pulse, r, 0, Math.PI * 2);
-  ctx.fill();
+      ctx.fillStyle = globeColor;
+      ctx.beginPath();
+      ctx.arc(cx + pulse, cy + pulse, r, 0, Math.PI * 2);
+      ctx.fill();
 
-  ctx.strokeStyle = "white";
-  ctx.lineWidth = 1;
+      ctx.strokeStyle = "white";
+      ctx.lineWidth = 1;
 
-  for (let i = -3; i <= 3; i++) {
-    const offset = (i / 3) * r * 0.8;
-    ctx.beginPath();
-    ctx.ellipse(cx + offset + pulse, cy + pulse, r * 0.9, r, 0, 0, Math.PI * 2);
-    ctx.stroke();
-  }
+      for (let i = -3; i <= 3; i++) {
+        const offset = (i / 3) * r * 0.8;
+        ctx.beginPath();
+        ctx.ellipse(cx + offset + pulse, cy + pulse, r * 0.9, r, 0, 0, Math.PI * 2);
+        ctx.stroke();
+      }
 
-  for (let j = -3; j <= 3; j++) {
-    const offset = (j / 3) * r * 0.8;
-    ctx.beginPath();
-    ctx.ellipse(cx + pulse, cy + offset + pulse, r, r * 0.9, 0, 0, Math.PI * 2);
-    ctx.stroke();
-  }
+      for (let j = -3; j <= 3; j++) {
+        const offset = (j / 3) * r * 0.8;
+        ctx.beginPath();
+        ctx.ellipse(cx + pulse, cy + offset + pulse, r, r * 0.9, 0, 0, Math.PI * 2);
+        ctx.stroke();
+      }
 
-  // ⭐ ALWAYS DRAW NEON GREEN SPLINE ⭐
-  const splinePoints = [
-    { x: 50, y: 300 },
-    { x: 120, y: 200 },
-    { x: 200, y: 260 },
-    { x: 280, y: 180 },
-    { x: 350, y: 320 }
-  ];
-  drawNaturalSplineNeonGreen(splinePoints);
+      draw007Points();
+      drawDampenerFace();
+      tick++;
+    }
 
-  draw007Points();
-  drawDampenerFace();
-  tick++;
-}
     // ---------------------------
     // Hover Detection
     // ---------------------------
