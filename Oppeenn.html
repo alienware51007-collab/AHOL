@@ -129,39 +129,41 @@
     // ---------------------------
     function activateFullScreenImage() {
 
-      // Run MATLAB-style analysis
-      const analysisData = matlabLoadImageForAnalysis(fullImg);
-      const brightness = matlabComputeBrightness(analysisData);
-      const color = matlabDominantColor(analysisData);
+  fullImg.onload = () => {
+    // Run MATLAB-style analysis AFTER image loads
+    const analysisData = matlabLoadImageForAnalysis(fullImg);
+    const brightness = matlabComputeBrightness(analysisData);
+    const color = matlabDominantColor(analysisData);
 
-      matlabRuntimeInteraction(brightness, color);
+    matlabRuntimeInteraction(brightness, color);
+  };
 
-      // Full-screen overlay
-      const overlay = document.createElement("div");
-      overlay.style.position = "fixed";
-      overlay.style.top = "0";
-      overlay.style.left = "0";
-      overlay.style.width = "100vw";
-      overlay.style.height = "100vh";
-      overlay.style.background = "black";
-      overlay.style.display = "flex";
-      overlay.style.justifyContent = "center";
-      overlay.style.alignItems = "center";
-      overlay.style.zIndex = "9999";
+  // Full-screen overlay
+  const overlay = document.createElement("div");
+  overlay.style.position = "fixed";
+  overlay.style.top = "0";
+  overlay.style.left = "0";
+  overlay.style.width = "100vw";
+  overlay.style.height = "100vh";
+  overlay.style.background = "black";
+  overlay.style.display = "flex";
+  overlay.style.justifyContent = "center";
+  overlay.style.alignItems = "center";
+  overlay.style.zIndex = "9999";
 
-      const img = document.createElement("img");
-      img.src = fullImg.src;
-      img.style.width = "100%";
-      img.style.height = "100%";
-      img.style.objectFit = "contain";
+  const img = document.createElement("img");
+  img.src = fullImg.src;
+  img.style.width = "100%";
+  img.style.height = "100%";
+  img.style.objectFit = "contain";
 
-      overlay.appendChild(img);
+  overlay.appendChild(img);
 
-      overlay.addEventListener("click", () => overlay.remove());
-      overlay.addEventListener("touchstart", () => overlay.remove());
+  overlay.addEventListener("click", () => overlay.remove());
+  overlay.addEventListener("touchstart", () => overlay.remove());
 
-      document.body.appendChild(overlay);
-    }
+  document.body.appendChild(overlay);
+}
 
     // ---------------------------
     // Dampener Face (upper-right)
