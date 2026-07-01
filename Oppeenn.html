@@ -98,14 +98,17 @@
       pt.active = true;
     }
 
-    function draw007Points() {
+    function draw007Points(pulse) {
       points007.forEach(pt => {
+        const px = pt.x + pulse;
+        const py = pt.y + pulse;
+
         if (pt.active) {
-          ctx.drawImage(faceImg, pt.x - 20, pt.y - 20, 40, 40);
+          ctx.drawImage(faceImg, px - 20, py - 20, 40, 40);
         } else {
           ctx.fillStyle = "black";
           ctx.beginPath();
-          ctx.arc(pt.x, pt.y, 4, 0, Math.PI * 2);
+          ctx.arc(px, py, 4, 0, Math.PI * 2);
           ctx.fill();
         }
       });
@@ -138,27 +141,31 @@
         ctx.stroke();
       }
 
-      draw007Points();
+      draw007Points(pulse);
+
       drawDampenerFace();
 
       tick++;
     }
 
-    // ⭐ UPDATED: Reliable full-screen trigger
     canvas.addEventListener("mousemove", (e) => {
       const rect = canvas.getBoundingClientRect();
       const mx = e.clientX - rect.left;
       const my = e.clientY - rect.top;
 
+      const pulse = Math.sin(tick / 10) * 4;
+
       drawGlobe();
 
       points007.forEach(pt => {
-        const dx = mx - pt.x;
-        const dy = my - pt.y;
+        const px = pt.x + pulse;
+        const py = pt.y + pulse;
+
+        const dx = mx - px;
+        const dy = my - py;
         const dist = Math.sqrt(dx*dx + dy*dy);
 
-        // ⭐ Full-screen trigger (distance only)
-        if (dist < 15 && pt === points007[7]) {
+        if (dist < 15 && pt.x === 330 && pt.y === 330) {
           activateFullScreenImage();
         }
 
@@ -173,12 +180,17 @@
       const mx = e.clientX - rect.left;
       const my = e.clientY - rect.top;
 
+      const pulse = Math.sin(tick / 10) * 4;
+
       points007.forEach(pt => {
-        const dx = mx - pt.x;
-        const dy = my - pt.y;
+        const px = pt.x + pulse;
+        const py = pt.y + pulse;
+
+        const dx = mx - px;
+        const dy = my - py;
         const dist = Math.sqrt(dx*dx + dy*dy);
 
-        if (dist < 15 && pt === points007[7]) {
+        if (dist < 15 && pt.x === 330 && pt.y === 330) {
           activateFullScreenImage();
         }
       });
