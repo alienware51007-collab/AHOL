@@ -123,7 +123,7 @@
       return result;
     }
 
-    function drawSplineOnOverlay(sctx) {
+    function drawSplineOnOverlay(sctx, splineCanvas) {
 
       // ⭐ Make canvas fully transparent ⭐
       sctx.clearRect(0, 0, splineCanvas.width, splineCanvas.height);
@@ -200,7 +200,7 @@
       const sctx = splineCanvas.getContext("2d");
 
       // ⭐ Draw neon spline under the image ⭐
-      drawSplineOnOverlay(sctx);
+      drawSplineOnOverlay(sctx, splineCanvas);
 
       overlay.addEventListener("click", () => overlay.remove());
       overlay.addEventListener("touchstart", () => overlay.remove());
