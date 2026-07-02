@@ -20,7 +20,21 @@
       max-width: 600px;
     }
 
-    <button id="baseButton" onclick="goToBase()">.BASE.</button>
+    /* RPX Drip Effect */
+    #vbnPhoto {
+      width: 180px;
+      border-radius: 10px;
+      margin-bottom: 10px;
+      filter: url(#rpxDrip);
+      animation: rpxFlow 2.2s infinite ease-in-out;
+    }
+
+    /* Animation for the drip */
+    @keyframes rpxFlow {
+      0% { transform: translateY(0px); }
+      50% { transform: translateY(4px); }
+      100% { transform: translateY(0px); }
+    }
 
     #userInput {
       margin-top: 20px;
@@ -35,6 +49,15 @@
 
 <body>
 
+  <!-- SVG Filter for RPX Drip -->
+  <svg width="0" height="0">
+    <filter id="rpxDrip">
+      <feTurbulence type="fractalNoise" baseFrequency="0.02 0.25" numOctaves="4" result="noise"/>
+      <feDisplacementMap in="SourceGraphic" in2="noise" scale="35" xChannelSelector="R" yChannelSelector="G"/>
+    </filter>
+  </svg>
+
+  <button id="baseButton" onclick="goToBase()">.BASE.</button>
   <h2>AHOL Chatbot</h2>
 
   <!-- Chatbox with vbnPhoto inside -->
