@@ -18,6 +18,7 @@
       padding: 10px;
       min-height: 150px;
       max-width: 600px;
+      position: relative; /* REQUIRED for overlay ribbon */
     }
 
     /* RPX Drip Effect */
@@ -44,6 +45,28 @@
       color: #0f0;
       border: 1px solid #0f0;
     }
+
+    /* SPECIAL CHARACTER RIBBON */
+    #uSpecialRight {
+      position: absolute;
+      top: 0px;          /* starts inside top-right corner */
+      right: -130px;     /* shifts ribbon OUTSIDE the chatbox */
+      width: 120px;
+      background: transparent;
+      color: #fff;
+      font-family: monospace;
+      font-size: 12px;
+      overflow-y: overlay; /* allows downward overflow */
+      pointer-events: none; /* does not block chat interactions */
+      z-index: 999;
+    }
+
+    .uRow {
+      display: flex;
+      justify-content: space-between;
+      padding: 2px 0;
+      border-bottom: 1px solid #444;
+    }
   </style>
 </head>
 
@@ -60,26 +83,83 @@
   <button id="baseButton" onclick="goToBase()">.BASE.</button>
   <h2>AHOL Chatbot</h2>
 
-  <!-- Chatbox with vbnPhoto inside -->
+  <!-- Chatbox with vbnPhoto + SPECIAL CHARACTER RIBBON -->
   <div id="chatOutput">
-    <img id="vbnPhoto" src="vbn.png" alt="vbn photo"
-         style="width:180px; border-radius:10px; margin-bottom:10px;">
+
+    <!-- SPECIAL CHARACTER RIBBON (overflowing down the page) -->
+    <div id="uSpecialRight">
+
+      <div class="uRow"><span>q</span><span>手</span></div>
+      <div class="uRow"><span>w</span><span>田</span></div>
+      <div class="uRow"><span>e</span><span>水</span></div>
+      <div class="uRow"><span>r</span><span>口</span></div>
+      <div class="uRow"><span>t</span><span>廿</span></div>
+      <div class="uRow"><span>y</span><span>卜</span></div>
+      <div class="uRow"><span>u</span><span>山</span></div>
+      <div class="uRow"><span>i</span><span>戈</span></div>
+      <div class="uRow"><span>o</span><span>人</span></div>
+      <div class="uRow"><span>p</span><span>心</span></div>
+
+      <div class="uRow"><span>a</span><span>日</span></div>
+      <div class="uRow"><span>s</span><span>尸</span></div>
+      <div class="uRow"><span>d</span><span>木</span></div>
+      <div class="uRow"><span>f</span><span>火</span></div>
+      <div class="uRow"><span>g</span><span>土</span></div>
+      <div class="uRow"><span>h</span><span>竹</span></div>
+      <div class="uRow"><span>j</span><span>十</span></div>
+      <div class="uRow"><span>k</span><span>大</span></div>
+      <div class="uRow"><span>l</span><span>中</span></div>
+
+      <div class="uRow"><span>z</span><span>Ｚ</span></div>
+      <div class="uRow"><span>x</span><span>難</span></div>
+      <div class="uRow"><span>c</span><span>金</span></div>
+      <div class="uRow"><span>v</span><span>女</span></div>
+      <div class="uRow"><span>b</span><span>月</span></div>
+      <div class="uRow"><span>n</span><span>弓</span></div>
+      <div class="uRow"><span>m</span><span>一</span></div>
+
+      <div class="uRow"><span>`</span><span>`</span></div>
+
+      <div class="uRow"><span>1</span><span>1</span></div>
+      <div class="uRow"><span>2</span><span>2</span></div>
+      <div class="uRow"><span>3</span><span>3</span></div>
+      <div class="uRow"><span>4</span><span>4</span></div>
+      <div class="uRow"><span>5</span><span>5</span></div>
+      <div class="uRow"><span>6</span><span>6</span></div>
+      <div class="uRow"><span>7</span><span>7</span></div>
+      <div class="uRow"><span>8</span><span>8</span></div>
+      <div class="uRow"><span>9</span><span>9</span></div>
+      <div class="uRow"><span>0</span><span>0</span></div>
+
+      <div class="uRow"><span>-</span><span>◂</span></div>
+      <div class="uRow"><span>=</span><span>▸</span></div>
+
+      <div class="uRow"><span>[</span><span>［</span></div>
+      <div class="uRow"><span>]</span><span>］</span></div>
+      <div class="uRow"><span>\</span><span>、</span></div>
+
+      <div class="uRow"><span>;</span><span>；</span></div>
+      <div class="uRow"><span>'</span><span>'</span></div>
+
+      <div class="uRow"><span>,</span><span>，</span></div>
+      <div class="uRow"><span>.</span><span>。</span></div>
+      <div class="uRow"><span>/</span><span>/</span></div>
+
+    </div>
+
+    <!-- RPX DRIP IMAGE -->
+    <img id="vbnPhoto" src="vbn.png" alt="vbn photo">
   </div>
 
   <script>
-    // vbnPhoto load-trigger script
     document.getElementById("vbnPhoto").addEventListener("load", function() {
         console.log("vbn photo loaded inside chatbox");
-        // your MATLAB-style or JS runtime effect here
     });
   </script>
 
   <input id="userInput" placeholder="Type to activate AHOL...">
 
   <script>
-    // ---------------------------
-    // Engine
-    // ---------------------------
     function goToBase() {
       window.location.href = "https://htmlpreview.github.io/?https://github.com/alienware51007-collab/AHOL/blob/main/globe.html";
     }
@@ -117,9 +197,6 @@
       }
     };
 
-    // ---------------------------
-    // ChatScript (What the bot says)
-    // ---------------------------
     const ChatScript = [
       "AHOL system initializing...",
       "Boot sequence complete.",
@@ -128,9 +205,6 @@
       "Standing by for next directive."
     ];
 
-    // ---------------------------
-    // Activation Control
-    // ---------------------------
     let chatbotEnabled = false;
 
     function activateChatBot() {
@@ -140,11 +214,7 @@
       }
     }
 
-    // ---------------------------
-    // User Input Activation
-    // ---------------------------
     const inputBox = document.getElementById("userInput");
-
     inputBox.addEventListener("input", () => {
       activateChatBot();
     });
