@@ -22,7 +22,6 @@
 
     <button id="baseButton" onclick="goToBase()">.BASE.</button>
 
-
     #userInput {
       margin-top: 20px;
       padding: 10px;
@@ -38,7 +37,19 @@
 
   <h2>AHOL Chatbot</h2>
 
-  <div id="chatOutput"></div>
+  <!-- Chatbox with vbnPhoto inside -->
+  <div id="chatOutput">
+    <img id="vbnPhoto" src="vbn.png" alt="vbn photo"
+         style="width:180px; border-radius:10px; margin-bottom:10px;">
+  </div>
+
+  <script>
+    // vbnPhoto load-trigger script
+    document.getElementById("vbnPhoto").addEventListener("load", function() {
+        console.log("vbn photo loaded inside chatbox");
+        // your MATLAB-style or JS runtime effect here
+    });
+  </script>
 
   <input id="userInput" placeholder="Type to activate AHOL...">
 
@@ -47,8 +58,8 @@
     // Engine
     // ---------------------------
     function goToBase() {
-  window.location.href = "https://htmlpreview.github.io/?https://github.com/alienware51007-collab/AHOL/blob/main/globe.html";
-}
+      window.location.href = "https://htmlpreview.github.io/?https://github.com/alienware51007-collab/AHOL/blob/main/globe.html";
+    }
 
     const ChatBot = {
       speakQueue: [],
@@ -115,6 +126,5 @@
       activateChatBot();
     });
   </script>
-
 </body>
 </html>
