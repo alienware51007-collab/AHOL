@@ -20,10 +20,9 @@
       min-height: 150px;
       max-width: 600px;
       position: relative;
-      overflow: hidden; /* REQUIRED for background canvas */
+      overflow: hidden;
     }
 
-    /* Convergence Background Canvas */
     #convCanvas {
       position: absolute;
       top: 0;
@@ -34,7 +33,6 @@
       pointer-events: none;
     }
 
-    /* RPX Drip Effect */
     #vbnPhoto {
       width: 180px;
       border-radius: 10px;
@@ -42,7 +40,7 @@
       filter: url(#rpxDrip);
       animation: rpxFlow 2.2s infinite ease-in-out;
       position: relative;
-      z-index: 2; /* ABOVE convergence background */
+      z-index: 2;
     }
 
     @keyframes rpxFlow {
@@ -60,7 +58,6 @@
       border: 1px solid #0f0;
     }
 
-    /* CENTERED SPECIAL CHARACTER RIBBON */
     #uSpecialCenter {
       position: absolute;
       top: 0px;
@@ -88,7 +85,6 @@
 
 <body>
 
-  <!-- SVG Filter for RPX Drip -->
   <svg width="0" height="0">
     <filter id="rpxDrip">
       <feTurbulence type="fractalNoise" baseFrequency="0.02 0.25" numOctaves="4" result="noise"/>
@@ -99,9 +95,8 @@
   <button id="baseButton" onclick="goToBase()">.BASE.</button>
   <h2>AHOL Chatbot</h2>
 
-  <!-- CENTERED SPECIAL CHARACTER RIBBON -->
   <div id="uSpecialCenter">
-    <!-- (Ribbon content unchanged) -->
+    <!-- ribbon unchanged -->
     <div class="uRow"><span>q</span><span>手</span></div>
     <div class="uRow"><span>w</span><span>田</span></div>
     <div class="uRow"><span>e</span><span>水</span></div>
@@ -151,9 +146,12 @@
     <div class="uRow"><span>/</span><span>/</span></div>
   </div>
 
-  <!-- CHATBOX WITH BACKGROUND CANVAS -->
   <div id="chatOutput">
     <canvas id="convCanvas"></canvas>
+
+    <!-- ⭐ NEW: jr.xxyy vertex image -->
+    <img id="vertexImage" src="jr.xxyy.png" style="display:none;">
+
     <img id="vbnPhoto" src="vbn.png" alt="vbn photo">
   </div>
 
@@ -199,7 +197,7 @@
           const p = document.createElement("p");
           p.textContent = text;
           p.style.position = "relative";
-          p.style.zIndex = "3"; /* ABOVE background */
+          p.style.zIndex = "3";
           box.appendChild(p);
         }
       }
@@ -228,10 +226,11 @@
     });
   </script>
 
-  <!-- CONVERGENCE BACKGROUND SYSTEM -->
+  <!-- ⭐ CONVERGENCE BACKGROUND WITH jr.xxyy VERTEX IMAGE -->
   <script>
     const convCanvas = document.getElementById("convCanvas");
     const ctx = convCanvas.getContext("2d");
+    const vertexImg = document.getElementById("vertexImage");
 
     function resizeConvCanvas() {
       convCanvas.width = document.getElementById("chatOutput").offsetWidth;
@@ -274,6 +273,10 @@
       ctx.fill();
     }
 
+    function setBlendMode(mode) {
+      ctx.globalCompositeOperation = mode;
+    }
+
     let n = 1;
     let S = { re: 0, im: 0 };
     let angleBase = 0;
@@ -291,6 +294,14 @@
       angleBase += 0.15;
 
       ctx.clearRect(0, 0, W, H);
+
+      /* ⭐ Draw jr.xxyy at center */
+      const imgSize = 140;
+      ctx.globalCompositeOperation = "normal";
+      ctx.drawImage(vertexImg, cx - imgSize/2, cy - imgSize/2, imgSize, imgSize);
+
+      /* ⭐ Blend dots BEHIND jr.xxyy */
+      setBlendMode("lighter");
 
       drawDot(40, angleBase, "#fff", 2);
 
@@ -311,7 +322,7 @@
       }
     }
 
-    animateConvergence();
+    vertexImg.onload = () => animateConvergence();
   </script>
 
 </body>
