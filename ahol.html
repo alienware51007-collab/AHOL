@@ -23,7 +23,6 @@
   <canvas id="convCanvas" width="500" height="500"></canvas>
 
   <script>
-    // Canvas setup
     const canvas = document.getElementById("convCanvas");
     const ctx = canvas.getContext("2d");
     const W = canvas.width;
@@ -31,33 +30,26 @@
     const cx = W / 2;
     const cy = H / 2;
 
-    // Target radii
-    const R1 = 4 * Math.PI;   // ~12.566
+    const R1 = 4 * Math.PI;
     const R2 = 3.44;
 
-    // Define an absolutely convergent complex sequence a_k
-    // Example: a_k = (1 / k^2) * e^{i * theta_k}
-    // We'll store as {re, im}
     function complexTerm(k) {
-      const mag = 1 / (k * k); // decays fast -> absolute convergence
-      const theta = 0.3 * k;   // some angle pattern
+      const mag = 1 / (k * k);
+      const theta = 0.3 * k;
       return {
         re: mag * Math.cos(theta),
         im: mag * Math.sin(theta)
       };
     }
 
-    // Norm of a complex number
     function norm(z) {
       return Math.sqrt(z.re * z.re + z.im * z.im);
     }
 
-    // Add two complex numbers
     function add(z1, z2) {
       return { re: z1.re + z2.re, im: z1.im + z2.im };
     }
 
-    // Draw base circle for reference
     function drawBaseCircle() {
       ctx.clearRect(0, 0, W, H);
       ctx.strokeStyle = "#333";
@@ -67,7 +59,6 @@
       ctx.stroke();
     }
 
-    // Draw a white dot for a given radius and angle
     function drawDot(radius, angle, color = "#fff", size = 3) {
       const x = cx + radius * Math.cos(angle);
       const y = cy + radius * Math.sin(angle);
@@ -77,44 +68,35 @@
       ctx.fill();
     }
 
-    // Main simulation: grow H_n and plot partial sums
     let n = 1;
-    let S = { re: 0, im: 0 }; // partial sum
-    let angleBase = 0;        // base angle for placing dots
+    let S = { re: 0, im: 0 };
+    let angleBase = 0;
 
     function step() {
-      // Grow H_n by adding one new index k = n
       const a_n = complexTerm(n);
       S = add(S, a_n);
       const r = norm(S);
 
-      // Update angle so dots move around the circle
       angleBase += 0.2;
 
-      // Draw base circle
       drawBaseCircle();
 
-      // Draw current partial sum as a white dot
       drawDot(80, angleBase, "#fff", 3);
 
-      // Draw a dot whose radius encodes ||S_n||
-      // Scale radius to fit canvas
       const scaledR = Math.min(r * 10, 200);
       drawDot(scaledR, angleBase + 1.0, "#ccc", 4);
 
-      // Highlight when ||S_n|| is near R1 or R2
       const eps = 0.2;
       if (Math.abs(r - R1) < eps) {
-        drawDot(150, angleBase + 2.0, "#0ff", 6); // glow near 4π
+        drawDot(150, angleBase + 2.0, "#0ff", 6);
       }
       if (Math.abs(r - R2) < eps) {
-        drawDot(150, angleBase - 2.0, "#f0f", 6); // glow near 3.44
+        drawDot(150, angleBase - 2.0, "#f0f", 6);
       }
 
-      // Display current norm
       ctx.fillStyle = "#0f0";
-      ctx.fillText(`n = ${n}`, 10, 20);
-      ctx.fillText(`||S_n|| ≈ ${r.toFixed(4)}`, 10, 40);
+      ctx.fillText("n = " + n, 10, 20);
+      ctx.fillText("||S_n|| ≈ " + r.toFixed(4), 10, 40);
 
       n++;
       if (n < 500) {
