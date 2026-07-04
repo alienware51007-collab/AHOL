@@ -80,6 +80,30 @@
       border-bottom: 1px solid #444;
       cursor: pointer;
     }
+
+    /* ⭐ Ribbon Visualization */
+    .ribbon-col {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    .left-col, .right-col {
+      width: 120px;
+    }
+
+    .center-col {
+      flex-grow: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    #seriesViz {
+      width: 100%;
+      height: 320px; /* 8 rows × 40px each */
+      background: transparent;
+    }
   </style>
 </head>
 
@@ -95,63 +119,43 @@
   <button id="baseButton" onclick="goToBase()">.BASE.</button>
   <h2>AHOL Chatbot</h2>
 
+  <!-- ⭐ RIBBON WITH CENTER VISUALIZATION INSERTED -->
   <div id="uSpecialCenter">
-    <!-- ribbon unchanged -->
-    <div class="uRow"><span>q</span><span>手</span></div>
-    <div class="uRow"><span>w</span><span>田</span></div>
-    <div class="uRow"><span>e</span><span>水</span></div>
-    <div class="uRow"><span>r</span><span>口</span></div>
-    <div class="uRow"><span>t</span><span>廿</span></div>
-    <div class="uRow"><span>y</span><span>卜</span></div>
-    <div class="uRow"><span>u</span><span>山</span></div>
-    <div class="uRow"><span>i</span><span>戈</span></div>
-    <div class="uRow"><span>o</span><span>人</span></div>
-    <div class="uRow"><span>p</span><span>心</span></div>
-    <div class="uRow"><span>a</span><span>日</span></div>
-    <div class="uRow"><span>s</span><span>尸</span></div>
-    <div class="uRow"><span>d</span><span>木</span></div>
-    <div class="uRow"><span>f</span><span>火</span></div>
-    <div class="uRow"><span>g</span><span>土</span></div>
-    <div class="uRow"><span>h</span><span>竹</span></div>
-    <div class="uRow"><span>j</span><span>十</span></div>
-    <div class="uRow"><span>k</span><span>大</span></div>
-    <div class="uRow"><span>l</span><span>中</span></div>
-    <div class="uRow"><span>z</span><span>Ｚ</span></div>
-    <div class="uRow"><span>x</span><span>難</span></div>
-    <div class="uRow"><span>c</span><span>金</span></div>
-    <div class="uRow"><span>v</span><span>女</span></div>
-    <div class="uRow"><span>b</span><span>月</span></div>
-    <div class="uRow"><span>n</span><span>弓</span></div>
-    <div class="uRow"><span>m</span><span>一</span></div>
-    <div class="uRow"><span>`</span><span>`</span></div>
-    <div class="uRow"><span>1</span><span>1</span></div>
-    <div class="uRow"><span>2</span><span>2</span></div>
-    <div class="uRow"><span>3</span><span>3</span></div>
-    <div class="uRow"><span>4</span><span>4</span></div>
-    <div class="uRow"><span>5</span><span>5</span></div>
-    <div class="uRow"><span>6</span><span>6</span></div>
-    <div class="uRow"><span>7</span><span>7</span></div>
-    <div class="uRow"><span>8</span><span>8</span></div>
-    <div class="uRow"><span>9</span><span>9</span></div>
-    <div class="uRow"><span>0</span><span>0</span></div>
-    <div class="uRow"><span>-</span><span>◂</span></div>
-    <div class="uRow"><span>=</span><span>▸</span></div>
-    <div class="uRow"><span>[</span><span>［</span></div>
-    <div class="uRow"><span>]</span><span>］</span></div>
-    <div class="uRow"><span>＼</span><span>、</span></div>
-    <div class="uRow"><span>;</span><span>；</span></div>
-    <div class="uRow"><span>'</span><span>'</span></div>
-    <div class="uRow"><span>,</span><span>，</span></div>
-    <div class="uRow"><span>.</span><span>。</span></div>
-    <div class="uRow"><span>/</span><span>/</span></div>
+
+    <!-- LEFT COLUMN -->
+    <div class="ribbon-col left-col">
+      <div class="uRow"><span>x</span><span>難</span></div>
+      <div class="uRow"><span>c</span><span>金</span></div>
+      <div class="uRow"><span>7</span><span>7</span></div>
+      <div class="uRow"><span>7</span><span>7</span></div>
+      <div class="uRow"><span>7</span><span>7</span></div>
+      <div class="uRow"><span>8</span><span>8</span></div>
+      <div class="uRow"><span>8</span><span>8</span></div>
+    </div>
+
+    <!-- ⭐ CENTER VISUALIZATION COLUMN -->
+    <div class="ribbon-col center-col">
+      <canvas id="seriesViz"></canvas>
+    </div>
+
+    <!-- RIGHT COLUMN -->
+    <div class="ribbon-col right-col">
+      <div class="uRow"><span>手</span></div>
+      <div class="uRow"><span>田</span></div>
+      <div class="uRow"><span>水</span></div>
+      <div class="uRow"><span>口</span></div>
+      <div class="uRow"><span>廿</span></div>
+      <div class="uRow"><span>卜</span></div>
+      <div class="uRow"><span>山</span></div>
+      <div class="uRow"><span>戈</span></div>
+    </div>
+
   </div>
 
   <div id="chatOutput">
     <canvas id="convCanvas"></canvas>
 
-    <!-- ⭐ NEW: jr.xxyy vertex image -->
     <img id="vertexImage" src="jrxxyy.png" style="display:none;">
-
     <img id="vbnPhoto" src="vbn.png" alt="vbn photo">
   </div>
 
@@ -226,10 +230,83 @@
     });
   </script>
 
-  <!-- ⭐ CONVERGENCE BACKGROUND WITH jr.xxyy VERTEX IMAGE -->
+  <!-- ⭐ TWO-PANEL VISUALIZATION SCRIPT -->
+  <script>
+    const seq = ["難","c","金",7,7,7,8,8];
+
+    const numericSeq = seq.map((v, i) => {
+        if (typeof v === "number") return v;
+        return 10 - i;
+    });
+
+    const partialSums = numericSeq.map((v, i) =>
+        numericSeq.slice(0, i + 1).reduce((a, b) => a + b, 0)
+    );
+
+    const canvas = document.getElementById("seriesViz");
+    const ctx = canvas.getContext("2d");
+
+    canvas.width = canvas.offsetWidth;
+    canvas.height = canvas.offsetHeight;
+
+    function drawSeriesViz() {
+        const w = canvas.width;
+        const h = canvas.height;
+
+        const mid = w * 0.5;
+
+        ctx.clearRect(0, 0, w, h);
+
+        ctx.strokeStyle = "orange";
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+
+        numericSeq.forEach((v, i) => {
+            const x = (i / (numericSeq.length - 1)) * (mid - 40) + 20;
+            const y = h - (v / Math.max(...numericSeq)) * (h - 40) - 20;
+            if (i === 0) ctx.moveTo(x, y);
+            else ctx.lineTo(x, y);
+        });
+        ctx.stroke();
+
+        ctx.fillStyle = "red";
+        numericSeq.forEach((v, i) => {
+            const x = (i / (numericSeq.length - 1)) * (mid - 40) + 20;
+            const y = h - (v / Math.max(...numericSeq)) * (h - 40) - 20;
+            ctx.beginPath();
+            ctx.arc(x, y, 4, 0, Math.PI * 2);
+            ctx.fill();
+        });
+
+        ctx.strokeStyle = "lime";
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+
+        partialSums.forEach((v, i) => {
+            const x = mid + (i / (partialSums.length - 1)) * (mid - 40) + 20;
+            const y = h - (v / Math.max(...partialSums)) * (h - 40) - 20;
+            if (i === 0) ctx.moveTo(x, y);
+            else ctx.lineTo(x, y);
+        });
+        ctx.stroke();
+
+        ctx.fillStyle = "red";
+        partialSums.forEach((v, i) => {
+            const x = mid + (i / (partialSums.length - 1)) * (mid - 40) + 20;
+            const y = h - (v / Math.max(...partialSums)) * (h - 40) - 20;
+            ctx.beginPath();
+            ctx.arc(x, y, 4, 0, Math.PI * 2);
+            ctx.fill();
+        });
+    }
+
+    drawSeriesViz();
+  </script>
+
+  <!-- -->
   <script>
     const convCanvas = document.getElementById("convCanvas");
-    const ctx = convCanvas.getContext("2d");
+    const ctx2 = convCanvas.getContext("2d");
     const vertexImg = document.getElementById("vertexImage");
 
     function resizeConvCanvas() {
@@ -267,14 +344,14 @@
     function drawDot(radius, angle, color = "#fff", size = 2) {
       const x = cx + radius * Math.cos(angle);
       const y = cy + radius * Math.sin(angle);
-      ctx.fillStyle = color;
-      ctx.beginPath();
-      ctx.arc(x, y, size, 0, 2 * Math.PI);
-      ctx.fill();
+      ctx2.fillStyle = color;
+      ctx2.beginPath();
+      ctx2.arc(x, y, size, 0, 2 * Math.PI);
+      ctx2.fill();
     }
 
     function setBlendMode(mode) {
-      ctx.globalCompositeOperation = mode;
+      ctx2.globalCompositeOperation = mode;
     }
 
     let n = 1;
@@ -293,14 +370,12 @@
 
       angleBase += 0.15;
 
-      ctx.clearRect(0, 0, W, H);
+      ctx2.clearRect(0, 0, W, H);
 
-      /* ⭐ Draw jr.xxyy at center */
       const imgSize = 200;
-      ctx.globalCompositeOperation = "normal";
-      ctx.drawImage(vertexImg, cx - imgSize/2, cy - imgSize/2, imgSize, imgSize);
+      ctx2.globalCompositeOperation = "normal";
+      ctx2.drawImage(vertexImg, cx - imgSize/2, cy - imgSize/2, imgSize, imgSize);
 
-      /* ⭐ Blend dots BEHIND jr.xxyy */
       setBlendMode("lighter");
 
       drawDot(40, angleBase, "#fff", 2);
