@@ -187,31 +187,41 @@
       window.location.href = "base.html";
     }
 
-    // ⭐ ORIGINAL CALCULUS CIRCULAR CONVERGENCE
+    // ⭐ ORIGINAL CALCULUS FOCUS POINT — RESTORED
     const cv = document.getElementById("seriesViz");
     const cx = cv.getContext("2d");
 
-    let t = 0;
-    function animateSeries() {
+    function drawCalculusFocus() {
       cx.clearRect(0, 0, cv.width, cv.height);
 
+      const centerX = 130;
+      const centerY = 130;
+      const radius = 80;
+
       cx.strokeStyle = "#0f0";
-      cx.lineWidth = 2;
+      cx.lineWidth = 1.5;
 
-      cx.beginPath();
+      // Draw 360 calculus rays converging to the vertex
       for (let i = 0; i < 360; i++) {
-        const r = 40 + Math.sin((i + t) * 0.05) * 20;
-        const x = 130 + Math.cos(i * Math.PI / 180) * r;
-        const y = 130 + Math.sin(i * Math.PI / 180) * r;
-        cx.lineTo(x, y);
-      }
-      cx.stroke();
+        const angle = i * Math.PI / 180;
 
-      t += 1.5;
-      requestAnimationFrame(animateSeries);
+        const x = centerX + Math.cos(angle) * radius;
+        const y = centerY + Math.sin(angle) * radius;
+
+        cx.beginPath();
+        cx.moveTo(centerX, centerY);
+        cx.lineTo(x, y);
+        cx.stroke();
+      }
+
+      // Draw the vertex (focus point)
+      cx.fillStyle = "#0f0";
+      cx.beginPath();
+      cx.arc(centerX, centerY, 4, 0, Math.PI * 2);
+      cx.fill();
     }
 
-    animateSeries();
+    drawCalculusFocus();
   </script>
 
 </body>
