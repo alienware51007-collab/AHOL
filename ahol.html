@@ -188,7 +188,7 @@
       window.location.href = "base.html";
     }
 
-    // ⭐ Dynamic Calculus Animation + Lebesgue Points
+    // ⭐ PURE LINES — Dynamic Calculus + Draggable Lebesgue Points
     const cv = document.getElementById("seriesViz");
     const cx = cv.getContext("2d");
 
@@ -231,7 +231,7 @@
       const baseRadius = 40 + (dist * 0.3);
 
       cx.strokeStyle = "#0f0";
-      cx.lineWidth = 1.5;
+      cx.lineWidth = 1.2;
 
       for (let i = 0; i < 360; i++) {
         const angle = i * Math.PI / 180;
@@ -246,11 +246,13 @@
         cx.stroke();
       }
 
+      // Vertex
       cx.fillStyle = "#0f0";
       cx.beginPath();
-      cx.arc(centerX, centerY, 4, 0, Math.PI * 2);
+      cx.arc(centerX, centerY, 3, 0, Math.PI * 2);
       cx.fill();
 
+      // Lebesgue points
       cx.fillStyle = "red";
       cx.beginPath();
       cx.arc(redPoint.x, redPoint.y, 6, 0, Math.PI * 2);
