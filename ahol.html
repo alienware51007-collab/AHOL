@@ -7,7 +7,10 @@
 
   <style>
     body {
-      background: #000;
+      background: url("jrxxyy.png");
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
       color: #fff;
       font-family: monospace;
       padding: 20px;
@@ -230,8 +233,19 @@
     });
   </script>
 
-  <!-- ⭐ TWO-PANEL VISUALIZATION SCRIPT -->
+  <!-- ⭐ TWO-PANEL VISUALIZATION SCRIPT WITH DRAGGABLE POINTS -->
   <script>
+    const canvas = document.getElementById("seriesViz");
+    const ctx = canvas.getContext("2d");
+
+    canvas.width = canvas.offsetWidth;
+    canvas.height = canvas.offsetHeight;
+
+    let aPoints = [];
+    let sPoints = [];
+    let dragPoint = null;
+    let isDragging = false;
+
     const seq = ["難","c","金",7,7,7,8,8];
 
     const numericSeq = seq.map((v, i) => {
@@ -239,71 +253,115 @@
         return 10 - i;
     });
 
-    const partialSums = numericSeq.map((v, i) =>
-        numericSeq.slice(0, i + 1).reduce((a, b) => a + b, 0)
-    );
-
-    const canvas = document.getElementById("seriesViz");
-    const ctx = canvas.getContext("2d");
-
-    canvas.width = canvas.offsetWidth;
-    canvas.height = canvas.offsetHeight;
-
     function drawSeriesViz() {
         const w = canvas.width;
         const h = canvas.height;
-
         const mid = w * 0.5;
 
         ctx.clearRect(0, 0, w, h);
 
+        /* ⭐ Draw aₖ curve based on draggable points */
         ctx.strokeStyle = "orange";
         ctx.lineWidth = 2;
         ctx.beginPath();
 
-        numericSeq.forEach((v, i) => {
-            const x = (i / (numericSeq.length - 1)) * (mid - 40) + 20;
-            const y = h - (v / Math.max(...numericSeq)) * (h - 40) - 20;
-            if (i === 0) ctx.moveTo(x, y);
-            else ctx.lineTo(x, y);
+        aPoints.forEach((pt, i) => {
+            if (i === 0) ctx.moveTo(pt.x, pt.y);
+            else ctx.lineTo(pt.x, pt.y);
         });
         ctx.stroke();
 
+        /* Draw aₖ points */
         ctx.fillStyle = "red";
-        numericSeq.forEach((v, i) => {
-            const x = (i / (numericSeq.length - 1)) * (mid - 40) + 20;
-            const y = h - (v / Math.max(...numericSeq)) * (h - 40) - 20;
+        aPoints.forEach(pt => {
             ctx.beginPath();
-            ctx.arc(x, y, 4, 0, Math.PI * 2);
+            ctx.arc(pt.x, pt.y, 5, 0, Math.PI * 2);
             ctx.fill();
         });
 
+        /* ⭐ Draw Sₙ curve based on draggable points */
         ctx.strokeStyle = "lime";
         ctx.lineWidth = 2;
         ctx.beginPath();
 
-        partialSums.forEach((v, i) => {
-            const x = mid + (i / (partialSums.length - 1)) * (mid - 40) + 20;
-            const y = h - (v / Math.max(...partialSums)) * (h - 40) - 20;
-            if (i === 0) ctx.moveTo(x, y);
-            else ctx.lineTo(x, y);
+        sPoints.forEach((pt, i) => {
+            if (i === 0) ctx.moveTo(pt.x, pt.y);
+            else ctx.lineTo(pt.x, pt.y);
         });
         ctx.stroke();
 
+        /* Draw Sₙ points */
         ctx.fillStyle = "red";
-        partialSums.forEach((v, i) => {
-            const x = mid + (i / (partialSums.length - 1)) * (mid - 40) + 20;
-            const y = h - (v / Math.max(...partialSums)) * (h - 40) - 20;
+        sPoints.forEach(pt => {
             ctx.beginPath();
-            ctx.arc(x, y, 4, 0, Math.PI * 2);
+            ctx.arc(pt.x, pt.y, 5, 0, Math.PI * 2);
             ctx.fill();
         });
     }
 
-    drawSeriesViz();
+    /* ⭐ Initialize points */
+    function initPoints() {
+        const w = canvas.width;
+        const h = canvas.height;
+        const mid = w * 0.5;
+
+        aPoints = [];
+        sPoints = [];
+
+        numericSeq.forEach((v, i) => {
+            const x = (i / (numericSeq.length - 1)) * (mid - 40) + 20;
+            const y = h - (v / Math.max(...numericSeq)) * (h - 40) - 20;
+            aPoints.push({ x, y });
+        });
+
+        const partialSums = numericSeq.map((v, i) =>
+            numericSeq.slice(0, i + 1).reduce((a, b) => a + b, 0)
+        );
+
+        partialSums.forEach((v, i) => {
+            const x = mid + (i / (partialSums.length - 1)) * (mid - 40) + 20;
+            const y = h - (v / Math.max(...partialSums)) * (h - 40) - 20;
+            sPoints.push({ x, y });
+        });
+
+        drawSeriesViz();
+    }
+
+    initPoints();
+
+    /* ⭐ DRAGGABLE POINT SYSTEM */
+    canvas.addEventListener("mousedown", (e) => {
+        const rect = canvas.getBoundingClientRect();
+        const mx = e.clientX - rect.left;
+        const my = e.clientY - rect.top;
+
+        [...aPoints, ...sPoints].forEach(pt => {
+            const dx = mx - pt.x;
+            const dy = my - pt.y;
+            if (Math.sqrt(dx*dx + dy*dy) < 10) {
+                dragPoint = pt;
+                isDragging = true;
+            }
+        });
+    });
+
+    canvas.addEventListener("mousemove", (e) => {
+        if (!isDragging || !dragPoint) return;
+
+        const rect = canvas.getBoundingClientRect();
+        dragPoint.x = e.clientX - rect.left;
+        dragPoint.y = e.clientY - rect.top;
+
+        drawSeriesViz();
+    });
+
+    canvas.addEventListener("mouseup", () => {
+        isDragging = false;
+        dragPoint = null;
+    });
   </script>
 
-  <!-- -->
+  <!-- ⭐ CONVERGENCE BACKGROUND -->
   <script>
     const convCanvas = document.getElementById("convCanvas");
     const ctx2 = convCanvas.getContext("2d");
