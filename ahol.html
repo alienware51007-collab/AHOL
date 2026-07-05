@@ -187,17 +187,30 @@
       window.location.href = "base.html";
     }
 
-    // ⭐ PURE LINES — Dynamic Calculus + Draggable Lebesgue Points
+    // ⭐ ONLY TWO DRAGGABLE DOTS — NO LINES, NO SHAPE
     const cv = document.getElementById("seriesViz");
     const cx = cv.getContext("2d");
-
-    const centerX = 130;
-    const centerY = 130;
 
     let redPoint = { x: 200, y: 130 };
     let greenPoint = { x: 60, y: 130 };
 
     let dragging = null;
+
+    function drawDots() {
+      cx.clearRect(0, 0, cv.width, cv.height);
+
+      // Red dot
+      cx.fillStyle = "red";
+      cx.beginPath();
+      cx.arc(redPoint.x, redPoint.y, 6, 0, Math.PI * 2);
+      cx.fill();
+
+      // Green dot
+      cx.fillStyle = "lime";
+      cx.beginPath();
+      cx.arc(greenPoint.x, greenPoint.y, 6, 0, Math.PI * 2);
+      cx.fill();
+    }
 
     cv.addEventListener("mousedown", (e) => {
       const rect = cv.getBoundingClientRect();
@@ -213,60 +226,13 @@
       const rect = cv.getBoundingClientRect();
       dragging.x = e.clientX - rect.left;
       dragging.y = e.clientY - rect.top;
+      drawDots();
     });
 
     cv.addEventListener("mouseup", () => dragging = null);
     cv.addEventListener("mouseleave", () => dragging = null);
 
-    let t = 0;
-
-    function animateCalculus() {
-      cx.clearRect(0, 0, cv.width, cv.height);
-
-      const dx = redPoint.x - greenPoint.x;
-      const dy = redPoint.y - greenPoint.y;
-      const dist = Math.hypot(dx, dy);
-
-      const baseRadius = 40 + (dist * 0.3);
-
-      cx.strokeStyle = "#0f0";
-      cx.lineWidth = 1.2;
-
-      for (let i = 0; i < 360; i++) {
-        const angle = i * Math.PI / 180;
-        const r = baseRadius + Math.sin((i + t) * 0.03) * 10;
-
-        const x = centerX + Math.cos(angle) * r;
-        const y = centerY + Math.sin(angle) * r;
-
-        cx.beginPath();
-        cx.moveTo(centerX, centerY);
-        cx.lineTo(x, y);
-        cx.stroke();
-      }
-
-      // Vertex
-      cx.fillStyle = "#0f0";
-      cx.beginPath();
-      cx.arc(centerX, centerY, 3, 0, Math.PI * 2);
-      cx.fill();
-
-      // Lebesgue points
-      cx.fillStyle = "red";
-      cx.beginPath();
-      cx.arc(redPoint.x, redPoint.y, 6, 0, Math.PI * 2);
-      cx.fill();
-
-      cx.fillStyle = "lime";
-      cx.beginPath();
-      cx.arc(greenPoint.x, greenPoint.y, 6, 0, Math.PI * 2);
-      cx.fill();
-
-      t += 1.2;
-      requestAnimationFrame(animateCalculus);
-    }
-
-    animateCalculus();
+    drawDots();
   </script>
 
 </body>
