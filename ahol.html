@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>AHOL Chatbot</title>
+  <title>AHOL Chatbot + AI Image Generator</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <style>
@@ -24,6 +24,7 @@
       max-width: 600px;
       position: relative;
       overflow: hidden;
+      margin-bottom: 20px;
     }
 
     #convCanvas {
@@ -59,6 +60,32 @@
       background: #222;
       color: #0f0;
       border: 1px solid #0f0;
+      display: block;
+    }
+
+    /* ⭐ AI Image Prompt + Button */
+    #imagePrompt {
+      margin-top: 10px;
+      padding: 10px;
+      width: 300px;
+      background: #111;
+      color: #0ff;
+      border: 1px solid #0ff;
+      display: inline-block;
+    }
+
+    #generateImage {
+      padding: 10px 16px;
+      margin-left: 8px;
+      background: #0ff;
+      color: #000;
+      border: none;
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    #generateImage:hover {
+      background: #0cc;
     }
 
     #uSpecialCenter {
@@ -104,8 +131,18 @@
 
     #seriesViz {
       width: 100%;
-      height: 320px; /* 8 rows × 40px each */
+      height: 320px;
       background: transparent;
+    }
+
+    /* ⭐ AI Image Canvas */
+    #imageCanvas {
+      border: 1px solid #0ff;
+      width: 600px;
+      height: 320px;
+      background: rgba(0, 0, 0, 0.6);
+      display: block;
+      margin-top: 20px;
     }
   </style>
 </head>
@@ -120,7 +157,7 @@
   </svg>
 
   <button id="baseButton" onclick="goToBase()">.BASE.</button>
-  <h2>AHOL Chatbot</h2>
+  <h2>AHOL Chatbot + DreamTech Image Synth</h2>
 
   <!-- ⭐ RIBBON WITH CENTER VISUALIZATION INSERTED -->
   <div id="uSpecialCenter">
@@ -168,7 +205,15 @@
     });
   </script>
 
+  <!-- Chat input -->
   <input id="userInput" placeholder="Type to activate AHOL...">
+
+  <!-- ⭐ AI Image Prompt + Button -->
+  <input id="imagePrompt" placeholder="Describe your image...">
+  <button id="generateImage">GENERATE</button>
+
+  <!-- ⭐ AI Image Canvas -->
+  <canvas id="imageCanvas"></canvas>
 
   <script>
     function goToBase() {
@@ -359,6 +404,95 @@
         isDragging = false;
         dragPoint = null;
     });
+  </script>
+
+  <!-- ⭐ AI IMAGE GENERATOR -->
+  <script>
+    const imgCanvas = document.getElementById("imageCanvas");
+    const imgCtx = imgCanvas.getContext("2d");
+
+    imgCanvas.width = imgCanvas.offsetWidth;
+    imgCanvas.height = imgCanvas.offsetHeight;
+
+    function randomBetween(min, max) {
+      return Math.random() * (max - min) + min;
+    }
+
+    function pickPalette(prompt) {
+      const p = prompt.toLowerCase();
+      if (p.includes("neon") || p.includes("cyber")) {
+        return ["#00ffcc", "#00ff00", "#ff00ff", "#0033ff"];
+      }
+      if (p.includes("fire") || p.includes("lava")) {
+        return ["#ff3300", "#ff9900", "#ffff00", "#660000"];
+      }
+      if (p.includes("space") || p.includes("galaxy")) {
+        return ["#ffffff", "#00ccff", "#9900ff", "#000022"];
+      }
+      if (p.includes("forest") || p.includes("nature")) {
+        return ["#004400", "#00aa44", "#88ff88", "#223300"];
+      }
+      return ["#00ffff", "#ff00ff", "#ffffff", "#222222"];
+    }
+
+    function generateImageFromPrompt(prompt) {
+      const w = imgCanvas.width;
+      const h = imgCanvas.height;
+
+      imgCtx.clearRect(0, 0, w, h);
+
+      const palette = pickPalette(prompt);
+
+      const grad = imgCtx.createRadialGradient(
+        w / 2, h / 2, 10,
+        w / 2, h / 2, Math.max(w, h) / 2
+      );
+      grad.addColorStop(0, palette[0]);
+      grad.addColorStop(0.5, palette[1]);
+      grad.addColorStop(1, "#000000");
+      imgCtx.fillStyle = grad;
+      imgCtx.fillRect(0, 0, w, h);
+
+      const layers = 40;
+      for (let i = 0; i < layers; i++) {
+        const color = palette[Math.floor(Math.random() * palette.length)];
+        imgCtx.strokeStyle = color;
+        imgCtx.globalAlpha = randomBetween(0.2, 0.8);
+        imgCtx.lineWidth = randomBetween(1, 4);
+
+        imgCtx.beginPath();
+        const cx = randomBetween(0, w);
+        const cy = randomBetween(0, h);
+        const radius = randomBetween(20, Math.min(w, h) / 2);
+
+        const spikes = Math.floor(randomBetween(3, 12));
+        for (let s = 0; s <= spikes; s++) {
+          const angle = (s / spikes) * Math.PI * 2;
+          const rx = cx + Math.cos(angle) * radius * randomBetween(0.5, 1.2);
+          const ry = cy + Math.sin(angle) * radius * randomBetween(0.5, 1.2);
+          if (s === 0) imgCtx.moveTo(rx, ry);
+          else imgCtx.lineTo(rx, ry);
+        }
+        imgCtx.closePath();
+        imgCtx.stroke();
+      }
+
+      imgCtx.globalAlpha = 1.0;
+      imgCtx.fillStyle = "#ffffff";
+      imgCtx.font = "12px monospace";
+      imgCtx.fillText(prompt, 10, h - 10);
+    }
+
+    const promptInput = document.getElementById("imagePrompt");
+    const generateBtn = document.getElementById("generateImage");
+
+    generateBtn.addEventListener("click", () => {
+      const prompt = promptInput.value.trim();
+      if (!prompt) return;
+      generateImageFromPrompt(prompt);
+    });
+
+    generateImageFromPrompt("initial hologram");
   </script>
 
   <!-- ⭐ CONVERGENCE BACKGROUND -->
