@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>AHOL Chatbot</title>
+  <title>AHOL Chatbot + AI Image Generator</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <style>
@@ -17,99 +17,47 @@
       position: relative;
     }
 
-    #chatOutput {
-      border: 1px solid #fff;
-      padding: 10px;
-      min-height: 150px;
-      max-width: 600px;
-      position: relative;
-      overflow: hidden;
+    h2 {
+      font-size: 28px;
+      margin-bottom: 10px;
+      text-shadow: 0 0 10px #0f0;
     }
 
-    #convCanvas {
+    #baseButton {
+      padding: 8px 20px;
+      background: black;
+      color: #0f0;
+      border: 1px solid #0f0;
+      cursor: pointer;
+      margin-bottom: 20px;
+      transition: 0.2s;
+    }
+    #baseButton:hover {
+      box-shadow: 0 0 12px #0f0;
+    }
+
+    /* Ribbon Row Styling */
+    .uRow span {
+      display: inline-block;
+      font-size: 22px;
+      padding: 4px 6px;
+      color: #0f0;
+      text-shadow: 0 0 6px #0f0;
+      transition: 0.2s;
+    }
+    .uRow span:hover {
+      transform: scale(1.25);
+      text-shadow: 0 0 12px #0f0;
+    }
+
+    /* RPX DRIP FILTER */
+    svg {
       position: absolute;
       top: 0;
       left: 0;
-      width: 100%;
-      height: 100%;
-      z-index: 0;
-      pointer-events: none;
-    }
-
-    #vbnPhoto {
-      width: 133px;
-      border-radius: 10px;
-      margin-bottom: 10px;
-      filter: url(#rpxDrip);
-      animation: rpxFlow 2.2s infinite ease-in-out;
-      position: relative;
-      z-index: 2;
-    }
-
-    @keyframes rpxFlow {
-      0% { transform: translateY(0px); }
-      50% { transform: translateY(4px); }
-      100% { transform: translateY(0px); }
-    }
-
-    #userInput {
-      margin-top: 20px;
-      padding: 10px;
-      width: 300px;
-      background: #222;
-      color: #0f0;
-      border: 1px solid #0f0;
-    }
-
-    #uSpecialCenter {
-      position: absolute;
-      top: 0px;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 120px;
-      background: transparent;
-      color: #fff;
-      font-family: monospace;
-      font-size: 12px;
-      overflow-y: overlay;
-      pointer-events: auto;
-      z-index: 999;
-    }
-
-    .uRow {
-      display: flex;
-      justify-content: space-between;
-      padding: 2px 0;
-      border-bottom: 1px solid #444;
-      cursor: pointer;
-    }
-
-    /* ⭐ Ribbon Visualization */
-    .ribbon-col {
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-    }
-
-    .left-col, .right-col {
-      width: 120px;
-    }
-
-    .center-col {
-      flex-grow: 1;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    #seriesViz {
-      width: 100%;
-      height: 320px; /* 8 rows × 40px each */
-      background: transparent;
     }
   </style>
 </head>
-
 <body>
 
   <svg width="0" height="0">
@@ -122,340 +70,143 @@
   <button id="baseButton" onclick="goToBase()">.BASE.</button>
   <h2>AHOL Chatbot</h2>
 
-  <!-- ⭐ RIBBON WITH CENTER VISUALIZATION INSERTED -->
-  <div id="uSpecialCenter">
+  <!-- ⭐ RIBBON WITH CENTER VISUALIZATION -->
+  <div id="uSpecialCenter" style="display:flex; gap:20px;">
 
     <!-- LEFT COLUMN -->
-    <div class="ribbon-col left-col">
+    <div class="ribbon-col left-col" style="display:flex; flex-direction:column; gap:10px;">
       <div class="uRow"><span>x</span><span>難</span></div>
       <div class="uRow"><span>c</span><span>金</span></div>
-      <div class="uRow"><span>7</span><span>7</span></div>
-      <div class="uRow"><span>7</span><span>7</span></div>
-      <div class="uRow"><span>7</span><span>7</span></div>
-      <div class="uRow"><span>8</span><span>8</span></div>
-      <div class="uRow"><span>8</span><span>8</span></div>
+      <div class="uRow"><span>7</span><span>魂</span></div>
+      <div class="uRow"><span>q</span><span>龍</span></div>
     </div>
 
-    <!-- ⭐ CENTER VISUALIZATION COLUMN -->
+    <!-- CENTER COLUMN -->
     <div class="ribbon-col center-col">
-      <canvas id="seriesViz"></canvas>
+      <canvas id="seriesViz" width="260" height="260"></canvas>
     </div>
 
     <!-- RIGHT COLUMN -->
-    <div class="ribbon-col right-col">
-      <div class="uRow"><span>手</span></div>
-      <div class="uRow"><span>田</span></div>
-      <div class="uRow"><span>水</span></div>
-      <div class="uRow"><span>口</span></div>
-      <div class="uRow"><span>廿</span></div>
-      <div class="uRow"><span>卜</span></div>
-      <div class="uRow"><span>山</span></div>
-      <div class="uRow"><span>戈</span></div>
+    <div class="ribbon-col right-col" style="display:flex; flex-direction:column; gap:10px;">
+      <div class="uRow"><span>9</span><span>力</span></div>
+      <div class="uRow"><span>t</span><span>火</span></div>
+      <div class="uRow"><span>m</span><span>天</span></div>
+      <div class="uRow"><span>z</span><span>神</span></div>
     </div>
 
   </div>
 
-  <div id="chatOutput">
-    <canvas id="convCanvas"></canvas>
-
-    <img id="vertexImage" src="jrxxyy.png" style="display:none;">
-    <img id="vbnPhoto" src="vbn.png" alt="vbn photo">
+  <div id="chatOutput" style="
+      border:1px solid #fff;
+      padding:10px;
+      min-height:150px;
+      max-width:600px;
+      margin-top:20px;
+      margin-bottom:20px;
+      position:relative;
+      overflow:hidden;
+  ">
+    <img id="vbnPhoto" src="vbn.png" alt="vbn photo" style="
+      width:120px;
+      filter:url(#rpxDrip);
+      position:absolute;
+      right:10px;
+      bottom:10px;
+    ">
   </div>
 
   <script>
-    document.getElementById("vbnPhoto").addEventListener("load", function() {
-        console.log("vbn photo loaded inside chatbox");
+    document.getElementById("vbnPhoto").addEventListener("load", () => {
+      console.log("vbn photo loaded inside chatbox");
     });
   </script>
 
-  <input id="userInput" placeholder="Type to activate AHOL...">
+  <input id="userInput" placeholder="Type to activate AHOL..." style="
+    width:300px;
+    padding:10px;
+    border:1px solid #0f0;
+    background:black;
+    color:#0f0;
+  ">
+
+  <div id="aiBox" style="
+      margin-top:30px;
+      padding:20px;
+      border:1px solid #fff;
+      width:340px;
+      background:black;
+  ">
+    <h3 style="text-shadow:0 0 10px #0f0;">AI Image Generator</h3>
+
+    <canvas id="aiCanvas" width="300" height="300" style="
+      border:1px solid #0f0;
+      background:#111;
+      margin-bottom:10px;
+    "></canvas>
+
+    <button id="generateImage" style="
+      padding:10px 20px;
+      background:#0f0;
+      color:black;
+      border:none;
+      cursor:pointer;
+    ">GENERATE</button>
+  </div>
 
   <script>
-    function goToBase() {
-      window.location.href = "https://htmlpreview.github.io/?https://github.com/alienware51007-collab/AHOL/blob/main/globe.html";
-    }
+    const aiCanvas = document.getElementById("aiCanvas");
+    const imgCtx = aiCanvas.getContext("2d");
 
-    const ChatBot = {
-      speakQueue: [],
-      active: false,
+    function generateImageFromPrompt(prompt) {
+      const img = new Image();
+      img.src = "jrxxyybeta.png";  // ⭐ Correct filename
 
-      loadScript(lines) {
-        this.speakQueue.push(...lines);
-        if (!this.active) this.run();
-      },
+      img.onload = () => {
+        imgCtx.clearRect(0, 0, aiCanvas.width, aiCanvas.height);
+        imgCtx.drawImage(img, 0, 0, aiCanvas.width, aiCanvas.height);
 
-      run() {
-        this.active = true;
-
-        if (this.speakQueue.length === 0) {
-          this.active = false;
-          return;
-        }
-
-        const line = this.speakQueue.shift();
-        this.output(line);
-
-        setTimeout(() => this.run(), 1200);
-      },
-
-      output(text) {
-        const box = document.getElementById("chatOutput");
-        if (box) {
-          const p = document.createElement("p");
-          p.textContent = text;
-          p.style.position = "relative";
-          p.style.zIndex = "3";
-          box.appendChild(p);
-        }
-      }
-    };
-
-    const ChatScript = [
-      "AHOL system initializing...",
-      "Boot sequence complete.",
-      "DreamTech interface online.",
-      "Monitoring environment...",
-      "Standing by for next directive."
-    ];
-
-    let chatbotEnabled = false;
-
-    function activateChatBot() {
-      if (!chatbotEnabled) {
-        chatbotEnabled = true;
-        ChatBot.loadScript(ChatScript);
-      }
-    }
-
-    const inputBox = document.getElementById("userInput");
-    inputBox.addEventListener("input", () => {
-      activateChatBot();
-    });
-  </script>
-
-  <!-- ⭐ TWO-PANEL VISUALIZATION SCRIPT WITH DRAGGABLE POINTS -->
-  <script>
-    const canvas = document.getElementById("seriesViz");
-    const ctx = canvas.getContext("2d");
-
-    canvas.width = canvas.offsetWidth;
-    canvas.height = canvas.offsetHeight;
-
-    let aPoints = [];
-    let sPoints = [];
-    let dragPoint = null;
-    let isDragging = false;
-
-    const seq = ["難","c","金",7,7,7,8,8];
-
-    const numericSeq = seq.map((v, i) => {
-        if (typeof v === "number") return v;
-        return 10 - i;
-    });
-
-    function drawSeriesViz() {
-        const w = canvas.width;
-        const h = canvas.height;
-        const mid = w * 0.5;
-
-        ctx.clearRect(0, 0, w, h);
-
-        /* ⭐ Draw aₖ curve based on draggable points */
-        ctx.strokeStyle = "orange";
-        ctx.lineWidth = 2;
-        ctx.beginPath();
-
-        aPoints.forEach((pt, i) => {
-            if (i === 0) ctx.moveTo(pt.x, pt.y);
-            else ctx.lineTo(pt.x, pt.y);
-        });
-        ctx.stroke();
-
-        /* Draw aₖ points */
-        ctx.fillStyle = "red";
-        aPoints.forEach(pt => {
-            ctx.beginPath();
-            ctx.arc(pt.x, pt.y, 5, 0, Math.PI * 2);
-            ctx.fill();
-        });
-
-        /* ⭐ Draw Sₙ curve based on draggable points */
-        ctx.strokeStyle = "lime";
-        ctx.lineWidth = 2;
-        ctx.beginPath();
-
-        sPoints.forEach((pt, i) => {
-            if (i === 0) ctx.moveTo(pt.x, pt.y);
-            else ctx.lineTo(pt.x, pt.y);
-        });
-        ctx.stroke();
-
-        /* Draw Sₙ points */
-        ctx.fillStyle = "red";
-        sPoints.forEach(pt => {
-            ctx.beginPath();
-            ctx.arc(pt.x, pt.y, 5, 0, Math.PI * 2);
-            ctx.fill();
-        });
-    }
-
-    /* ⭐ Initialize points */
-    function initPoints() {
-        const w = canvas.width;
-        const h = canvas.height;
-        const mid = w * 0.5;
-
-        aPoints = [];
-        sPoints = [];
-
-        numericSeq.forEach((v, i) => {
-            const x = (i / (numericSeq.length - 1)) * (mid - 40) + 20;
-            const y = h - (v / Math.max(...numericSeq)) * (h - 40) - 20;
-            aPoints.push({ x, y });
-        });
-
-        const partialSums = numericSeq.map((v, i) =>
-            numericSeq.slice(0, i + 1).reduce((a, b) => a + b, 0)
-        );
-
-        partialSums.forEach((v, i) => {
-            const x = mid + (i / (partialSums.length - 1)) * (mid - 40) + 20;
-            const y = h - (v / Math.max(...partialSums)) * (h - 40) - 20;
-            sPoints.push({ x, y });
-        });
-
-        drawSeriesViz();
-    }
-
-    initPoints();
-
-    /* ⭐ DRAGGABLE POINT SYSTEM */
-    canvas.addEventListener("mousedown", (e) => {
-        const rect = canvas.getBoundingClientRect();
-        const mx = e.clientX - rect.left;
-        const my = e.clientY - rect.top;
-
-        [...aPoints, ...sPoints].forEach(pt => {
-            const dx = mx - pt.x;
-            const dy = my - pt.y;
-            if (Math.sqrt(dx*dx + dy*dy) < 10) {
-                dragPoint = pt;
-                isDragging = true;
-            }
-        });
-    });
-
-    canvas.addEventListener("mousemove", (e) => {
-        if (!isDragging || !dragPoint) return;
-
-        const rect = canvas.getBoundingClientRect();
-        dragPoint.x = e.clientX - rect.left;
-        dragPoint.y = e.clientY - rect.top;
-
-        drawSeriesViz();
-    });
-
-    canvas.addEventListener("mouseup", () => {
-        isDragging = false;
-        dragPoint = null;
-    });
-  </script>
-
-  <!-- ⭐ CONVERGENCE BACKGROUND -->
-  <script>
-    const convCanvas = document.getElementById("convCanvas");
-    const ctx2 = convCanvas.getContext("2d");
-    const vertexImg = document.getElementById("vertexImage");
-
-    function resizeConvCanvas() {
-      convCanvas.width = document.getElementById("chatOutput").offsetWidth;
-      convCanvas.height = document.getElementById("chatOutput").offsetHeight;
-    }
-    resizeConvCanvas();
-    window.addEventListener("resize", resizeConvCanvas);
-
-    let W = convCanvas.width;
-    let H = convCanvas.height;
-    let cx = W / 2;
-    let cy = H / 2;
-
-    const R1 = 4 * Math.PI;
-    const R2 = 3.44;
-
-    function complexTerm(k) {
-      const mag = 1 / (k * k);
-      const theta = 0.3 * k;
-      return {
-        re: mag * Math.cos(theta),
-        im: mag * Math.sin(theta)
+        imgCtx.fillStyle = "#0f0";
+        imgCtx.font = "16px monospace";
+        imgCtx.fillText(prompt, 10, aiCanvas.height - 10);
       };
     }
 
-    function norm(z) {
-      return Math.sqrt(z.re * z.re + z.im * z.im);
+    document.getElementById("generateImage").addEventListener("click", () => {
+      generateImageFromPrompt("JR.XXYY BETA");
+    });
+
+    generateImageFromPrompt("JR.XXYY BETA");
+  </script>
+
+  <script>
+    function goToBase() {
+      window.location.href = "base.html";
     }
 
-    function add(z1, z2) {
-      return { re: z1.re + z2.re, im: z1.im + z2.im };
-    }
+    // ⭐ Convergence Animation
+    const cv = document.getElementById("seriesViz");
+    const cx = cv.getContext("2d");
 
-    function drawDot(radius, angle, color = "#fff", size = 2) {
-      const x = cx + radius * Math.cos(angle);
-      const y = cy + radius * Math.sin(angle);
-      ctx2.fillStyle = color;
-      ctx2.beginPath();
-      ctx2.arc(x, y, size, 0, 2 * Math.PI);
-      ctx2.fill();
-    }
+    let t = 0;
+    function animateSeries() {
+      cx.clearRect(0, 0, cv.width, cv.height);
 
-    function setBlendMode(mode) {
-      ctx2.globalCompositeOperation = mode;
-    }
+      cx.strokeStyle = "#0f0";
+      cx.lineWidth = 2;
 
-    let n = 1;
-    let S = { re: 0, im: 0 };
-    let angleBase = 0;
-
-    function animateConvergence() {
-      W = convCanvas.width;
-      H = convCanvas.height;
-      cx = W / 2;
-      cy = H / 2;
-
-      const a_n = complexTerm(n);
-      S = add(S, a_n);
-      const r = norm(S);
-
-      angleBase += 0.15;
-
-      ctx2.clearRect(0, 0, W, H);
-
-      const imgSize = 200;
-      ctx2.globalCompositeOperation = "normal";
-      ctx2.drawImage(vertexImg, cx - imgSize/2, cy - imgSize/2, imgSize, imgSize);
-
-      setBlendMode("lighter");
-
-      drawDot(40, angleBase, "#fff", 2);
-
-      const scaledR = Math.min(r * 8, Math.min(W, H) / 2);
-      drawDot(scaledR, angleBase + 1.0, "#ccc", 3);
-
-      const eps = 0.15;
-      if (Math.abs(r - R1) < eps) {
-        drawDot(100, angleBase + 2.0, "#0ff", 5);
+      cx.beginPath();
+      for (let i = 0; i < 200; i++) {
+        const x = 130 + Math.cos(i * 0.1 + t) * (i * 0.5);
+        const y = 130 + Math.sin(i * 0.1 + t) * (i * 0.5);
+        cx.lineTo(x, y);
       }
-      if (Math.abs(r - R2) < eps) {
-        drawDot(100, angleBase - 2.0, "#f0f", 5);
-      }
+      cx.stroke();
 
-      n++;
-      if (n < 800) {
-        requestAnimationFrame(animateConvergence);
-      }
+      t += 0.03;
+      requestAnimationFrame(animateSeries);
     }
 
-    vertexImg.onload = () => animateConvergence();
+    animateSeries();
   </script>
 
 </body>
