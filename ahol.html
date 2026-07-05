@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>AHOL Chatbot + AI Image Generator</title>
+  <title>AHOL Chatbot</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <style>
@@ -24,7 +24,6 @@
       max-width: 600px;
       position: relative;
       overflow: hidden;
-      margin-bottom: 20px;
     }
 
     #convCanvas {
@@ -60,43 +59,8 @@
       background: #222;
       color: #0f0;
       border: 1px solid #0f0;
-      display: block;
     }
 
-    #imagePrompt {
-      margin-top: 10px;
-      padding: 10px;
-      width: 300px;
-      background: #111;
-      color: #0ff;
-      border: 1px solid #0ff;
-      display: inline-block;
-    }
-
-    #generateImage {
-      padding: 10px 16px;
-      margin-left: 8px;
-      background: #0ff;
-      color: #000;
-      border: none;
-      cursor: pointer;
-      font-weight: bold;
-    }
-
-    #generateImage:hover {
-      background: #0cc;
-    }
-
-    #imageCanvas {
-      border: 1px solid #0ff;
-      width: 600px;
-      height: 320px;
-      background: rgba(0, 0, 0, 0.6);
-      display: block;
-      margin-top: 20px;
-    }
-
-    /* Ribbon UI */
     #uSpecialCenter {
       position: absolute;
       top: 0px;
@@ -120,6 +84,7 @@
       cursor: pointer;
     }
 
+    /* ⭐ Ribbon Visualization */
     .ribbon-col {
       display: flex;
       flex-direction: column;
@@ -139,7 +104,7 @@
 
     #seriesViz {
       width: 100%;
-      height: 320px;
+      height: 320px; /* 8 rows × 40px each */
       background: transparent;
     }
   </style>
@@ -147,7 +112,6 @@
 
 <body>
 
-  <!-- RPX Drip Filter -->
   <svg width="0" height="0">
     <filter id="rpxDrip">
       <feTurbulence type="fractalNoise" baseFrequency="0.02 0.25" numOctaves="4" result="noise"/>
@@ -155,10 +119,13 @@
     </filter>
   </svg>
 
-  <h2>AHOL Chatbot + DreamTech Image Synth</h2>
+  <button id="baseButton" onclick="goToBase()">.BASE.</button>
+  <h2>AHOL Chatbot</h2>
 
-  <!-- Ribbon UI -->
+  <!-- ⭐ RIBBON WITH CENTER VISUALIZATION INSERTED -->
   <div id="uSpecialCenter">
+
+    <!-- LEFT COLUMN -->
     <div class="ribbon-col left-col">
       <div class="uRow"><span>x</span><span>難</span></div>
       <div class="uRow"><span>c</span><span>金</span></div>
@@ -169,10 +136,12 @@
       <div class="uRow"><span>8</span><span>8</span></div>
     </div>
 
+    <!-- ⭐ CENTER VISUALIZATION COLUMN -->
     <div class="ribbon-col center-col">
       <canvas id="seriesViz"></canvas>
     </div>
 
+    <!-- RIGHT COLUMN -->
     <div class="ribbon-col right-col">
       <div class="uRow"><span>手</span></div>
       <div class="uRow"><span>田</span></div>
@@ -183,50 +152,61 @@
       <div class="uRow"><span>山</span></div>
       <div class="uRow"><span>戈</span></div>
     </div>
+
   </div>
 
-  <!-- Chatbox -->
   <div id="chatOutput">
     <canvas id="convCanvas"></canvas>
+
     <img id="vertexImage" src="jrxxyy.png" style="display:none;">
     <img id="vbnPhoto" src="vbn.png" alt="vbn photo">
   </div>
 
-  <!-- Inputs -->
-  <input id="userInput" placeholder="Type to activate AHOL...">
-  <input id="imagePrompt" placeholder="Describe your image...">
-  <button id="generateImage">GENERATE</button>
-  <canvas id="imageCanvas"></canvas>
-
-  <!-- JR.XXYY BETA base texture -->
-  <img id="tex_jr" src="JR.XXYY.png" style="display:none;">
-
-  <!-- Chatbot Boot Sequence -->
   <script>
+    document.getElementById("vbnPhoto").addEventListener("load", function() {
+        console.log("vbn photo loaded inside chatbox");
+    });
+  </script>
+
+  <input id="userInput" placeholder="Type to activate AHOL...">
+
+  <script>
+    function goToBase() {
+      window.location.href = "https://htmlpreview.github.io/?https://github.com/alienware51007-collab/AHOL/blob/main/globe.html";
+    }
+
     const ChatBot = {
       speakQueue: [],
       active: false,
+
       loadScript(lines) {
         this.speakQueue.push(...lines);
         if (!this.active) this.run();
       },
+
       run() {
         this.active = true;
+
         if (this.speakQueue.length === 0) {
           this.active = false;
           return;
         }
+
         const line = this.speakQueue.shift();
         this.output(line);
+
         setTimeout(() => this.run(), 1200);
       },
+
       output(text) {
         const box = document.getElementById("chatOutput");
-        const p = document.createElement("p");
-        p.textContent = text;
-        p.style.position = "relative";
-        p.style.zIndex = "3";
-        box.appendChild(p);
+        if (box) {
+          const p = document.createElement("p");
+          p.textContent = text;
+          p.style.position = "relative";
+          p.style.zIndex = "3";
+          box.appendChild(p);
+        }
       }
     };
 
@@ -240,15 +220,20 @@
 
     let chatbotEnabled = false;
 
-    document.getElementById("userInput").addEventListener("input", () => {
+    function activateChatBot() {
       if (!chatbotEnabled) {
         chatbotEnabled = true;
         ChatBot.loadScript(ChatScript);
       }
+    }
+
+    const inputBox = document.getElementById("userInput");
+    inputBox.addEventListener("input", () => {
+      activateChatBot();
     });
   </script>
 
-  <!-- Ribbon SeriesViz -->
+  <!-- ⭐ TWO-PANEL VISUALIZATION SCRIPT WITH DRAGGABLE POINTS -->
   <script>
     const canvas = document.getElementById("seriesViz");
     const ctx = canvas.getContext("2d");
@@ -258,81 +243,125 @@
 
     let aPoints = [];
     let sPoints = [];
+    let dragPoint = null;
+    let isDragging = false;
 
     const seq = ["難","c","金",7,7,7,8,8];
-    const numericSeq = seq.map((v, i) => typeof v === "number" ? v : 10 - i);
+
+    const numericSeq = seq.map((v, i) => {
+        if (typeof v === "number") return v;
+        return 10 - i;
+    });
 
     function drawSeriesViz() {
-      const w = canvas.width;
-      const h = canvas.height;
-      const mid = w * 0.5;
+        const w = canvas.width;
+        const h = canvas.height;
+        const mid = w * 0.5;
 
-      ctx.clearRect(0, 0, w, h);
+        ctx.clearRect(0, 0, w, h);
 
-      ctx.strokeStyle = "orange";
-      ctx.lineWidth = 2;
-      ctx.beginPath();
-      aPoints.forEach((pt, i) => {
-        if (i === 0) ctx.moveTo(pt.x, pt.y);
-        else ctx.lineTo(pt.x, pt.y);
-      });
-      ctx.stroke();
-
-      ctx.fillStyle = "red";
-      aPoints.forEach(pt => {
+        /* ⭐ Draw aₖ curve based on draggable points */
+        ctx.strokeStyle = "orange";
+        ctx.lineWidth = 2;
         ctx.beginPath();
-        ctx.arc(pt.x, pt.y, 5, 0, Math.PI * 2);
-        ctx.fill();
-      });
 
-      ctx.strokeStyle = "lime";
-      ctx.lineWidth = 2;
-      ctx.beginPath();
-      sPoints.forEach((pt, i) => {
-        if (i === 0) ctx.moveTo(pt.x, pt.y);
-        else ctx.lineTo(pt.x, pt.y);
-      });
-      ctx.stroke();
+        aPoints.forEach((pt, i) => {
+            if (i === 0) ctx.moveTo(pt.x, pt.y);
+            else ctx.lineTo(pt.x, pt.y);
+        });
+        ctx.stroke();
 
-      ctx.fillStyle = "red";
-      sPoints.forEach(pt => {
+        /* Draw aₖ points */
+        ctx.fillStyle = "red";
+        aPoints.forEach(pt => {
+            ctx.beginPath();
+            ctx.arc(pt.x, pt.y, 5, 0, Math.PI * 2);
+            ctx.fill();
+        });
+
+        /* ⭐ Draw Sₙ curve based on draggable points */
+        ctx.strokeStyle = "lime";
+        ctx.lineWidth = 2;
         ctx.beginPath();
-        ctx.arc(pt.x, pt.y, 5, 0, Math.PI * 2);
-        ctx.fill();
-      });
+
+        sPoints.forEach((pt, i) => {
+            if (i === 0) ctx.moveTo(pt.x, pt.y);
+            else ctx.lineTo(pt.x, pt.y);
+        });
+        ctx.stroke();
+
+        /* Draw Sₙ points */
+        ctx.fillStyle = "red";
+        sPoints.forEach(pt => {
+            ctx.beginPath();
+            ctx.arc(pt.x, pt.y, 5, 0, Math.PI * 2);
+            ctx.fill();
+        });
     }
 
+    /* ⭐ Initialize points */
     function initPoints() {
-      const w = canvas.width;
-      const h = canvas.height;
-      const mid = w * 0.5;
+        const w = canvas.width;
+        const h = canvas.height;
+        const mid = w * 0.5;
 
-      aPoints = [];
-      sPoints = [];
+        aPoints = [];
+        sPoints = [];
 
-      numericSeq.forEach((v, i) => {
-        const x = (i / (numericSeq.length - 1)) * (mid - 40) + 20;
-        const y = h - (v / Math.max(...numericSeq)) * (h - 40) - 20;
-        aPoints.push({ x, y });
-      });
+        numericSeq.forEach((v, i) => {
+            const x = (i / (numericSeq.length - 1)) * (mid - 40) + 20;
+            const y = h - (v / Math.max(...numericSeq)) * (h - 40) - 20;
+            aPoints.push({ x, y });
+        });
 
-      const partialSums = numericSeq.map((v, i) =>
-        numericSeq.slice(0, i + 1).reduce((a, b) => a + b, 0)
-      );
+        const partialSums = numericSeq.map((v, i) =>
+            numericSeq.slice(0, i + 1).reduce((a, b) => a + b, 0)
+        );
 
-      partialSums.forEach((v, i) => {
-        const x = mid + (i / (partialSums.length - 1)) * (mid - 40) + 20;
-        const y = h - (v / Math.max(...partialSums)) * (h - 40) - 20;
-        sPoints.push({ x, y });
-      });
+        partialSums.forEach((v, i) => {
+            const x = mid + (i / (partialSums.length - 1)) * (mid - 40) + 20;
+            const y = h - (v / Math.max(...partialSums)) * (h - 40) - 20;
+            sPoints.push({ x, y });
+        });
 
-      drawSeriesViz();
+        drawSeriesViz();
     }
 
     initPoints();
+
+    /* ⭐ DRAGGABLE POINT SYSTEM */
+    canvas.addEventListener("mousedown", (e) => {
+        const rect = canvas.getBoundingClientRect();
+        const mx = e.clientX - rect.left;
+        const my = e.clientY - rect.top;
+
+        [...aPoints, ...sPoints].forEach(pt => {
+            const dx = mx - pt.x;
+            const dy = my - pt.y;
+            if (Math.sqrt(dx*dx + dy*dy) < 10) {
+                dragPoint = pt;
+                isDragging = true;
+            }
+        });
+    });
+
+    canvas.addEventListener("mousemove", (e) => {
+        if (!isDragging || !dragPoint) return;
+
+        const rect = canvas.getBoundingClientRect();
+        dragPoint.x = e.clientX - rect.left;
+        dragPoint.y = e.clientY - rect.top;
+
+        drawSeriesViz();
+    });
+
+    canvas.addEventListener("mouseup", () => {
+        isDragging = false;
+        dragPoint = null;
+    });
   </script>
 
-  <!-- Convergence Background -->
+  <!-- ⭐ CONVERGENCE BACKGROUND -->
   <script>
     const convCanvas = document.getElementById("convCanvas");
     const ctx2 = convCanvas.getContext("2d");
@@ -379,6 +408,10 @@
       ctx2.fill();
     }
 
+    function setBlendMode(mode) {
+      ctx2.globalCompositeOperation = mode;
+    }
+
     let n = 1;
     let S = { re: 0, im: 0 };
     let angleBase = 0;
@@ -401,7 +434,7 @@
       ctx2.globalCompositeOperation = "normal";
       ctx2.drawImage(vertexImg, cx - imgSize/2, cy - imgSize/2, imgSize, imgSize);
 
-      ctx2.globalCompositeOperation = "lighter";
+      setBlendMode("lighter");
 
       drawDot(40, angleBase, "#fff", 2);
 
@@ -409,73 +442,21 @@
       drawDot(scaledR, angleBase + 1.0, "#ccc", 3);
 
       const eps = 0.15;
-      if (Math.abs(r - R1) < eps) drawDot(100, angleBase + 2.0, "#0ff", 5);
-      if (Math.abs(r - R2) < eps) drawDot(100, angleBase - 2.0, "#f0f", 5);
+      if (Math.abs(r - R1) < eps) {
+        drawDot(100, angleBase + 2.0, "#0ff", 5);
+      }
+      if (Math.abs(r - R2) < eps) {
+        drawDot(100, angleBase - 2.0, "#f0f", 5);
+      }
 
       n++;
-      if (n < 800) requestAnimationFrame(animateConvergence);
+      if (n < 800) {
+        requestAnimationFrame(animateConvergence);
+      }
     }
 
     vertexImg.onload = () => animateConvergence();
   </script>
 
-  <!-- AI IMAGE GENERATOR (JR.XXYY ALWAYS REFRESHES) -->
-  <script>
-    const imgCanvas = document.getElementById("imageCanvas");
-    const imgCtx = imgCanvas.getContext("2d");
-    const texJR = document.getElementById("tex_jr");
-    const generateBtn = document.getElementById("generateImage");
-
-    imgCanvas.width = imgCanvas.offsetWidth;
-    imgCanvas.height = imgCanvas.offsetHeight;
-
-    function randomBetween(min, max) {
-      return Math.random() * (max - min) + min;
-    }
-
-    function pickPalette(prompt) {
-      const p = prompt.toLowerCase();
-      if (p.includes("neon") || p.includes("cyber")) return ["#00ffcc", "#00ff00", "#ff00ff", "#0033ff"];
-      if (p.includes("fire") || p.includes("lava")) return ["#ff3300", "#ff9900", "#ffff00", "#660000"];
-      if (p.includes("space") || p.includes("galaxy")) return ["#ffffff", "#00ccff", "#9900ff", "#000022"];
-      if (p.includes("forest") || p.includes("nature")) return ["#004400", "#00aa44", "#88ff88", "#223300"];
-      return ["#00ffff", "#ff00ff", "#ffffff", "#222222"];
-    }
-
-    function generateImageFromPrompt(prompt) {
-      const w = imgCanvas.width;
-      const h = imgCanvas.height;
-
-      imgCtx.clearRect(0, 0, w, h);
-
-      imgCtx.globalAlpha = 1.0;
-      imgCtx.drawImage(texJR, 0, 0, w, h);
-
-      const palette = pickPalette(prompt);
-
-      const grad = imgCtx.createRadialGradient(w/2, h/2, 10, w/2, h/2, Math.max(w,h)/2);
-      grad.addColorStop(0, palette[0]);
-      grad.addColorStop(0.5, palette[1]);
-      grad.addColorStop(1, "rgba(0,0,0,0.4)");
-
-      imgCtx.globalAlpha = 0.35;
-      imgCtx.fillStyle = grad;
-      imgCtx.fillRect(0, 0, w, h);
-
-      imgCtx.globalAlpha = 0.5;
-      for (let i = 0; i < 20; i++) {
-        const color = palette[Math.floor(Math.random() * palette.length)];
-        imgCtx.strokeStyle = color;
-        imgCtx.lineWidth = randomBetween(1, 3);
-
-        imgCtx.beginPath();
-        const cx = randomBetween(0, w);
-        const cy = randomBetween(0, h);
-        const radius = randomBetween(20, Math.min(w, h) / 3);
-
-        const spikes = Math.floor(randomBetween(4, 10));
-        for (let s = 0; s <= spikes; s++) {
-          const angle = (s / spikes) * Math.PI * 2;
-          const rx = cx + Math.cos(angle) * radius;
-          const ry = cy + Math.sin(angle) * radius;
-          if (s === 
+</body>
+</html>
