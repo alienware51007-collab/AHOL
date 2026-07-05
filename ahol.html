@@ -36,7 +36,6 @@
       box-shadow: 0 0 12px #0f0;
     }
 
-    /* Ribbon Row Styling */
     .uRow span {
       display: inline-block;
       font-size: 22px;
@@ -50,7 +49,6 @@
       text-shadow: 0 0 12px #0f0;
     }
 
-    /* RPX DRIP FILTER */
     svg {
       position: absolute;
       top: 0;
@@ -70,10 +68,8 @@
   <button id="baseButton" onclick="goToBase()">.BASE.</button>
   <h2>AHOL Chatbot</h2>
 
-  <!-- ⭐ RIBBON WITH CENTER VISUALIZATION -->
   <div id="uSpecialCenter" style="display:flex; gap:20px;">
 
-    <!-- LEFT COLUMN -->
     <div class="ribbon-col left-col" style="display:flex; flex-direction:column; gap:10px;">
       <div class="uRow"><span>x</span><span>難</span></div>
       <div class="uRow"><span>c</span><span>金</span></div>
@@ -81,12 +77,10 @@
       <div class="uRow"><span>q</span><span>龍</span></div>
     </div>
 
-    <!-- CENTER COLUMN -->
     <div class="ribbon-col center-col">
       <canvas id="seriesViz" width="260" height="260"></canvas>
     </div>
 
-    <!-- RIGHT COLUMN -->
     <div class="ribbon-col right-col" style="display:flex; flex-direction:column; gap:10px;">
       <div class="uRow"><span>9</span><span>力</span></div>
       <div class="uRow"><span>t</span><span>火</span></div>
@@ -138,6 +132,15 @@
   ">
     <h3 style="text-shadow:0 0 10px #0f0;">AI Image Generator</h3>
 
+    <input id="aiPrompt" placeholder="Type your prompt..." style="
+      width:300px;
+      padding:10px;
+      border:1px solid #0f0;
+      background:black;
+      color:#0f0;
+      margin-bottom:10px;
+    ">
+
     <canvas id="aiCanvas" width="300" height="300" style="
       border:1px solid #0f0;
       background:#111;
@@ -159,7 +162,7 @@
 
     function generateImageFromPrompt(prompt) {
       const img = new Image();
-      img.src = "jrxxyybeta.png";  // ⭐ Correct filename
+      img.src = "jrxxyybeta.png";
 
       img.onload = () => {
         imgCtx.clearRect(0, 0, aiCanvas.width, aiCanvas.height);
@@ -172,7 +175,8 @@
     }
 
     document.getElementById("generateImage").addEventListener("click", () => {
-      generateImageFromPrompt("JR.XXYY BETA");
+      const prompt = document.getElementById("aiPrompt").value || "JR.XXYY BETA";
+      generateImageFromPrompt(prompt);
     });
 
     generateImageFromPrompt("JR.XXYY BETA");
@@ -183,7 +187,7 @@
       window.location.href = "base.html";
     }
 
-    // ⭐ Convergence Animation
+    // ⭐ ORIGINAL CALCULUS CIRCULAR CONVERGENCE
     const cv = document.getElementById("seriesViz");
     const cx = cv.getContext("2d");
 
@@ -195,14 +199,15 @@
       cx.lineWidth = 2;
 
       cx.beginPath();
-      for (let i = 0; i < 200; i++) {
-        const x = 130 + Math.cos(i * 0.1 + t) * (i * 0.5);
-        const y = 130 + Math.sin(i * 0.1 + t) * (i * 0.5);
+      for (let i = 0; i < 360; i++) {
+        const r = 40 + Math.sin((i + t) * 0.05) * 20;
+        const x = 130 + Math.cos(i * Math.PI / 180) * r;
+        const y = 130 + Math.sin(i * Math.PI / 180) * r;
         cx.lineTo(x, y);
       }
       cx.stroke();
 
-      t += 0.03;
+      t += 1.5;
       requestAnimationFrame(animateSeries);
     }
 
