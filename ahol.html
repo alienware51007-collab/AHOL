@@ -88,7 +88,8 @@
       <div class="uRow"><span>z</span><span>神</span></div>
     </div>
 
-  </div>
+  </div> <!-- closes ribbon columns -->
+</div> <!-- closes uSpecialCenter -->
 
   <div id="chatOutput" style="
       border:1px solid #fff;
@@ -187,26 +188,57 @@
       window.location.href = "base.html";
     }
 
-    // ⭐ ORIGINAL CALCULUS FOCUS POINT — RESTORED
+    // ⭐ Dynamic Calculus Animation + Lebesgue Points
     const cv = document.getElementById("seriesViz");
     const cx = cv.getContext("2d");
 
-    function drawCalculusFocus() {
+    const centerX = 130;
+    const centerY = 130;
+
+    let redPoint = { x: 200, y: 130 };
+    let greenPoint = { x: 60, y: 130 };
+
+    let dragging = null;
+
+    cv.addEventListener("mousedown", (e) => {
+      const rect = cv.getBoundingClientRect();
+      const mx = e.clientX - rect.left;
+      const my = e.clientY - rect.top;
+
+      if (Math.hypot(mx - redPoint.x, my - redPoint.y) < 10) dragging = redPoint;
+      else if (Math.hypot(mx - greenPoint.x, my - greenPoint.y) < 10) dragging = greenPoint;
+    });
+
+    cv.addEventListener("mousemove", (e) => {
+      if (!dragging) return;
+      const rect = cv.getBoundingClientRect();
+      dragging.x = e.clientX - rect.left;
+      dragging.y = e.clientY - rect.top;
+    });
+
+    cv.addEventListener("mouseup", () => dragging = null);
+    cv.addEventListener("mouseleave", () => dragging = null);
+
+    let t = 0;
+
+    function animateCalculus() {
       cx.clearRect(0, 0, cv.width, cv.height);
 
-      const centerX = 130;
-      const centerY = 130;
-      const radius = 80;
+      const dx = redPoint.x - greenPoint.x;
+      const dy = redPoint.y - greenPoint.y;
+      const dist = Math.hypot(dx, dy);
+
+      const baseRadius = 40 + (dist * 0.3);
 
       cx.strokeStyle = "#0f0";
       cx.lineWidth = 1.5;
 
-      // Draw 360 calculus rays converging to the vertex
       for (let i = 0; i < 360; i++) {
         const angle = i * Math.PI / 180;
+        const r = baseRadius + Math.sin((i + t) * 0.03) * 10;
 
-        const x = centerX + Math.cos(angle) * radius;
-        const y = centerY + Math.sin(angle) * radius;
+        const x = centerX + Math.cos(angle) * r;
+        const y = centerY + Math.sin(angle) * r;
 
         cx.beginPath();
         cx.moveTo(centerX, centerY);
@@ -214,14 +246,26 @@
         cx.stroke();
       }
 
-      // Draw the vertex (focus point)
       cx.fillStyle = "#0f0";
       cx.beginPath();
       cx.arc(centerX, centerY, 4, 0, Math.PI * 2);
       cx.fill();
+
+      cx.fillStyle = "red";
+      cx.beginPath();
+      cx.arc(redPoint.x, redPoint.y, 6, 0, Math.PI * 2);
+      cx.fill();
+
+      cx.fillStyle = "lime";
+      cx.beginPath();
+      cx.arc(greenPoint.x, greenPoint.y, 6, 0, Math.PI * 2);
+      cx.fill();
+
+      t += 1.2;
+      requestAnimationFrame(animateCalculus);
     }
 
-    drawCalculusFocus();
+    animateCalculus();
   </script>
 
 </body>
