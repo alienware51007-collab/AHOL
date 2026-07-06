@@ -163,8 +163,49 @@
     ">GENERATE</button>
   </div>
 
-  <!-- ASDX COMMAND SYSTEM -->
-  <script src="asdx.js"></script>
+  <!-- ⭐ ASDX ENGINE EMBEDDED DIRECTLY -->
+  <script>
+    function asdxCommand(cmd) {
+      switch(cmd) {
+
+        case "a":
+          replaceFaceRegion();
+          break;
+
+        case "s":
+          console.log("S pressed");
+          break;
+
+        case "d":
+          console.log("D pressed");
+          break;
+
+        case "x":
+          console.log("X pressed");
+          break;
+
+        default:
+          console.log("Unknown command:", cmd);
+      }
+    }
+
+    function replaceFaceRegion() {
+      const canvas = document.getElementById("aiCanvas");
+      const ctx = canvas.getContext("2d");
+
+      const faceImg = new Image();
+      faceImg.src = "vrshark.png";
+
+      faceImg.onload = () => {
+        const faceX = 60;
+        const faceY = 0;
+        const faceWidth = 180;
+        const faceHeight = 120;
+
+        ctx.drawImage(faceImg, faceX, faceY, faceWidth, faceHeight);
+      };
+    }
+  </script>
 
   <script>
     const aiCanvas = document.getElementById("aiCanvas");
@@ -198,7 +239,6 @@
   </script>
 
   <script>
-    // ⭐ ONLY TWO DRAGGABLE DOTS — NO LINES, NO SHAPE
     const cv = document.getElementById("seriesViz");
     const cx = cv.getContext("2d");
 
