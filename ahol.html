@@ -61,6 +61,13 @@
       transform: translateY(0) scale(1);
     }
 
+    /* ⭐ SHINE FLASH ANIMATION */
+    @keyframes shineFlash {
+      0% { opacity:1; box-shadow:0 0 6px #0f0; }
+      50% { opacity:1; box-shadow:0 0 22px #0f0; }
+      100% { opacity:0; box-shadow:0 0 0 transparent; }
+    }
+
     h2 {
       font-size: 28px;
       margin-bottom: 10px;
@@ -159,6 +166,25 @@
       right:10px;
       bottom:10px;
     ">
+  </div>
+
+  <!-- ⭐ NEW SHINE BOX (OUTSIDE CHATBOX) -->
+  <div id="shineBox" style="
+    position:absolute;
+    top:20px;
+    left:calc(50% + 320px);
+    padding:8px 12px;
+    background:black;
+    border:1px solid #0f0;
+    color:#0f0;
+    font-family:monospace;
+    font-size:14px;
+    text-shadow:0 0 6px #0f0;
+    cursor:default;
+    transition:0.3s;
+    z-index:5;
+  ">
+    press 1 to shine CD...
   </div>
 
   <script>
@@ -332,6 +358,22 @@
     window.addEventListener('scroll', () => requestAnimationFrame(checkVisibility));
     window.addEventListener('load', checkVisibility);
   })();
+  </script>
+
+  <!-- ⭐ SHINE BOX KEY LISTENER -->
+  <script>
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "1") {
+      const box = document.getElementById("shineBox");
+      if (!box) return;
+
+      box.style.animation = "shineFlash 0.8s ease-out forwards";
+
+      setTimeout(() => {
+        box.style.display = "none";
+      }, 800);
+    }
+  });
   </script>
 
 </body>
