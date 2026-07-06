@@ -168,11 +168,11 @@
     ">
   </div>
 
-  <!-- ⭐ NEW SHINE BOX (OUTSIDE CHATBOX) -->
+  <!-- ⭐ SHINE BOX (UPPER RIGHT, OUTSIDE CHATBOX) -->
   <div id="shineBox" style="
     position:absolute;
     top:20px;
-    left:calc(50% + 320px);
+    right:20px;
     padding:8px 12px;
     background:black;
     border:1px solid #0f0;
@@ -180,8 +180,6 @@
     font-family:monospace;
     font-size:14px;
     text-shadow:0 0 6px #0f0;
-    cursor:default;
-    transition:0.3s;
     z-index:5;
   ">
     press 1 to shine CD...
@@ -200,165 +198,6 @@
     background:black;
     color:#0f0;
   ">
-
-  <div id="aiBox" style="
-      margin-top:30px;
-      padding:20px;
-      border:1px solid #fff;
-      width:340px;
-      background:black;
-  ">
-    <h3 style="text-shadow:0 0 10px #0f0;">AI Image Generator</h3>
-
-    <input id="aiPrompt" placeholder="Type your prompt..." style="
-      width:300px;
-      padding:10px;
-      border:1px solid #0f0;
-      background:black;
-      color:#0f0;
-      margin-bottom:10px;
-    ">
-
-    <canvas id="aiCanvas" width="300" height="300" style="
-      border:1px solid #0f0;
-      background:#111;
-      margin-bottom:10px;
-    "></canvas>
-
-    <button id="generateImage" style="
-      padding:10px 20px;
-      background:#0f0;
-      color:black;
-      border:none;
-      cursor:pointer;
-    ">GENERATE</button>
-  </div>
-
-  <!-- ⭐ ASDX ENGINE -->
-  <script>
-    function asdxCommand(cmd) {
-      switch(cmd) {
-        case "a": replaceFaceRegion(); break;
-        case "s": replaceRightBoundary(); break;
-        case "d": console.log("D pressed"); break;
-        case "x": console.log("X pressed"); break;
-        default: console.log("Unknown command:", cmd);
-      }
-    }
-
-    function replaceFaceRegion() {
-      const canvas = document.getElementById("aiCanvas");
-      const ctx = canvas.getContext("2d");
-      const faceImg = new Image();
-      faceImg.src = "vrshark.png";
-      faceImg.onload = () => ctx.drawImage(faceImg, 60, 0, 180, 120);
-    }
-
-    function replaceRightBoundary() {
-      const canvas = document.getElementById("aiCanvas");
-      const ctx = canvas.getContext("2d");
-      const rightImg = new Image();
-      rightImg.src = "rty.png";
-      rightImg.onload = () => ctx.drawImage(rightImg, canvas.width - 80, 0, 80, canvas.height);
-    }
-  </script>
-
-  <script>
-    const aiCanvas = document.getElementById("aiCanvas");
-    const imgCtx = aiCanvas.getContext("2d");
-
-    function generateImageFromPrompt(prompt) {
-      const img = new Image();
-      img.src = "jrxxyybeta.png";
-
-      img.onload = () => {
-        imgCtx.clearRect(0, 0, aiCanvas.width, aiCanvas.height);
-        imgCtx.drawImage(img, 0, 0, aiCanvas.width, aiCanvas.height);
-
-        imgCtx.fillStyle = "#0f0";
-        imgCtx.font = "16px monospace";
-        imgCtx.fillText(prompt, 10, aiCanvas.height - 10);
-      };
-    }
-
-    document.getElementById("generateImage").addEventListener("click", () => {
-      const prompt = document.getElementById("aiPrompt").value || "JR.XXYY BETA";
-      generateImageFromPrompt(prompt);
-    });
-
-    document.getElementById("aiPrompt").addEventListener("change", () => {
-      const cmd = document.getElementById("aiPrompt").value.trim().toLowerCase();
-      asdxCommand(cmd);
-    });
-
-    generateImageFromPrompt("JR.XXYY BETA");
-  </script>
-
-  <script>
-    const cv = document.getElementById("seriesViz");
-    const cx = cv.getContext("2d");
-
-    let redPoint = { x: 200, y: 130 };
-    let greenPoint = { x: 60, y: 130 };
-
-    let dragging = null;
-
-    function drawDots() {
-      cx.clearRect(0, 0, cv.width, cv.height);
-
-      cx.fillStyle = "red";
-      cx.beginPath();
-      cx.arc(redPoint.x, redPoint.y, 6, 0, Math.PI * 2);
-      cx.fill();
-
-      cx.fillStyle = "lime";
-      cx.beginPath();
-      cx.arc(greenPoint.x, greenPoint.y, 6, 0, Math.PI * 2);
-      cx.fill();
-    }
-
-    cv.addEventListener("mousedown", (e) => {
-      const rect = cv.getBoundingClientRect();
-      const mx = e.clientX - rect.left;
-      const my = e.clientY - rect.top;
-
-      if (Math.hypot(mx - redPoint.x, my - redPoint.y) < 10) dragging = redPoint;
-      else if (Math.hypot(mx - greenPoint.x, my - greenPoint.y) < 10) dragging = greenPoint;
-    });
-
-    cv.addEventListener("mousemove", (e) => {
-      if (!dragging) return;
-      const rect = cv.getBoundingClientRect();
-      dragging.x = e.clientX - rect.left;
-      dragging.y = e.clientY - rect.top;
-      drawDots();
-    });
-
-    cv.addEventListener("mouseup", () => dragging = null);
-    cv.addEventListener("mouseleave", () => dragging = null);
-
-    drawDots();
-  </script>
-
-  <!-- ⭐ SCROLL REVEAL SCRIPT -->
-  <script>
-  (function() {
-    const elements = document.querySelectorAll('.scrollReveal');
-
-    function checkVisibility() {
-      elements.forEach(el => {
-        const rect = el.getBoundingClientRect();
-        const inView = rect.top < window.innerHeight * 0.85 && rect.bottom > 0;
-        if (inView) {
-          el.classList.add('visible');
-        }
-      });
-    }
-
-    window.addEventListener('scroll', () => requestAnimationFrame(checkVisibility));
-    window.addEventListener('load', checkVisibility);
-  })();
-  </script>
 
   <!-- ⭐ SHINE BOX KEY LISTENER -->
   <script>
