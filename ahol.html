@@ -18,7 +18,7 @@
       position: relative;
     }
 
-    /* ✨ ADDED NEON GRID OVERLAY WITH MOTION BLUR + GLOW PULSE */
+    /* ✨ NEON GRID OVERLAY WITH MOTION BLUR + GLOW PULSE */
     body::before {
       content: "";
       position: fixed;
@@ -48,6 +48,17 @@
     body > * {
       position: relative;
       z-index: 1;
+    }
+
+    /* ⭐ SCROLL REVEAL ANIMATION */
+    .scrollReveal {
+      opacity: 0;
+      transform: translateY(40px) scale(0.95);
+      transition: all 0.8s ease-out;
+    }
+    .scrollReveal.visible {
+      opacity: 1;
+      transform: translateY(0) scale(1);
     }
 
     h2 {
@@ -130,7 +141,8 @@
 
   </div>
 
-  <div id="chatOutput" style="
+  <!-- ⭐ CHATBOX WITH SCROLL REVEAL -->
+  <div id="chatOutput" class="scrollReveal" style="
       border:1px solid #fff;
       padding:10px;
       min-height:150px;
@@ -140,7 +152,7 @@
       position:relative;
       overflow:hidden;
   ">
-    <img id="vbnPhoto" src="vbn.png" alt="vbn photo" style="
+    <img id="vbnPhoto" class="scrollReveal" src="vbn.png" alt="vbn photo" style="
       width:120px;
       filter:url(#rpxDrip);
       position:absolute;
@@ -300,6 +312,26 @@
     cv.addEventListener("mouseleave", () => dragging = null);
 
     drawDots();
+  </script>
+
+  <!-- ⭐ SCROLL REVEAL SCRIPT -->
+  <script>
+  (function() {
+    const elements = document.querySelectorAll('.scrollReveal');
+
+    function checkVisibility() {
+      elements.forEach(el => {
+        const rect = el.getBoundingClientRect();
+        const inView = rect.top < window.innerHeight * 0.85 && rect.bottom > 0;
+        if (inView) {
+          el.classList.add('visible');
+        }
+      });
+    }
+
+    window.addEventListener('scroll', () => requestAnimationFrame(checkVisibility));
+    window.addEventListener('load', checkVisibility);
+  })();
   </script>
 
 </body>
