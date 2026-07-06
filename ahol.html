@@ -206,83 +206,66 @@
       };
     }
   </script>
-
   <script>
-    const aiCanvas = document.getElementById("aiCanvas");
-    const imgCtx = aiCanvas.getContext("2d");
+  function asdxCommand(cmd) {
+    switch(cmd) {
 
-    function generateImageFromPrompt(prompt) {
-      const img = new Image();
-      img.src = "jrxxyybeta.png";
+      case "a":
+        replaceFaceRegion();
+        break;
 
-      img.onload = () => {
-        imgCtx.clearRect(0, 0, aiCanvas.width, aiCanvas.height);
-        imgCtx.drawImage(img, 0, 0, aiCanvas.width, aiCanvas.height);
+      case "s":
+        replaceRightBoundary();
+        break;
 
-        imgCtx.fillStyle = "#0f0";
-        imgCtx.font = "16px monospace";
-        imgCtx.fillText(prompt, 10, aiCanvas.height - 10);
-      };
+      case "d":
+        console.log("D pressed");
+        break;
+
+      case "x":
+        console.log("X pressed");
+        break;
+
+      default:
+        console.log("Unknown command:", cmd);
     }
+  }
 
-    document.getElementById("generateImage").addEventListener("click", () => {
-      const prompt = document.getElementById("aiPrompt").value || "JR.XXYY BETA";
-      generateImageFromPrompt(prompt);
-    });
+  // A — Replace face region
+  function replaceFaceRegion() {
+    const canvas = document.getElementById("aiCanvas");
+    const ctx = canvas.getContext("2d");
 
-    document.getElementById("aiPrompt").addEventListener("change", () => {
-      const cmd = document.getElementById("aiPrompt").value.trim().toLowerCase();
-      asdxCommand(cmd);
-    });
+    const faceImg = new Image();
+    faceImg.src = "vrshark.png";
 
-    generateImageFromPrompt("JR.XXYY BETA");
+    faceImg.onload = () => {
+      const faceX = 60;
+      const faceY = 0;
+      const faceWidth = 180;
+      const faceHeight = 120;
+
+      ctx.drawImage(faceImg, faceX, faceY, faceWidth, faceHeight);
+    };
+  }
+
+  // S — Replace RIGHT vertical boundary region with rty.png
+  function replaceRightBoundary() {
+    const canvas = document.getElementById("aiCanvas");
+    const ctx = canvas.getContext("2d");
+
+    const rightImg = new Image();
+    rightImg.src = "rty.png";  // ⭐ your new vertical image
+
+    rightImg.onload = () => {
+      // ⭐ RIGHT VERTICAL BOUNDARY REGION
+      const regionWidth = 80;                 // vertical strip width
+      const regionX = canvas.width - regionWidth; // rightmost 80px
+      const regionY = 0;
+      const regionHeight = canvas.height;     // full vertical height
+
+      // ⭐ Draw rty.png stretched vertically
+      ctx.drawImage(rightImg, regionX, regionY, regionWidth, regionHeight);
+    };
+  }
   </script>
-
-  <script>
-    const cv = document.getElementById("seriesViz");
-    const cx = cv.getContext("2d");
-
-    let redPoint = { x: 200, y: 130 };
-    let greenPoint = { x: 60, y: 130 };
-
-    let dragging = null;
-
-    function drawDots() {
-      cx.clearRect(0, 0, cv.width, cv.height);
-
-      cx.fillStyle = "red";
-      cx.beginPath();
-      cx.arc(redPoint.x, redPoint.y, 6, 0, Math.PI * 2);
-      cx.fill();
-
-      cx.fillStyle = "lime";
-      cx.beginPath();
-      cx.arc(greenPoint.x, greenPoint.y, 6, 0, Math.PI * 2);
-      cx.fill();
-    }
-
-    cv.addEventListener("mousedown", (e) => {
-      const rect = cv.getBoundingClientRect();
-      const mx = e.clientX - rect.left;
-      const my = e.clientY - rect.top;
-
-      if (Math.hypot(mx - redPoint.x, my - redPoint.y) < 10) dragging = redPoint;
-      else if (Math.hypot(mx - greenPoint.x, my - greenPoint.y) < 10) dragging = greenPoint;
-    });
-
-    cv.addEventListener("mousemove", (e) => {
-      if (!dragging) return;
-      const rect = cv.getBoundingClientRect();
-      dragging.x = e.clientX - rect.left;
-      dragging.y = e.clientY - rect.top;
-      drawDots();
-    });
-
-    cv.addEventListener("mouseup", () => dragging = null);
-    cv.addEventListener("mouseleave", () => dragging = null);
-
-    drawDots();
-  </script>
-
-</body>
-</html>
