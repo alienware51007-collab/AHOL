@@ -163,6 +163,9 @@
     ">GENERATE</button>
   </div>
 
+  <!-- ASDX COMMAND SYSTEM -->
+  <script src="asdx.js"></script>
+
   <script>
     const aiCanvas = document.getElementById("aiCanvas");
     const imgCtx = aiCanvas.getContext("2d");
@@ -186,6 +189,11 @@
       generateImageFromPrompt(prompt);
     });
 
+    document.getElementById("aiPrompt").addEventListener("change", () => {
+      const cmd = document.getElementById("aiPrompt").value.trim().toLowerCase();
+      asdxCommand(cmd);
+    });
+
     generateImageFromPrompt("JR.XXYY BETA");
   </script>
 
@@ -202,13 +210,11 @@
     function drawDots() {
       cx.clearRect(0, 0, cv.width, cv.height);
 
-      // Red dot
       cx.fillStyle = "red";
       cx.beginPath();
       cx.arc(redPoint.x, redPoint.y, 6, 0, Math.PI * 2);
       cx.fill();
 
-      // Green dot
       cx.fillStyle = "lime";
       cx.beginPath();
       cx.arc(greenPoint.x, greenPoint.y, 6, 0, Math.PI * 2);
