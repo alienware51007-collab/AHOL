@@ -133,9 +133,10 @@
 
 <body>
 
+  <!-- ⭐ DESKTOP: 45 → tig.png | MOBILE: auto-display tig.png -->
   <script>
     const numbers = [45, 5, 9, 16, 25];
-    const images = ["tig.png", "tig.png", "image3.jpg", "image4.jpg", "image5.jpg"];
+    const images = ["tig.png", "image2.jpg", "image3.jpg", "image4.jpg", "image5.jpg"];
 
     function myDisplayer(some) {
       const demo = document.getElementById("demo");
@@ -151,6 +152,16 @@
         e.target.value = "";
       }
     });
+
+    // ⭐ MOBILE AUTO-DISPLAY tig.png
+    function isMobile() {
+      return /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+    }
+
+    if (isMobile()) {
+      const demo = document.getElementById("demo");
+      demo.innerHTML = '<img src="tig.png" style="width:100px; height:100px; border:1px solid #0f0; object-fit:cover;">';
+    }
   </script>
 
   <svg width="0" height="0">
