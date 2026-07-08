@@ -6,6 +6,19 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <style>
+    #numberInput {
+      position: fixed;
+      bottom: 20px;
+      right: 10px;
+      width: 200px;
+      padding: 8px;
+      background: black;
+      border: 1px solid #0f0;
+      color:#0f0;
+      z-index:99999;
+      font-family: monospace;
+    }
+
     body {
       background: url("jrxxyy.png");
       background-size: cover;
@@ -110,35 +123,11 @@
     }
   </style>
 </head>
+
+<!-- ⭐ NUMBER BOX MOVED OUTSIDE BODY (Safari fix) -->
+<input id="numberInput" type="text" placeholder="Enter: 45, 4, 9, 16, or 25">
+
 <body>
-
-  <svg width="0" height="0">
-    <filter id="rpxDrip">
-      <feTurbulence type="fractalNoise" baseFrequency="0.02 0.25" numOctaves="4" result="noise"/>
-      <feDisplacementMap in="SourceGraphic" in2="noise" scale="35" xChannelSelector="R" yChannelSelector="G"/>
-    </filter>
-  </svg>
-
-  <button id="baseButton" onclick="goToBase()">.BASE.</button>
-
-  <script>
-    function goToBase() {
-      window.location.href = "https://alienware51007-collab.github.io/AHOL/Oppeenn.html";
-    }
-  </script>
-
-  <div id="upperBox">
-    SYSTEM STATUS: ACTIVE
-  </div>
-
-  <!-- GALLERY DEMO GRID -->
-  <div id="demo" style="position: fixed; top: 10px; right: 10px; display: grid; grid-template-columns: repeat(5, 100px); gap: 10px; z-index: 9999; padding: 10px; background: rgba(0, 0, 0, 0.7); border: 2px solid #0f0; box-shadow: 0 0 15px #0f0;">
-  </div>
-
-  <!-- NUMBER INPUT (ticker removed) -->
-  <input id="numberInput" type="text" placeholder="Enter: 45, 4, 9, 16, or 25"
-  style="position: fixed; bottom: 20px; right: 10px; width: 200px; padding: 8px;
-  background: black; border: 1px solid #0f0; color:#0f0; z-index:9998;">
 
   <script>
     const numbers = [45, 4, 9, 16, 25];
@@ -159,6 +148,28 @@
       }
     });
   </script>
+
+  <svg width="0" height="0">
+    <filter id="rpxDrip">
+      <feTurbulence type="fractalNoise" baseFrequency="0.02 0.25" numOctaves="4" result="noise"/>
+      <feDisplacementMap in="SourceGraphic" in2="noise" scale="35" xChannelSelector="R" yChannelSelector="G"/>
+    </filter>
+  </svg>
+
+  <button id="baseButton" onclick="goToBase()">.BASE.</button>
+
+  <script>
+    function goToBase() {
+      window.location.href = "https://alienware51007-collab.github.io/AHOL/Oppeenn.html";
+    }
+  </script>
+
+  <div id="upperBox">
+    SYSTEM STATUS: ACTIVE
+  </div>
+
+  <div id="demo" style="position: fixed; top: 10px; right: 10px; display: grid; grid-template-columns: repeat(5, 100px); gap: 10px; z-index: 9999; padding: 10px; background: rgba(0, 0, 0, 0.7); border: 2px solid #0f0; box-shadow: 0 0 15px #0f0;">
+  </div>
 
   <h2>AHOL Chatbot</h2>
 
@@ -183,7 +194,6 @@
   </div>
 
   <script>
-    // ORIGINAL DOTS
     const sv = document.getElementById("seriesViz");
     const svctx = sv.getContext("2d");
 
@@ -212,11 +222,6 @@
   </div>
 
   <script>
-    document.getElementById("vbnPhoto").addEventListener("load", function() {
-      console.log("vbn photo loaded inside chatbox");
-    });
-
-    // TAP TO SHINE CD
     const shineBox = document.getElementById("shineBox");
     shineBox.addEventListener("click", function() {
       shineBox.style.animation = "shineFlash 0.8s ease-out";
@@ -225,74 +230,6 @@
 
     document.addEventListener("keydown", function(e) {
       if (e.key === "1") shineBox.click();
-    });
-  </script>
-
-  <input id="userInput" placeholder="Type to activate AHOL..." style="width:300px; padding:10px; border:1px solid #0f0; background:black; color:#0f0;">
-
-  <div id="aiBox" style="margin-top:30px; padding:20px; border:1px solid #fff; width:340px; background:black;">
-    <h3 style="text-shadow:0 0 10px #0f0;">AI Image Generator</h3>
-    <input id="aiPrompt" placeholder="Type your prompt..." style="width:300px; padding:10px; border:1px solid #0f0; background:black; color:#0f0; margin-bottom:10px;">
-    <canvas id="aiCanvas" width="300" height="300" style="border:1px solid #0f0; background:#111; margin-bottom:10px;"></canvas>
-    <button id="generateImage" style="padding:10px 20px; background:#0f0; color:black; border:none; cursor:pointer;">GENERATE</button>
-  </div>
-
-  <script>
-    const aiCanvas = document.getElementById("aiCanvas");
-    const aiCtx = aiCanvas.getContext("2d");
-
-    // BASE IMAGE
-    const baseImg = new Image();
-    baseImg.src = "jrxxyybeta.png";
-    baseImg.onload = () => aiCtx.drawImage(baseImg, 0, 0, aiCanvas.width, aiCanvas.height);
-
-    // BLENDING MODES
-    const blendModes = ["source-over", "screen", "lighten", "overlay", "difference", "color-dodge"];
-    let blendIndex = 0;
-
-    function setBlendMode() {
-      aiCtx.globalCompositeOperation = blendModes[blendIndex];
-      console.log("Blend mode:", blendModes[blendIndex]);
-    }
-
-    function asdxCommand(cmd) {
-      switch(cmd) {
-        case "a":
-          replaceFaceRegion();
-          break;
-        case "s":
-          replaceRightBoundary();
-          break;
-        case "d":
-          blendIndex = (blendIndex + 1) % blendModes.length;
-          setBlendMode();
-          break;
-        case "x":
-          aiCtx.globalCompositeOperation = "source-over";
-          aiCtx.clearRect(0, 0, aiCanvas.width, aiCanvas.height);
-          aiCtx.drawImage(baseImg, 0, 0, aiCanvas.width, aiCanvas.height);
-          break;
-      }
-    }
-
-    function replaceFaceRegion() {
-      const faceImg = new Image();
-      faceImg.src = "vrshark.png";
-      faceImg.onload = () => aiCtx.drawImage(faceImg, 60, 0, 180, 120);
-    }
-
-    function replaceRightBoundary() {
-      const rightImg = new Image();
-      rightImg.src = "rty.png";
-      rightImg.onload = () => aiCtx.drawImage(rightImg, aiCanvas.width - 80, 0, 80, aiCanvas.height);
-    }
-
-    document.addEventListener("keydown", function(e) {
-      if (["a","s","d","x"].includes(e.key)) asdxCommand(e.key);
-    });
-
-    document.getElementById("generateImage").addEventListener("click", function() {
-      console.log("AI prompt:", document.getElementById("aiPrompt").value);
     });
   </script>
 
