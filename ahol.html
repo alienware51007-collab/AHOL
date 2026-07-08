@@ -135,8 +135,10 @@
   <div id="demo" style="position: fixed; top: 10px; right: 10px; display: grid; grid-template-columns: repeat(5, 100px); gap: 10px; z-index: 9999; padding: 10px; background: rgba(0, 0, 0, 0.7); border: 2px solid #0f0; box-shadow: 0 0 15px #0f0;">
   </div>
 
-  <!-- NUMBER INPUT (no Enter, auto-trigger) -->
-  <input id="numberInput" type="number" placeholder="Enter: 45, 4, 9, 16, or 25" style="position: fixed; bottom: 20px; right: 10px; width: 200px; padding: 8px; background: black; border: 1px solid #0f0; color: #0f0; z-index: 9998;">
+  <!-- NUMBER INPUT (ticker removed) -->
+  <input id="numberInput" type="text" placeholder="Enter: 45, 4, 9, 16, or 25"
+  style="position: fixed; bottom: 20px; right: 10px; width: 200px; padding: 8px;
+  background: black; border: 1px solid #0f0; color:#0f0; z-index:9998;">
 
   <script>
     const numbers = [45, 4, 9, 16, 25];
@@ -181,20 +183,18 @@
   </div>
 
   <script>
-    // ORIGINAL-STYLE RED/GREEN DOTS (static base)
+    // ORIGINAL DOTS
     const sv = document.getElementById("seriesViz");
     const svctx = sv.getContext("2d");
 
     function drawSeriesDots() {
       svctx.clearRect(0, 0, sv.width, sv.height);
 
-      // red dot
       svctx.fillStyle = "red";
       svctx.beginPath();
       svctx.arc(80, 80, 8, 0, Math.PI * 2);
       svctx.fill();
 
-      // green dot
       svctx.fillStyle = "lime";
       svctx.beginPath();
       svctx.arc(180, 180, 8, 0, Math.PI * 2);
@@ -212,25 +212,19 @@
   </div>
 
   <script>
-    // vbn photo load log
     document.getElementById("vbnPhoto").addEventListener("load", function() {
       console.log("vbn photo loaded inside chatbox");
     });
 
-    // TAP-TO-SHINE CD (shineBox click)
+    // TAP TO SHINE CD
     const shineBox = document.getElementById("shineBox");
     shineBox.addEventListener("click", function() {
       shineBox.style.animation = "shineFlash 0.8s ease-out";
-      setTimeout(() => {
-        shineBox.style.animation = "";
-      }, 900);
+      setTimeout(() => shineBox.style.animation = "", 900);
     });
 
-    // also allow key '1' to trigger shine
     document.addEventListener("keydown", function(e) {
-      if (e.key === "1") {
-        shineBox.click();
-      }
+      if (e.key === "1") shineBox.click();
     });
   </script>
 
@@ -247,15 +241,12 @@
     const aiCanvas = document.getElementById("aiCanvas");
     const aiCtx = aiCanvas.getContext("2d");
 
-    // BASE IMAGE jrxxyybeta
+    // BASE IMAGE
     const baseImg = new Image();
     baseImg.src = "jrxxyybeta.png";
-    baseImg.onload = () => {
-      aiCtx.clearRect(0, 0, aiCanvas.width, aiCanvas.height);
-      aiCtx.drawImage(baseImg, 0, 0, aiCanvas.width, aiCanvas.height);
-    };
+    baseImg.onload = () => aiCtx.drawImage(baseImg, 0, 0, aiCanvas.width, aiCanvas.height);
 
-    // ASDX COMMANDS WITH BLENDING MODES
+    // BLENDING MODES
     const blendModes = ["source-over", "screen", "lighten", "overlay", "difference", "color-dodge"];
     let blendIndex = 0;
 
@@ -273,12 +264,10 @@
           replaceRightBoundary();
           break;
         case "d":
-          // cycle blend mode
           blendIndex = (blendIndex + 1) % blendModes.length;
           setBlendMode();
           break;
         case "x":
-          // clear overlays, restore base
           aiCtx.globalCompositeOperation = "source-over";
           aiCtx.clearRect(0, 0, aiCanvas.width, aiCanvas.height);
           aiCtx.drawImage(baseImg, 0, 0, aiCanvas.width, aiCanvas.height);
@@ -289,31 +278,21 @@
     function replaceFaceRegion() {
       const faceImg = new Image();
       faceImg.src = "vrshark.png";
-      faceImg.onload = function() {
-        aiCtx.drawImage(faceImg, 60, 0, 180, 120);
-      };
+      faceImg.onload = () => aiCtx.drawImage(faceImg, 60, 0, 180, 120);
     }
 
     function replaceRightBoundary() {
       const rightImg = new Image();
       rightImg.src = "rty.png";
-      rightImg.onload = function() {
-        aiCtx.drawImage(rightImg, aiCanvas.width - 80, 0, 80, aiCanvas.height);
-      };
+      rightImg.onload = () => aiCtx.drawImage(rightImg, aiCanvas.width - 80, 0, 80, aiCanvas.height);
     }
 
-    // keyboard bindings for ASDX
     document.addEventListener("keydown", function(e) {
-      if (["a","s","d","x"].includes(e.key)) {
-        asdxCommand(e.key);
-      }
+      if (["a","s","d","x"].includes(e.key)) asdxCommand(e.key);
     });
 
-    // GENERATE button (placeholder behavior)
     document.getElementById("generateImage").addEventListener("click", function() {
-      const prompt = document.getElementById("aiPrompt").value;
-      console.log("AI prompt:", prompt);
-      // keep base + overlays; you can hook real generation here later
+      console.log("AI prompt:", document.getElementById("aiPrompt").value);
     });
   </script>
 
