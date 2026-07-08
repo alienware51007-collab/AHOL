@@ -124,7 +124,7 @@
   </style>
 </head>
 
-<!-- ⭐ NUMBER BOX MOVED OUTSIDE BODY (Safari fix) -->
+<!-- NUMBER BOX OUTSIDE BODY (Safari fix) -->
 <input id="numberInput" type="text" placeholder="Enter: 45, 4, 9, 16, or 25">
 
 <body>
@@ -231,6 +231,24 @@
     document.addEventListener("keydown", function(e) {
       if (e.key === "1") shineBox.click();
     });
+  </script>
+
+  <!-- ⭐ AI CHATBOX RESTORED (smaller jrxxyybeta.png) -->
+  <div id="aiChatBox" style="margin-top:30px; padding:20px; border:1px solid #fff; width:260px; background:black;">
+    <h3 style="text-shadow:0 0 10px #0f0;">AI Chatbox</h3>
+    <canvas id="aiCanvas" width="240" height="240" style="border:1px solid #0f0; background:#111; margin-bottom:10px;"></canvas>
+  </div>
+
+  <script>
+    const aiCanvas = document.getElementById("aiCanvas");
+    const aiCtx = aiCanvas.getContext("2d");
+
+    const betaImg = new Image();
+    betaImg.src = "jrxxyybeta.png";
+    betaImg.onload = () => {
+      aiCtx.clearRect(0, 0, aiCanvas.width, aiCanvas.height);
+      aiCtx.drawImage(betaImg, 0, 0, aiCanvas.width, aiCanvas.height);
+    };
   </script>
 
 </body>
