@@ -124,14 +124,18 @@
   </style>
 </head>
 
-<!-- NUMBER BOX OUTSIDE BODY (Safari fix) -->
-<input id="numberInput" type="text" placeholder="Enter: 45, 4, 9, 16, or 25">
+<!-- ⭐ NUMBER BOX OUTSIDE BODY + FIXED INPUTMODE -->
+<input id="numberInput" 
+       type="text" 
+       inputmode="numeric" 
+       pattern="[0-9]*"
+       placeholder="Enter: 45, 4, 9, 16, or 25">
 
 <body>
 
   <script>
     const numbers = [45, 4, 9, 16, 25];
-    const images = ["tig.png", "image2.jpg", "image3.jpg", "image4.jpg", "image5.jpg"];
+    const images = ["tiger.png", "image2.jpg", "image3.jpg", "image4.jpg", "image5.jpg"];
 
     function myDisplayer(some) {
       const demo = document.getElementById("demo");
