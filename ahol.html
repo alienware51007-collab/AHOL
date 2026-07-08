@@ -131,31 +131,28 @@
     SYSTEM STATUS: ACTIVE
   </div>
 
-  <!-- GALLERY DEMO GRID (Fixed Upper-Right) -->
+  <!-- GALLERY DEMO GRID -->
   <div id="demo" style="position: fixed; top: 10px; right: 10px; display: grid; grid-template-columns: repeat(5, 100px); gap: 10px; z-index: 9999; padding: 10px; background: rgba(0, 0, 0, 0.7); border: 2px solid #0f0; box-shadow: 0 0 15px #0f0;">
   </div>
 
-  <!-- NUMBER INPUT (Fixed Lower Position) -->
-  <input id="numberInput" type="text" placeholder="Enter: 45, 4, 9, 16, or 25 + press Enter" style="position: fixed; bottom: 20px; right: 10px; width: 200px; padding: 8px; background: black; border: 1px solid #0f0; color: #0f0; z-index: 9998;">
+  <!-- NUMBER INPUT (iPhone-friendly auto-trigger) -->
+  <input id="numberInput" type="number" placeholder="Enter: 45, 4, 9, 16, or 25" style="position: fixed; bottom: 20px; right: 10px; width: 200px; padding: 8px; background: black; border: 1px solid #0f0; color: #0f0; z-index: 9998;">
 
   <script>
     const numbers = [45, 4, 9, 16, 25];
     const images = ["tig.png", "image2.jpg", "image3.jpg", "image4.jpg", "image5.jpg"];
-    
+
     function myDisplayer(some) {
       const demo = document.getElementById("demo");
       demo.innerHTML = '<img src="' + some + '" style="width:100px; height:100px; border:1px solid #0f0; object-fit:cover;">';
     }
-    
-    document.getElementById("numberInput").addEventListener("keypress", function(e) {
-      if (e.key === "Enter") {
-        const userNum = parseInt(e.target.value);
-        const index = numbers.indexOf(userNum);
-        if (index !== -1) {
-          myDisplayer(images[index]);
-        } else {
-          alert("Enter: 45, 4, 9, 16, or 25");
-        }
+
+    document.getElementById("numberInput").addEventListener("input", function(e) {
+      const userNum = parseInt(e.target.value);
+      const index = numbers.indexOf(userNum);
+
+      if (index !== -1) {
+        myDisplayer(images[index]);
         e.target.value = "";
       }
     });
@@ -230,86 +227,6 @@
       rightImg.src = "rty.png";
       rightImg.onload = function() { ctx.drawImage(rightImg, canvas.width - 80, 0, 80, canvas.height); };
     }
-  </script>
-
-  <script>
-    const aiCanvas = document.getElementById("aiCanvas");
-    const imgCtx = aiCanvas.getContext("2d");
-
-    function generateImageFromPrompt(prompt) {
-      const img = new Image();
-      img.src = "jrxxyybeta.png";
-      img.onload = function() {
-        imgCtx.clearRect(0, 0, aiCanvas.width, aiCanvas.height);
-        imgCtx.drawImage(img, 0, 0, aiCanvas.width, aiCanvas.height);
-        imgCtx.fillStyle = "#0f0";
-        imgCtx.font = "16px monospace";
-        imgCtx.fillText(prompt, 10, aiCanvas.height - 10);
-      };
-    }
-
-    document.getElementById("generateImage").addEventListener("click", function() {
-      const prompt = document.getElementById("aiPrompt").value || "JR.XXYY BETA";
-      generateImageFromPrompt(prompt);
-    });
-
-    document.getElementById("aiPrompt").addEventListener("change", function() {
-      const cmd = document.getElementById("aiPrompt").value.trim().toLowerCase();
-      asdxCommand(cmd);
-    });
-
-    generateImageFromPrompt("JR.XXYY BETA");
-  </script>
-
-  <script>
-    const cv = document.getElementById("seriesViz");
-    const cx = cv.getContext("2d");
-    let redPoint = { x: 200, y: 130 };
-    let greenPoint = { x: 60, y: 130 };
-    let dragging = null;
-
-    function drawDots() {
-      cx.clearRect(0, 0, cv.width, cv.height);
-      cx.fillStyle = "red";
-      cx.beginPath();
-      cx.arc(redPoint.x, redPoint.y, 6, 0, Math.PI * 2);
-      cx.fill();
-      cx.fillStyle = "lime";
-      cx.beginPath();
-      cx.arc(greenPoint.x, greenPoint.y, 6, 0, Math.PI * 2);
-      cx.fill();
-    }
-
-    cv.addEventListener("mousedown", function(e) {
-      const rect = cv.getBoundingClientRect();
-      const mx = e.clientX - rect.left;
-      const my = e.clientY - rect.top;
-      if (Math.hypot(mx - redPoint.x, my - redPoint.y) < 10) dragging = redPoint;
-      else if (Math.hypot(mx - greenPoint.x, my - greenPoint.y) < 10) dragging = greenPoint;
-    });
-
-    cv.addEventListener("mousemove", function(e) {
-      if (!dragging) return;
-      const rect = cv.getBoundingClientRect();
-      dragging.x = e.clientX - rect.left;
-      dragging.y = e.clientY - rect.top;
-      drawDots();
-    });
-
-    cv.addEventListener("mouseup", function() { dragging = null; });
-    cv.addEventListener("mouseleave", function() { dragging = null; });
-    drawDots();
-  </script>
-
-  <script>
-    document.addEventListener("keydown", function(e) {
-      if (e.key === "1") {
-        const box = document.getElementById("shineBox");
-        if (!box) return;
-        box.style.animation = "shineFlash 0.8s ease-out forwards";
-        setTimeout(function() { box.style.display = "none"; }, 800);
-      }
-    });
   </script>
 
 </body>
