@@ -233,7 +233,7 @@
     });
   </script>
 
-  <!-- ⭐ AI CHATBOX RESTORED (smaller jrxxyybeta.png) -->
+  <!-- ⭐ AI CHATBOX (smaller jrxxyybeta.png) -->
   <div id="aiChatBox" style="margin-top:30px; padding:20px; border:1px solid #fff; width:260px; background:black;">
     <h3 style="text-shadow:0 0 10px #0f0;">AI Chatbox</h3>
     <canvas id="aiCanvas" width="240" height="240" style="border:1px solid #0f0; background:#111; margin-bottom:10px;"></canvas>
@@ -249,6 +249,45 @@
       aiCtx.clearRect(0, 0, aiCanvas.width, aiCanvas.height);
       aiCtx.drawImage(betaImg, 0, 0, aiCanvas.width, aiCanvas.height);
     };
+
+    /* ⭐ ASDX SYSTEM RESTORED */
+    const blendModes = ["source-over", "screen", "lighten", "overlay", "difference", "color-dodge"];
+    let blendIndex = 0;
+
+    function setBlendMode() {
+      aiCtx.globalCompositeOperation = blendModes[blendIndex];
+    }
+
+    function asdxCommand(cmd) {
+      switch(cmd) {
+        case "a":
+          const faceImg = new Image();
+          faceImg.src = "vrshark.png";
+          faceImg.onload = () => aiCtx.drawImage(faceImg, 60, 0, 180, 120);
+          break;
+
+        case "s":
+          const rightImg = new Image();
+          rightImg.src = "rty.png";
+          rightImg.onload = () => aiCtx.drawImage(rightImg, aiCanvas.width - 80, 0, 80, aiCanvas.height);
+          break;
+
+        case "d":
+          blendIndex = (blendIndex + 1) % blendModes.length;
+          setBlendMode();
+          break;
+
+        case "x":
+          aiCtx.globalCompositeOperation = "source-over";
+          aiCtx.clearRect(0, 0, aiCanvas.width, aiCanvas.height);
+          aiCtx.drawImage(betaImg, 0, 0, aiCanvas.width, aiCanvas.height);
+          break;
+      }
+    }
+
+    document.addEventListener("keydown", function(e) {
+      if (["a","s","d","x"].includes(e.key)) asdxCommand(e.key);
+    });
   </script>
 
 </body>
