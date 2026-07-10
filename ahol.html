@@ -124,7 +124,6 @@
   </style>
 </head>
 
-<!-- ⭐ NUMBER BOX OUTSIDE BODY + FIXED INPUTMODE -->
 <input id="numberInput" 
        type="text" 
        inputmode="numeric" 
@@ -133,7 +132,6 @@
 
 <body>
 
-  <!-- ⭐ DESKTOP: 45 → tig.png | MOBILE: auto-display tig.png -->
   <script>
     const numbers = [45, 5, 9, 16, 25];
     const images = ["tig.png", "image2.jpg", "image3.jpg", "image4.jpg", "image5.jpg"];
@@ -153,7 +151,6 @@
       }
     });
 
-    // ⭐ MOBILE AUTO-DISPLAY tig.png
     function isMobile() {
       return /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
     }
@@ -186,7 +183,11 @@
   <div id="demo" style="position: fixed; top: 10px; right: 10px; display: grid; grid-template-columns: repeat(5, 100px); gap: 10px; z-index: 9999; padding: 10px; background: rgba(0, 0, 0, 0.7); border: 2px solid #0f0; box-shadow: 0 0 15px #0f0;">
   </div>
 
-  <h2>AHOL Chatbot</h2>
+  <!-- ⭐ UPDATED HEADER WITH ooo.png -->
+  <h2 style="display:flex; align-items:center; gap:6px;">
+    AHOL Chatbot
+    <img src="ooo.png" style="width:22px; height:22px; image-rendering:crisp-edges;">
+  </h2>
 
   <div id="uSpecialCenter" style="display:flex; gap:20px;">
     <div class="ribbon-col left-col" style="display:flex; flex-direction:column; gap:10px;">
@@ -248,7 +249,6 @@
     });
   </script>
 
-  <!-- ⭐ AI CHATBOX (smaller jrxxyybeta.png) -->
   <div id="aiChatBox" style="margin-top:30px; padding:20px; border:1px solid #fff; width:260px; background:black;">
     <h3 style="text-shadow:0 0 10px #0f0;">AI Chatbox</h3>
     <canvas id="aiCanvas" width="240" height="240" style="border:1px solid #0f0; background:#111; margin-bottom:10px;"></canvas>
@@ -265,7 +265,6 @@
       aiCtx.drawImage(betaImg, 0, 0, aiCanvas.width, aiCanvas.height);
     };
 
-    /* ⭐ ASDX SYSTEM RESTORED */
     const blendModes = ["source-over", "screen", "lighten", "overlay", "difference", "color-dodge"];
     let blendIndex = 0;
 
