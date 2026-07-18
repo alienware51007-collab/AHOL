@@ -45,27 +45,11 @@
       animation: zoomPattern 16s ease-in-out infinite alternate, glowPulse 6s ease-in-out infinite;
     }
 
-    @keyframes zoomPattern {
-      0% { transform: scale(1); }
-      100% { transform: scale(1.16); }
-    }
+    @keyframes zoomPattern { 0% { transform: scale(1); } 100% { transform: scale(1.16); } }
+    @keyframes glowPulse { 0%,100% { filter: blur(2px) brightness(1.1); } 50% { filter: blur(4px) brightness(1.4); } }
+    @keyframes shineFlash { 0% { opacity:1; box-shadow:0 0 3px #ccc; } 50% { opacity:1; box-shadow:0 0 11px #ccc; } 100% { opacity:0; } }
 
-    @keyframes glowPulse {
-      0%, 100% { filter: blur(2px) brightness(1.1); }
-      50% { filter: blur(4px) brightness(1.4); }
-    }
-
-    @keyframes shineFlash {
-      0% { opacity:1; box-shadow:0 0 3px #ccc; }
-      50% { opacity:1; box-shadow:0 0 11px #ccc; }
-      100% { opacity:0; box-shadow:0 0 0 transparent; }
-    }
-
-    h2 {
-      font-size: 28px;
-      margin-bottom: 10px;
-      text-shadow: 0 0 10px #ccc;
-    }
+    h2 { font-size: 28px; margin-bottom: 10px; text-shadow: 0 0 10px #ccc; }
 
     #upperBox {
       width: 50%;
@@ -84,8 +68,7 @@
 
     @keyframes upperFloat {
       0% { background-position: center; filter: brightness(1) blur(0px); }
-      50% { background-position: center 20px; filter: brightness(1.3) blur(2px); }
-      100% { background-position: center -20px; filter: brightness(1.1) blur(1px); }
+      100% { background-position: center 20px; filter: brightness(1.3) blur(2px); }
     }
 
     #baseButton {
@@ -97,10 +80,7 @@
       margin-bottom: 20px;
       transition: 0.2s;
     }
-
-    #baseButton:hover {
-      box-shadow: 0 0 12px #ccc;
-    }
+    #baseButton:hover { box-shadow: 0 0 12px #ccc; }
 
     .uRow span {
       display: inline-block;
@@ -110,78 +90,21 @@
       text-shadow: 0 0 6px #ccc;
       transition: 0.2s;
     }
+    .uRow span:hover { transform: scale(1.25); text-shadow: 0 0 12px #ccc; }
 
-    .uRow span:hover {
-      transform: scale(1.25);
-      text-shadow: 0 0 12px #ccc;
-    }
-
-    svg {
-      position: absolute;
-      top: 0;
-      left: 0;
-    }
+    svg { position: absolute; top: 0; left: 0; }
   </style>
 </head>
 
 <body>
 
-  <input id="numberInput" 
-         type="text" 
-         inputmode="numeric" 
-         pattern="[0-9]*"
-         placeholder="Enter: 45, 5, 9, 16, or 25">
+  <input id="numberInput" type="text" inputmode="numeric" pattern="[0-9]*" placeholder="Enter: 45, 5, 9, 16, or 25">
 
-  <script>
-    const numbers = [45, 5, 9, 16, 25];
-    const images = ["tig.png", "image2.jpg", "image3.jpg", "image4.jpg", "image5.jpg"];
+  <button id="baseButton" onclick="goToBase()"> .BASE. </button>
 
-    function myDisplayer(some) {
-      const demo = document.getElementById("demo");
-      demo.innerHTML = '<img src="' + some + '" style="width:100px; height:100px; border:1px solid #ccc; object-fit:cover;">';
-    }
+  <div id="upperBox">SYSTEM STATUS: ACTIVE</div>
 
-    document.getElementById("numberInput").addEventListener("input", function(e) {
-      const userNum = parseInt(e.target.value);
-      const index = numbers.indexOf(userNum);
-
-      if (!isNaN(userNum) && index !== -1) {
-        myDisplayer(images[index]);
-        e.target.value = "";
-      }
-    });
-
-    function isMobile() {
-      return /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-    }
-
-    if (isMobile()) {
-      const demo = document.getElementById("demo");
-      demo.innerHTML = '<img src="tig.png" style="width:100px; height:100px; border:1px solid #ccc; object-fit:cover;">';
-    }
-  </script>
-
-  <svg width="0" height="0">
-    <filter id="rpxDrip">
-      <feTurbulence type="fractalNoise" baseFrequency="0.02 0.25" numOctaves="4" result="noise"/>
-      <feDisplacementMap in="SourceGraphic" in2="noise" scale="35" xChannelSelector="R" yChannelSelector="G"/>
-    </filter>
-  </svg>
-
-  <button id="baseButton" onclick="goToBase()">.BASE.</button>
-
-  <script>
-    function goToBase() {
-      window.location.href = "https://alienware51007-collab.github.io/AHOL/Oppeenn.html";
-    }
-  </script>
-
-  <div id="upperBox">
-    SYSTEM STATUS: ACTIVE
-  </div>
-
-  <div id="demo" style="position: fixed; top: 10px; right: 10px; display: grid; grid-template-columns: repeat(5, 100px); gap: 10px; z-index: 9999; padding: 10px; background: rgba(0, 0, 0, 0.7); border: 2px solid #ccc; box-shadow: 0 0 15px #ccc;">
-  </div>
+  <div id="demo" style="position: fixed; top: 10px; right: 10px; display: grid; grid-template-columns: repeat(5, 100px); gap: 10px; z-index: 9999; padding: 10px; background: rgba(0, 0, 0, 0.7); border: 2px solid #ccc; box-shadow: 0 0 15px #ccc;"></div>
 
   <h2 style="display:flex; align-items:center; gap:6px;">
     AHOL Chatbot
@@ -208,27 +131,6 @@
     </div>
   </div>
 
-  <script>
-    const sv = document.getElementById("seriesViz");
-    const svctx = sv.getContext("2d");
-
-    function drawSeriesDots() {
-      svctx.clearRect(0, 0, sv.width, sv.height);
-
-      svctx.fillStyle = "red";
-      svctx.beginPath();
-      svctx.arc(80, 80, 8, 0, Math.PI * 2);
-      svctx.fill();
-
-      svctx.fillStyle = "lime";
-      svctx.beginPath();
-      svctx.arc(180, 180, 8, 0, Math.PI * 2);
-      svctx.fill();
-    }
-
-    drawSeriesDots();
-  </script>
-
   <div id="chatOutput" style="border:1px solid #fff; padding:10px; min-height:150px; max-width:600px; margin-top:20px; margin-bottom:20px; position:relative; overflow:auto;">
     <div id="shineBox" style="position:absolute; top:10px; right:10px; padding:4px 6px; background:black; border:1px solid #ccc; color:#ccc; font-family:monospace; font-size:8px; text-shadow:0 0 3px #ccc; z-index:10; cursor:pointer;">
       press 1 to shine CD...
@@ -236,234 +138,181 @@
     <img id="vbnPhoto" src="vbn.png" alt="vbn photo" style="width:120px; filter:url(#rpxDrip); position:absolute; right:10px; bottom:10px;">
   </div>
 
-  <script>
-    const shineBox = document.getElementById("shineBox");
-    shineBox.addEventListener("click", function() {
-      shineBox.style.animation = "shineFlash 0.8s ease-out";
-      setTimeout(() => shineBox.style.animation = "", 900);
-    });
-
-    document.addEventListener("keydown", function(e) {
-      if (e.key === "1") shineBox.click();
-    });
-  </script>
-
   <div id="aiChatBox" style="margin-top:30px; padding:20px; border:1px solid #fff; width:260px; background:black;">
     <h3 style="text-shadow:0 0 10px #ccc;">AI Chatbox</h3>
     <canvas id="aiCanvas" width="240" height="240" style="border:1px solid #ccc; background:#111; margin-bottom:10px;"></canvas>
   </div>
 
-  <script>
-    const aiCanvas = document.getElementById("aiCanvas");
-    const aiCtx = aiCanvas.getContext("2d");
-
-    const betaImg = new Image();
-    betaImg.src = "jrxxyybeta.png";
-    betaImg.onload = () => {
-      aiCtx.clearRect(0, 0, aiCanvas.width, aiCanvas.height);
-      aiCtx.drawImage(betaImg, 0, 0, aiCanvas.width, aiCanvas.height);
-    };
-
-    const blendModes = ["source-over", "screen", "lighten", "overlay", "difference", "color-dodge"];
-    let blendIndex = 0;
-
-    function setBlendMode() {
-      aiCtx.globalCompositeOperation = blendModes[blendIndex];
-    }
-
-    function asdxCommand(cmd) {
-      switch(cmd) {
-        case "a":
-          const faceImg = new Image();
-          faceImg.src = "vrshark.png";
-          faceImg.onload = () => aiCtx.drawImage(faceImg, 60, 0, 180, 120);
-          break;
-
-        case "s":
-          const rightImg = new Image();
-          rightImg.src = "rty.png";
-          rightImg.onload = () => aiCtx.drawImage(rightImg, aiCanvas.width - 80, 0, 80, aiCanvas.height);
-          break;
-
-        case "d":
-          blendIndex = (blendIndex + 1) % blendModes.length;
-          setBlendMode();
-          break;
-
-        case "x":
-          aiCtx.globalCompositeOperation = "source-over";
-          aiCtx.clearRect(0, 0, aiCanvas.width, aiCanvas.height);
-          aiCtx.drawImage(betaImg, 0, 0, aiCanvas.width, aiCanvas.height);
-          break;
-      }
-    }
-
-    document.addEventListener("keydown", function(e) {
-      if (["a","s","d","x"].includes(e.key)) asdxCommand(e.key);
-    });
-  </script>
-
-  <!-- CHAT-LINK INPUT FIELD -->
+  <!-- CHAT INPUT -->
   <div style="margin-top:20px;">
-    <input id="userInput" 
-           type="text" 
-           placeholder="{command}[payload]" 
+    <input id="userInput" type="text" placeholder="{command}[payload]" 
            style="width:260px; padding:8px; background:black; color:#ccc; border:1px solid #ccc; font-family:monospace;">
   </div>
 
+  <svg width="0" height="0">
+    <filter id="rpxDrip">
+      <feTurbulence type="fractalNoise" baseFrequency="0.02 0.25" numOctaves="4" result="noise"/>
+      <feDisplacementMap in="SourceGraphic" in2="noise" scale="35" xChannelSelector="R" yChannelSelector="G"/>
+    </filter>
+  </svg>
+
   <script>
-  // CHAT-LINK ENGINE
-  const ChatLink = {
-      // Chinese characters already on the page
+    // ==================== FIXED CHAT SYSTEM ====================
+    const ChatLink = {
       chars: ["難", "金", "魂", "龍", "力", "火", "天", "神"],
 
       parse(msg) {
-          const cmdMatch = msg.match(/\{([^}]+)\}/);
-          const dataMatch = msg.match(/
-
-\[([^\]
-
-]+)\]
-
-/);
-
-          return {
-              command: cmdMatch ? cmdMatch[1].trim() : null,
-              payload: dataMatch ? dataMatch[1].trim() : null
-          };
+        const cmdMatch = msg.match(/\{([^}]+)\}/);
+        const dataMatch = msg.match(/\[([^\]]+)\]/);
+        return {
+          command: cmdMatch ? cmdMatch[1].trim() : null,
+          payload: dataMatch ? dataMatch[1].trim() : null
+        };
       },
 
-      // Drop ONE random character
       async handleCharacterDrop() {
-          const demo = document.getElementById("demo");
-          const chars = this.chars;
-          const chosen = chars[Math.floor(Math.random() * chars.length)];
+        const demo = document.getElementById("demo");
+        const chosen = this.chars[Math.floor(Math.random() * this.chars.length)];
 
-          const span = document.createElement("span");
-          span.textContent = chosen;
-          span.style.fontSize = "32px";
-          span.style.color = "#ccc";
-          span.style.textShadow = "0 0 6px #ccc";
-          span.style.border = "1px solid #ccc";
-          span.style.display = "flex";
-          span.style.alignItems = "center";
-          span.style.justifyContent = "center";
-          span.style.width = "100px";
-          span.style.height = "100px";
+        const span = document.createElement("span");
+        span.textContent = chosen;
+        span.style.fontSize = "32px";
+        span.style.color = "#ccc";
+        span.style.textShadow = "0 0 6px #ccc";
+        span.style.border = "1px solid #ccc";
+        span.style.display = "flex";
+        span.style.alignItems = "center";
+        span.style.justifyContent = "center";
+        span.style.width = "100px";
+        span.style.height = "100px";
 
-          demo.appendChild(span);
-          return `Placed '${chosen}' into the demo grid.`;
+        demo.appendChild(span);
+        return `Placed '${chosen}'`;
       },
 
-      // Remove ALL characters
       async handleClearDemo() {
-          const demo = document.getElementById("demo");
-          demo.innerHTML = "";
-          return "Cleared all characters from the demo grid.";
+        document.getElementById("demo").innerHTML = "";
+        return "Demo grid cleared.";
       },
 
-      // Spawn multiple characters
       async handleSpawn(count) {
-          const demo = document.getElementById("demo");
-          count = parseInt(count);
-
-          if (isNaN(count) || count < 1) {
-              return "Invalid spawn count.";
-          }
-
-          for (let i = 0; i < count; i++) {
-              await this.handleCharacterDrop();
-          }
-
-          return `Spawned ${count} characters.`;
+        count = parseInt(count);
+        if (isNaN(count) || count < 1) return "Invalid count.";
+        for (let i = 0; i < count; i++) await this.handleCharacterDrop();
+        return `Spawned ${count} characters.`;
       },
 
-      // Move characters left
       async handleMoveLeft() {
-          const demo = document.getElementById("demo");
-          const items = Array.from(demo.children);
-
-          if (items.length < 2) {
-              return "Not enough characters to move.";
-          }
-
-          const first = items.shift();
-          demo.appendChild(first);
-
-          return "Moved characters left.";
+        const demo = document.getElementById("demo");
+        const items = Array.from(demo.children);
+        if (items.length < 2) return "Not enough items.";
+        demo.appendChild(items.shift());
+        return "Moved left.";
       },
 
       async dispatch(command, payload) {
-          if (command === "clear" && payload === "demo") {
-              return this.handleClearDemo();
-          }
-
-          if (command === "spawn") {
-              return this.handleSpawn(payload);
-          }
-
-          if (command === "move" && payload === "left") {
-              return this.handleMoveLeft();
-          }
-
-          if (command && payload) {
-              return this.handleCharacterDrop();
-          }
-
-          return "Invalid format. Use {command}[payload]";
+        if (command === "clear" && payload === "demo") return this.handleClearDemo();
+        if (command === "spawn") return this.handleSpawn(payload);
+        if (command === "move" && payload === "left") return this.handleMoveLeft();
+        if (command) return this.handleCharacterDrop();
+        return "Invalid command. Use {command}[payload]";
       }
-  };
+    };
 
-  // Basic HTML escaping for chat output
-  function escapeHTML(str) {
-      return str
-          .replace(/&/g, "&amp;")
-          .replace(/</g, "&lt;")
-          .replace(/>/g, "&gt;")
-          .replace(/"/g, "&quot;")
-          .replace(/'/g, "&#039;");
-  }
+    // ==================== UTILITIES ====================
+    function escapeHTML(str) {
+      return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+    }
 
-  // AHOL CHAT UI BINDING
-  const aholInput = document.getElementById("userInput");
-  const aholChatbox = document.getElementById("chatOutput");
-
-  function appendToChat(role, msg) {
-      if (!aholChatbox) return;
-      const safeMsg = escapeHTML(msg);
+    function appendToChat(role, msg) {
+      const chat = document.getElementById("chatOutput");
       const div = document.createElement("div");
-      div.innerHTML = `<b>${role}:</b> ${safeMsg}`;
-      aholChatbox.appendChild(div);
-      aholChatbox.scrollTop = aholChatbox.scrollHeight;
-  }
+      div.innerHTML = `<b>${role}:</b> ${escapeHTML(msg)}`;
+      chat.appendChild(div);
+      chat.scrollTop = chat.scrollHeight;
+    }
 
-  async function processChatInput(userMsg) {
-      const { command, payload } = ChatLink.parse(userMsg);
+    // ==================== EVENT LISTENERS ====================
+    document.getElementById("userInput").addEventListener("keydown", async (e) => {
+      if (e.key === "Enter") {
+        const msg = e.target.value.trim();
+        if (!msg) return;
 
-      if (!command || !payload) {
-          return "Invalid format. Use {command}[payload]";
+        appendToChat("You", msg);
+        const { command, payload } = ChatLink.parse(msg);
+        const response = await ChatLink.dispatch(command, payload);
+        appendToChat("System", response);
+
+        e.target.value = "";
       }
+    });
 
-      return await ChatLink.dispatch(command, payload);
-  }
+    // Number input
+    const numbers = [45, 5, 9, 16, 25];
+    const images = ["tig.png", "image2.jpg", "image3.jpg", "image4.jpg", "image5.jpg"];
 
-  if (aholInput) {
-      aholInput.addEventListener("keydown", async (e) => {
-          if (e.key === "Enter") {
-              const userMsg = e.target.value.trim();
-              if (!userMsg) return;
+    document.getElementById("numberInput").addEventListener("input", function(e) {
+      const num = parseInt(e.target.value);
+      const idx = numbers.indexOf(num);
+      if (!isNaN(num) && idx !== -1) {
+        const demo = document.getElementById("demo");
+        demo.innerHTML = `<img src="${images[idx]}" style="width:100px; height:100px; border:1px solid #ccc; object-fit:cover;">`;
+        e.target.value = "";
+      }
+    });
 
-              appendToChat("You", userMsg);
+    // Mobile fallback
+    if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
+      document.getElementById("demo").innerHTML = '<img src="tig.png" style="width:100px;height:100px;border:1px solid #ccc;">';
+    }
 
-              const response = await processChatInput(userMsg);
+    function goToBase() {
+      window.location.href = "https://alienware51007-collab.github.io/AHOL/Oppeenn.html";
+    }
 
-              appendToChat("System", response);
+    // Shine effect
+    document.getElementById("shineBox").addEventListener("click", function() {
+      this.style.animation = "shineFlash 0.8s ease-out";
+      setTimeout(() => this.style.animation = "", 900);
+    });
+    document.addEventListener("keydown", e => { if (e.key === "1") document.getElementById("shineBox").click(); });
 
-              e.target.value = "";
-          }
-      });
-  }
+    // Canvas dots
+    const sv = document.getElementById("seriesViz");
+    const ctx = sv.getContext("2d");
+    ctx.fillStyle = "red"; ctx.beginPath(); ctx.arc(80, 80, 8, 0, Math.PI*2); ctx.fill();
+    ctx.fillStyle = "lime"; ctx.beginPath(); ctx.arc(180, 180, 8, 0, Math.PI*2); ctx.fill();
+
+    // AI Canvas
+    const aiCanvas = document.getElementById("aiCanvas");
+    const aiCtx = aiCanvas.getContext("2d");
+    const betaImg = new Image();
+    betaImg.src = "jrxxyybeta.png";
+    betaImg.onload = () => aiCtx.drawImage(betaImg, 0, 0, 240, 240);
+
+    let blendIndex = 0;
+    const blends = ["source-over", "screen", "lighten", "overlay", "difference", "color-dodge"];
+
+    function asdxCommand(cmd) {
+      if (cmd === "a") {
+        const img = new Image(); img.src = "vrshark.png";
+        img.onload = () => aiCtx.drawImage(img, 60, 0, 180, 120);
+      } else if (cmd === "s") {
+        const img = new Image(); img.src = "rty.png";
+        img.onload = () => aiCtx.drawImage(img, 160, 0, 80, 240);
+      } else if (cmd === "d") {
+        blendIndex = (blendIndex + 1) % blends.length;
+        aiCtx.globalCompositeOperation = blends[blendIndex];
+      } else if (cmd === "x") {
+        aiCtx.globalCompositeOperation = "source-over";
+        aiCtx.clearRect(0, 0, 240, 240);
+        aiCtx.drawImage(betaImg, 0, 0, 240, 240);
+      }
+    }
+
+    document.addEventListener("keydown", e => {
+      if (["a","s","d","x"].includes(e.key)) asdxCommand(e.key);
+    });
   </script>
-
 </body>
 </html>
