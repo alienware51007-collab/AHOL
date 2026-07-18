@@ -303,5 +303,102 @@
     });
   </script>
 
+
+  <!-- =============================== -->
+  <!-- CHAT-LINK INPUT FIELD           -->
+  <!-- =============================== -->
+  <div style="margin-top:20px;">
+    <input id="userInput" 
+           type="text" 
+           placeholder="{command}[payload]" 
+           style="width:260px; padding:8px; background:black; color:#ccc; border:1px solid #ccc; font-family:monospace;">
+  </div>
+
+  <script>
+  // ===============================
+  // CHAT-LINK ENGINE
+  // ===============================
+
+  const ChatLink = {
+      parse(msg) {
+          const cmdMatch = msg.match(/\{([^}]+)\}/);
+          const dataMatch = msg.match(/
+
+\[([^]+)\]
+
+/);
+
+          return {
+              command: cmdMatch ? cmdMatch[1].trim() : null,
+              payload: dataMatch ? dataMatch[1].trim() : null
+          };
+      },
+
+      async dispatch(command, payload) {
+          switch (command) {
+              case "ping": return `PONG: ${payload}`;
+              case "echo": return payload;
+              case "sql_query": return this.handleSQL(payload);
+              case "python_exec": return this.handlePython(payload);
+              case "image_gen": return this.handleImageGen(payload);
+              default: return `Unknown command: ${command}`;
+          }
+      },
+
+      async handleSQL(query) {
+          return `[SQL MODULE NOT YET ENABLED] → ${query}`;
+      },
+
+      async handlePython(code) {
+          return `[PYTHON MODULE NOT YET ENABLED] → ${code}`;
+      },
+
+      async handleImageGen(prompt) {
+          return `[IMAGE GEN MODULE] → ${prompt}`;
+      }
+  };
+
+
+  // ===============================
+  // AHOL CHAT UI BINDING
+  // ===============================
+
+  const aholInput = document.getElementById("userInput");
+  const aholChatbox = document.getElementById("chatOutput");
+
+  function appendToChat(role, msg) {
+      if (!aholChatbox) return;
+      aholChatbox.innerHTML += `<div><b>${role}:</b> ${msg}</div>`;
+      aholChatbox.scrollTop = aholChatbox.scrollHeight;
+  }
+
+  async function processChatInput(userMsg) {
+      const { command, payload } = ChatLink.parse(userMsg);
+
+      if (!command || !payload) {
+          return "Invalid format. Use {command}[payload]";
+      }
+
+      return await ChatLink.dispatch(command, payload);
+  }
+
+  if (aholInput) {
+      aholInput.addEventListener("keydown", async (e) => {
+          if (e.key === "Enter") {
+              const userMsg = e.target.value.trim();
+              if (!userMsg) return;
+
+              appendToChat("You", userMsg);
+
+              const response = await processChatInput(userMsg);
+
+              appendToChat("System", response);
+
+              e.target.value = "";
+          }
+      });
+  }
+  </script>
+
 </body>
 </html>
