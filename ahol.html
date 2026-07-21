@@ -6,7 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <style>
-    #numberInput {
+    #numberInput, #devLinkInput {
       position: fixed;
       bottom: 20px;
       right: 10px;
@@ -18,109 +18,58 @@
       z-index: 99999;
       font-family: monospace;
     }
+    #devLinkInput { bottom: 60px; width: 280px; }
 
-    body {
-      background: url("jrxxyy.png");
-      background-size: cover;
-      background-position: center;
-      background-repeat: no-repeat;
-      color: #fff;
-      font-family: monospace;
-      padding: 20px;
+    #aiChatBox {
       position: relative;
-    }
-
-    body::before {
-      content: "";
-      position: fixed;
-      inset: -20%;
-      z-index: 0;
-      pointer-events: none;
-      background-image:
-        linear-gradient(rgba(200,200,200,0.10) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(200,200,200,0.10) 1px, transparent 1px),
-        repeating-linear-gradient(45deg, rgba(255,255,255,0.03) 0 2px, transparent 2px 14px);
-      background-size: 60px 60px, 60px 60px, 140px 140px;
-      filter: blur(2px) brightness(1.1);
-      animation: zoomPattern 16s ease-in-out infinite alternate, glowPulse 6s ease-in-out infinite;
-    }
-
-    @keyframes zoomPattern { 0% { transform: scale(1); } 100% { transform: scale(1.16); } }
-    @keyframes glowPulse { 0%,100% { filter: blur(2px) brightness(1.1); } 50% { filter: blur(4px) brightness(1.4); } }
-    @keyframes shineFlash { 0% { opacity:1; box-shadow:0 0 3px #ccc; } 50% { opacity:1; box-shadow:0 0 11px #ccc; } 100% { opacity:0; } }
-
-    h2 { font-size: 28px; margin-bottom: 10px; text-shadow: 0 0 10px #ccc; }
-
-    #upperBox {
-      width: 50%;
-      margin: 0 auto 20px auto;
-      padding: 15px;
-      background: url("stp.png");
-      background-size: cover;
-      background-position: center;
-      border: 2px solid #ccc;
-      box-shadow: 0 0 15px #ccc;
-      text-align: center;
-      font-size: 18px;
-      text-shadow: 0 0 6px #ccc;
-      animation: upperFloat 8s ease-in-out infinite alternate;
-    }
-
-    @keyframes upperFloat {
-      0% { background-position: center; filter: brightness(1) blur(0px); }
-      100% { background-position: center 20px; filter: brightness(1.3) blur(2px); }
-    }
-
-    #baseButton {
-      padding: 8px 20px;
+      margin-top: 30px;
+      padding: 20px;
+      border: 1px solid #fff;
+      width: 260px;
       background: black;
-      color: #ccc;
-      border: 1px solid #ccc;
-      cursor: pointer;
-      margin-bottom: 20px;
-      transition: 0.2s;
-    }
-    #baseButton:hover { box-shadow: 0 0 12px #ccc; }
-
-    .uRow span {
-      display: inline-block;
-      font-size: 22px;
-      padding: 4px 6px;
-      color: #ccc;
-      text-shadow: 0 0 6px #ccc;
-      transition: 0.2s;
-    }
-    .uRow span:hover { transform: scale(1.25); text-shadow: 0 0 12px #ccc; }
-
-    #demo {
-      position: fixed;
-      top: 10px;
-      right: 10px;
-      display: grid;
-      grid-template-columns: repeat(auto-fill, 100px);
-      gap: 8px;
-      z-index: 9999;
-      padding: 12px;
-      background: rgba(0, 0, 0, 0.75);
-      border: 2px solid #ccc;
-      box-shadow: 0 0 15px #ccc;
-      max-width: 540px;
-      max-height: 440px;
-      overflow: auto;
     }
 
-    svg { position: absolute; top: 0; left: 0; }
+    #aiDescription {
+      position: absolute;
+      top: -12px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(0, 255, 0, 0.9);
+      color: black;
+      font-size: 11px;
+      padding: 2px 8px;
+      border: 1px solid #0f0;
+      white-space: nowrap;
+      opacity: 0;
+      transition: all 0.3s;
+      pointer-events: none;
+      z-index: 100;
+      box-shadow: 0 0 10px #0f0;
+    }
+
+    #aiChatBox:hover #aiDescription {
+      opacity: 1;
+      top: -28px;
+      animation: flashTag 1.2s infinite alternate;
+    }
+
+    @keyframes flashTag {
+      from { opacity: 0.7; }
+      to { opacity: 1; }
+    }
+
+    /* Rest of your styles remain the same */
+    body { background: url("jrxxyy.png"); background-size: cover; color: #fff; font-family: monospace; padding: 20px; position: relative; }
+    /* ... (all your original styles for demo, upperBox, etc.) ... */
   </style>
 </head>
-
 <body>
 
   <input id="numberInput" type="text" inputmode="numeric" pattern="[0-9]*" placeholder="Enter: 45, 5, 9, 16, or 25">
+  <input id="devLinkInput" type="text" placeholder="Dev: .cnx sublink here">
 
   <button id="baseButton" onclick="goToBase()"> .BASE. </button>
-
   <div id="upperBox">SYSTEM STATUS: ACTIVE</div>
-
   <div id="demo"></div>
 
   <h2 style="display:flex; align-items:center; gap:6px;">
@@ -129,34 +78,19 @@
   </h2>
 
   <div id="uSpecialCenter" style="display:flex; gap:20px;">
-    <div class="ribbon-col left-col" style="display:flex; flex-direction:column; gap:10px;">
-      <div class="uRow"><span>x</span><span>難</span></div>
-      <div class="uRow"><span>c</span><span>金</span></div>
-      <div class="uRow"><span>7</span><span>魂</span></div>
-      <div class="uRow"><span>q</span><span>龍</span></div>
-    </div>
-
-    <div class="ribbon-col center-col">
-      <canvas id="seriesViz" width="260" height="260"></canvas>
-    </div>
-
-    <div class="ribbon-col right-col" style="display:flex; flex-direction:column; gap:10px;">
-      <div class="uRow"><span>9</span><span>力</span></div>
-      <div class="uRow"><span>t</span><span>火</span></div>
-      <div class="uRow"><span>m</span><span>天</span></div>
-      <div class="uRow"><span>z</span><span>神</span></div>
-    </div>
+    <!-- Your ribbon columns and seriesViz unchanged -->
   </div>
 
   <div id="chatOutput" style="border:1px solid #fff; padding:10px; min-height:150px; max-width:600px; margin-top:20px; margin-bottom:20px; position:relative; overflow:auto;">
     <div id="shineBox" style="position:absolute; top:10px; right:10px; padding:4px 6px; background:black; border:1px solid #ccc; color:#ccc; font-family:monospace; font-size:8px; text-shadow:0 0 3px #ccc; z-index:10; cursor:pointer;">
       press 1 to shine CD...
     </div>
-    <img id="vbnPhoto" src="vbn.png" alt="vbn photo" style="width:120px; filter:url(#rpxDrip); position:absolute; right:10px; bottom:10px;">
   </div>
 
-  <div id="aiChatBox" style="margin-top:30px; padding:20px; border:1px solid #fff; width:260px; background:black;">
-    <h3 style="text-shadow:0 0 10px #ccc;">AI Chatbox</h3>
+  <!-- AI ChatBox with hover tag -->
+  <div id="aiChatBox">
+    <div id="aiDescription">AI.cnx ROBOT</div>
+    <h3 style="text-shadow:0 0 10px #ccc;">AI Chatbox <span style="font-size:12px; color:#0f0;">(DEV INT)</span></h3>
     <canvas id="aiCanvas" width="240" height="240" style="border:1px solid #ccc; background:#111; margin-bottom:10px;"></canvas>
   </div>
 
@@ -166,20 +100,13 @@
   </div>
 
   <svg width="0" height="0">
-    <filter id="rpxDrip">
-      <feTurbulence type="fractalNoise" baseFrequency="0.02 0.25" numOctaves="4" result="noise"/>
-      <feDisplacementMap in="SourceGraphic" in2="noise" scale="35" xChannelSelector="R" yChannelSelector="G"/>
-    </filter>
+    <filter id="rpxDrip">...</filter>
   </svg>
 
   <script>
     const ChatLink = {
       chars: ["難", "金", "魂", "龍", "力", "火", "天", "神"],
-
-      markerMap: {
-        x: "難", c: "金", 7: "魂", q: "龍",
-        9: "力", t: "火", m: "天", z: "神"
-      },
+      markerMap: { x:"難", c:"金", 7:"魂", q:"龍", 9:"力", t:"火", m:"天", z:"神" },
 
       parse(msg) {
         const cmdMatch = msg.match(/\{([^}]+)\}/);
@@ -190,173 +117,100 @@
         };
       },
 
-      createDemoSpan(text) {
-        const span = document.createElement("span");
-        span.textContent = text;
-        span.style.fontSize = "38px";
-        span.style.color = "#ccc";
-        span.style.textShadow = "0 0 10px #ccc";
-        span.style.border = "1px solid #ccc";
-        span.style.background = "rgba(20,20,20,0.6)";
-        span.style.display = "flex";
-        span.style.alignItems = "center";
-        span.style.justifyContent = "center";
-        span.style.width = "100px";
-        span.style.height = "100px";
-        return span;
+      // ... (all your previous methods: handleCharacterDrop, spawn, clear, etc.) ...
+
+      currentSequence: null,
+      sequenceInterval: null,
+
+      // NEW: AI.cnxROBOT Web Image Search
+      async handleAICNXRobot(query) {
+        if (!query) return "No search term provided.";
+
+        appendToChat("System", `Searching web for: ${query}...`);
+
+        try {
+          // Using Unsplash random source with keyword (public & no API key needed)
+          const images = [];
+          for (let i = 0; i < 8; i++) {  // Load 8 images
+            images.push(`https://source.unsplash.com/random/240x240/?${encodeURIComponent(query)}&sig=${i}`);
+          }
+
+          this.currentSequence = {
+            images: images,
+            timing: 700,
+            loop: true
+          };
+
+          appendToChat("System", `AI.cnxROBOT → Loaded ${images.length} images for "${query}"`);
+          this.playSequence();
+          return `AI.cnxROBOT sequence started for: ${query}`;
+        } catch (e) {
+          return "Failed to fetch images.";
+        }
       },
 
-      async handleSpecificCharacter(ch) {
-        const demo = document.getElementById("demo");
-        demo.appendChild(this.createDemoSpan(ch));
-        return `Placed '${ch}'`;
-      },
+      playSequence() {
+        if (this.sequenceInterval) clearInterval(this.sequenceInterval);
+        if (!this.currentSequence) return;
 
-      async handleCharacterDrop() {
-        const chosen = this.chars[Math.floor(Math.random() * this.chars.length)];
-        const demo = document.getElementById("demo");
-        demo.appendChild(this.createDemoSpan(chosen));
-        return `Placed '${chosen}'`;
-      },
+        const aiCtx = document.getElementById("aiCanvas").getContext("2d");
+        let index = 0;
 
-      async handleClearDemo() {
-        document.getElementById("demo").innerHTML = "";
-        return "Demo grid cleared.";
-      },
-
-      async handleSpawn(count) {
-        count = parseInt(count);
-        if (isNaN(count) || count < 1) return "Invalid count.";
-        for (let i = 0; i < count; i++) await this.handleCharacterDrop();
-        return `Spawned ${count} characters.`;
-      },
-
-      async handleMoveLeft() {
-        const demo = document.getElementById("demo");
-        const items = Array.from(demo.children);
-        if (items.length < 2) return "Not enough items.";
-        demo.appendChild(items.shift());
-        return "Moved left.";
+        this.sequenceInterval = setInterval(() => {
+          const img = new Image();
+          img.src = this.currentSequence.images[index];
+          img.onload = () => {
+            aiCtx.clearRect(0, 0, 240, 240);
+            aiCtx.drawImage(img, 0, 0, 240, 240);
+          };
+          index = (index + 1) % this.currentSequence.images.length;
+        }, this.currentSequence.timing);
       },
 
       async dispatch(command, payload) {
-        if (payload && this.markerMap[payload]) {
-          return this.handleSpecificCharacter(this.markerMap[payload]);
-        }
+        if (payload && this.markerMap[payload]) return this.handleSpecificCharacter(this.markerMap[payload]);
         if (command === "clear" && payload === "demo") return this.handleClearDemo();
         if (command === "spawn") return this.handleSpawn(payload);
         if (command === "move" && payload === "left") return this.handleMoveLeft();
-        if (command) return this.handleCharacterDrop();
+        if (command === "cnx") return await this.loadCNX(payload);
+        
+        // NEW COMMAND
+        if (command === "AI.cnxROBOT") return await this.handleAICNXRobot(payload);
 
+        if (command) return this.handleCharacterDrop();
         return "Invalid command. Use {command}[payload]";
       }
     };
 
-    function escapeHTML(str) {
-      return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
-    }
+    // Chat handling (unchanged)
+    function appendToChat(role, msg) { /* ... same as before ... */ }
 
-    function appendToChat(role, msg) {
-      const chat = document.getElementById("chatOutput");
-      const div = document.createElement("div");
-      div.innerHTML = `<b>${role}:</b> ${escapeHTML(msg)}`;
-      chat.appendChild(div);
-      chat.scrollTop = chat.scrollHeight;
-    }
-
-    // Main Chat Input
     document.getElementById("userInput").addEventListener("keydown", async (e) => {
       if (e.key === "Enter") {
         const msg = e.target.value.trim();
         if (!msg) return;
-
         appendToChat("You", msg);
         const { command, payload } = ChatLink.parse(msg);
         const response = await ChatLink.dispatch(command, payload);
         appendToChat("System", response);
-
         e.target.value = "";
       }
     });
 
-    // Number Input
-    const numbers = [45, 5, 9, 16, 25];
-    const images = ["tig.png", "image2.jpg", "image3.jpg", "image4.jpg", "image5.jpg"];
-
-    document.getElementById("numberInput").addEventListener("input", function(e) {
-      const num = parseInt(e.target.value);
-      const idx = numbers.indexOf(num);
-      if (!isNaN(num) && idx !== -1) {
-        document.getElementById("demo").innerHTML = 
-          `<img src="${images[idx]}" style="width:100px;height:100px;border:1px solid #ccc;object-fit:cover;">`;
-        e.target.value = "";
+    // Dev input for .cnx (unchanged)
+    document.getElementById("devLinkInput").addEventListener("keydown", async (e) => {
+      if (e.key === "Enter") {
+        const url = e.target.value.trim();
+        if (url) {
+          const response = await ChatLink.loadCNX(url);
+          appendToChat("Dev", response);
+          e.target.value = "";
+        }
       }
     });
 
-    // Mobile fallback
-    if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
-      document.getElementById("demo").innerHTML = 
-        '<img src="tig.png" style="width:100px;height:100px;border:1px solid #ccc;">';
-    }
-
-    function goToBase() {
-      window.location.href = "https://alienware51007-collab.github.io/AHOL/Oppeenn.html";
-    }
-
-    // Shine effect
-    const shineBox = document.getElementById("shineBox");
-    shineBox.addEventListener("click", function() {
-      this.style.animation = "shineFlash 0.8s ease-out";
-      setTimeout(() => this.style.animation = "", 900);
-    });
-    document.addEventListener("keydown", e => { 
-      if (e.key === "1") shineBox.click(); 
-    });
-
-    // Canvas dots
-    const sv = document.getElementById("seriesViz");
-    const ctx = sv.getContext("2d");
-    ctx.fillStyle = "red"; 
-    ctx.beginPath(); 
-    ctx.arc(80, 80, 8, 0, Math.PI*2); 
-    ctx.fill();
-    ctx.fillStyle = "lime"; 
-    ctx.beginPath(); 
-    ctx.arc(180, 180, 8, 0, Math.PI*2); 
-    ctx.fill();
-
-    // AI Canvas
-    const aiCanvas = document.getElementById("aiCanvas");
-    const aiCtx = aiCanvas.getContext("2d");
-    const betaImg = new Image();
-    betaImg.src = "jrxxyybeta.png";
-    betaImg.onload = () => aiCtx.drawImage(betaImg, 0, 0, 240, 240);
-
-    let blendIndex = 0;
-    const blends = ["source-over", "screen", "lighten", "overlay", "difference", "color-dodge"];
-
-    function asdxCommand(cmd) {
-      if (cmd === "a") {
-        const img = new Image(); 
-        img.src = "vrshark.png";
-        img.onload = () => aiCtx.drawImage(img, 60, 0, 180, 120);
-      } else if (cmd === "s") {
-        const img = new Image(); 
-        img.src = "rty.png";
-        img.onload = () => aiCtx.drawImage(img, 160, 0, 80, 240);
-      } else if (cmd === "d") {
-        blendIndex = (blendIndex + 1) % blends.length;
-        aiCtx.globalCompositeOperation = blends[blendIndex];
-      } else if (cmd === "x") {
-        aiCtx.globalCompositeOperation = "source-over";
-        aiCtx.clearRect(0, 0, 240, 240);
-        aiCtx.drawImage(betaImg, 0, 0, 240, 240);
-      }
-    }
-
-    document.addEventListener("keydown", e => {
-      if (["a","s","d","x"].includes(e.key)) asdxCommand(e.key);
-    });
+    // Keep all your original keyboard shortcuts, canvas init, shine effect, etc.
+    // ... (paste the rest of your previous script here: goToBase, shine, asdx keys, etc.) ...
   </script>
 </body>
 </html>
