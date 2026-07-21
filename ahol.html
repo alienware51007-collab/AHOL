@@ -17,10 +17,9 @@
       margin: 0;
       display: flex;
       flex-direction: column;
-      align-items: center;          /* Helps center content too */
+      align-items: center;
     }
 
-    /* Solid AI ChatBox */
     #aiChatBox {
       position: relative;
       margin: 25px auto;
@@ -71,8 +70,7 @@
       aspect-ratio: 1 / 1;
     }
 
-    /* Inputs */
-    #numberInput, #devLinkInput, #userInput {
+    input {
       background: rgba(0, 0, 0, 0.8);
       border: 1px solid #666;
       color: #ccc;
@@ -83,8 +81,6 @@
       max-width: 320px;
       margin-bottom: 10px;
     }
-
-    #devLinkInput { margin-top: 10px; }
 
     button {
       background: rgba(255,255,255,0.1);
@@ -108,38 +104,38 @@
       max-width: 600px;
     }
 
-    /* Mobile Optimizations */
-    @media (max-width: 480px) {
-      body { padding: 10px; }
-      #aiChatBox { max-width: 100%; margin: 20px auto; }
-      #chatOutput { max-height: 40vh; }
+    .ai-controls { 
+      display:flex; 
+      gap:8px; 
+      margin-top:10px; 
+      justify-content:center; 
+      flex-wrap: wrap;
     }
-
-    #chatOutput::-webkit-scrollbar { width: 6px; }
-    #chatOutput::-webkit-scrollbar-thumb {
-      background: rgba(255,255,255,0.3);
-      border-radius: 10px;
-    }
-
-    /* AI Chat controls and modal */
-    .ai-controls { display:flex; gap:8px; margin-top:10px; justify-content:center; }
-    .ai-controls button { padding:6px 10px; font-size:13px; }
 
     #imageModal {
-      position:fixed; inset:0; display:none; align-items:center; justify-content:center; background:rgba(0,0,0,0.8); z-index:9999;
+      position:fixed; inset:0; display:none; align-items:center; justify-content:center; 
+      background:rgba(0,0,0,0.9); z-index:9999;
     }
-    #imageModal img { max-width:95%; max-height:95%; border:4px solid rgba(255,255,255,0.06); box-shadow:0 10px 40px rgba(0,0,0,0.8); border-radius:8px; }
-    #imageModal .closeBtn { position:absolute; top:18px; right:18px; background:rgba(255,255,255,0.05); border:1px solid #fff; color:#fff; padding:6px 8px; cursor:pointer; border-radius:6px; }
+    #imageModal img { 
+      max-width:95%; max-height:95%; 
+      border:4px solid rgba(255,255,255,0.1); 
+      box-shadow:0 10px 40px rgba(0,0,0,0.8); 
+      border-radius:8px; 
+    }
+    #imageModal .closeBtn { 
+      position:absolute; top:18px; right:18px; 
+      background:rgba(255,255,255,0.05); border:1px solid #fff; 
+      color:#fff; padding:6px 12px; cursor:pointer; border-radius:6px; 
+    }
   </style>
 </head>
 <body>
 
-  <input id="numberInput" type="text" inputmode="numeric" pattern="[0-9]*" placeholder="Enter: 45, 5, 9, 16, or 25">
+  <input id="numberInput" type="text" inputmode="numeric" placeholder="Enter: 45, 5, 9, 16, or 25">
   <input id="devLinkInput" type="text" placeholder="Dev: .cnx sublink here">
 
-  <button id="baseButton" onclick="goToBase()"> .BASE. </button>
+  <button id="baseButton">.BASE.</button>
 
-  <div id="upperBox">SYSTEM STATUS: ACTIVE</div>
   <div id="demo"></div>
 
   <h2 style="display:flex; align-items:center; gap:6px; margin:15px 0;">
@@ -147,7 +143,7 @@
   </h2>
 
   <div id="chatOutput">
-    <div id="shineBox" style="position:absolute; top:12px; right:12px; padding:4px 8px; background:rgba(0,0,0,0.7); border:1px solid #ccc; font-size:9px; cursor:pointer;">
+    <div id="shineBox" style="position:absolute; top:12px; right:12px; padding:4px 8px; background:rgba(0,0,0,0.7); border:1px solid #0f0; font-size:9px; cursor:pointer;">
       press 1 to shine CD...
     </div>
   </div>
@@ -158,28 +154,32 @@
     <canvas id="aiCanvas" width="240" height="240"></canvas>
 
     <div class="ai-controls">
-      <button type="button" onclick="ChatLink.viewImage()">View</button>
-      <button type="button" onclick="ChatLink.restoreImage()">Restore</button>
-      <button type="button" onclick="ChatLink.showShark()">Shark</button>
-      <button type="button" onclick="ChatLink.stopSequence()">Stop</button>
+      <button onclick="ChatLink.viewImage()">View</button>
+      <button onclick="ChatLink.restoreImage()">Restore</button>
+      <button onclick="ChatLink.showShark()">Shark</button>
+      <button onclick="ChatLink.stopSequence()">Stop</button>
     </div>
   </div>
 
-  <!-- Modal for viewing canvas image -->
-  <div id="imageModal" onclick="document.getElementById('imageModal').style.display='none'">
-    <button class="closeBtn" onclick="document.getElementById('imageModal').style.display='none'; event.stopPropagation();">Close</button>
-    <img id="modalImg" src="" alt="Canvas view">
+  <div>
+    <input id="userInput" type="text" placeholder="{command}[payload]" style="width:100%; max-width:320px;">
   </div>
 
-  <div>
-    <input id="userInput" type="text" placeholder="{command}[payload]" 
-           style="width:100%; max-width:320px;">
+  <!-- Modal -->
+  <div id="imageModal">
+    <button class="closeBtn" onclick="document.getElementById('imageModal').style.display='none'">Close</button>
+    <img id="modalImg" src="" alt="Canvas view">
   </div>
 
   <script>
     const ChatLink = {
       chars: ["難", "金", "魂", "龍", "力", "火", "天", "神"],
       markerMap: { x:"難", c:"金", 7:"魂", q:"龍", 9:"力", t:"火", m:"天", z:"神" },
+
+      currentSequence: null,
+      sequenceInterval: null,
+      lastSaved: null,
+      isTainted: false,
 
       parse(msg) {
         const cmdMatch = msg.match(/\{([^}]+)\}/);
@@ -238,9 +238,6 @@
         return "Moved left.";
       },
 
-      currentSequence: null,
-      sequenceInterval: null,
-
       async handleAICNXRobot(query) {
         if (!query) return "No search term provided.";
         appendToChat("System", `Searching for: ${query}...`);
@@ -248,10 +245,11 @@
         try {
           const images = [];
           for (let i = 0; i < 8; i++) {
-            images.push(`https://source.unsplash.com/random/240x240/?${encodeURIComponent(query)}&sig=${i}`);
+            images.push(`https://source.unsplash.com/random/240x240/?${encodeURIComponent(query)}&sig=${Date.now()}${i}`);
           }
           this.currentSequence = { images, timing: 700, loop: true };
-          appendToChat("System", `AI.cnxROBOT → Loaded ${images.length} images`);
+          this.isTainted = true;
+          appendToChat("System", `AI.cnxROBOT → Loaded sequence for "${query}"`);
           this.playSequence();
           return `Sequence started for "${query}"`;
         } catch (e) {
@@ -261,22 +259,23 @@
 
       playSequence() {
         if (this.sequenceInterval) clearInterval(this.sequenceInterval);
+        
         const aiCanvas = document.getElementById("aiCanvas");
         const aiCtx = aiCanvas.getContext("2d");
         let index = 0;
-
-        // Reset saved markers for this sequence run
-        try { this.savedImage = this.savedImage || aiCanvas.toDataURL(); } catch (e) { /* ignore cross-origin */ }
 
         this.sequenceInterval = setInterval(() => {
           const img = new Image();
           img.crossOrigin = "anonymous";
           img.src = this.currentSequence.images[index];
+          
           img.onload = () => {
-            try { this.lastSaved = aiCanvas.toDataURL(); } catch (e) { /* ignore */ }
             aiCtx.clearRect(0, 0, aiCanvas.width, aiCanvas.height);
             aiCtx.drawImage(img, 0, 0, aiCanvas.width, aiCanvas.height);
           };
+          
+          img.onerror = () => console.warn("Image failed to load");
+          
           index = (index + 1) % this.currentSequence.images.length;
         }, this.currentSequence.timing);
       },
@@ -292,18 +291,19 @@
       restoreImage() {
         const aiCanvas = document.getElementById("aiCanvas");
         const aiCtx = aiCanvas.getContext("2d");
-        const data = this.lastSaved || this.savedImage;
-        if (!data) {
-          appendToChat("System", "No saved image to restore.");
-          return "No saved image.";
+        
+        if (this.isTainted || !this.lastSaved) {
+          appendToChat("System", "Cannot restore - canvas is tainted or no saved image.");
+          return "Restore failed (tainted canvas).";
         }
+        
         const img = new Image();
-        img.src = data;
+        img.src = this.lastSaved;
         img.onload = () => {
           aiCtx.clearRect(0, 0, aiCanvas.width, aiCanvas.height);
           aiCtx.drawImage(img, 0, 0, aiCanvas.width, aiCanvas.height);
         };
-        return "Restored image.";
+        return "Restored previous image.";
       },
 
       viewImage() {
@@ -311,29 +311,29 @@
         const data = aiCanvas.toDataURL();
         const modal = document.getElementById("imageModal");
         const modalImg = document.getElementById("modalImg");
-        if (!modal || !modalImg) return "Modal not available.";
+        
         modalImg.src = data;
         modal.style.display = "flex";
-        return "Opened view.";
+        return "Opened full view.";
       },
 
-      showShark(query) {
-        const q = query || "shark";
+      showShark(query = "shark") {
         this.stopSequence();
         const aiCanvas = document.getElementById("aiCanvas");
         const aiCtx = aiCanvas.getContext("2d");
         const img = new Image();
         img.crossOrigin = "anonymous";
-        img.src = `https://source.unsplash.com/random/240x240/?${encodeURIComponent(q)}`;
+        img.src = `https://source.unsplash.com/random/240x240/?${encodeURIComponent(query)}&t=${Date.now()}`;
+        
         img.onload = () => {
-          try { this.lastSaved = aiCanvas.toDataURL(); } catch (e) { /* ignore */ }
+          this.lastSaved = aiCanvas.toDataURL(); // save before next draw
+          this.isTainted = true;
           aiCtx.clearRect(0, 0, aiCanvas.width, aiCanvas.height);
           aiCtx.drawImage(img, 0, 0, aiCanvas.width, aiCanvas.height);
           appendToChat("System", "Shark image loaded.");
         };
-        return "Shark shown.";
+        return "Loading shark...";
       },
-
 
       async dispatch(command, payload) {
         if (payload && this.markerMap[payload]) return this.handleSpecificCharacter(this.markerMap[payload]);
@@ -356,6 +356,7 @@
       chat.scrollTop = chat.scrollHeight;
     }
 
+    // Input handlers
     document.getElementById("userInput").addEventListener("keydown", async (e) => {
       if (e.key === "Enter") {
         const msg = e.target.value.trim();
@@ -369,21 +370,38 @@
     });
 
     document.getElementById("devLinkInput").addEventListener("keydown", (e) => {
-      if (e.key === "Enter") {
-        const url = e.target.value.trim();
-        if (url) {
-          appendToChat("Dev", "Loading .cnx...");
-          e.target.value = "";
-        }
+      if (e.key === "Enter" && e.target.value.trim()) {
+        appendToChat("Dev", "Loading .cnx sublink...");
+        e.target.value = "";
       }
     });
 
-    function goToBase() {
+    document.getElementById("baseButton").addEventListener("click", () => {
       window.location.href = "https://alienware51007-collab.github.io/AHOL/Oppeenn.html";
-    }
+    });
+
+    // Shine effect on key 1
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "1") {
+        const shine = document.getElementById("shineBox");
+        shine.style.background = "#0f0";
+        shine.style.color = "#000";
+        setTimeout(() => {
+          shine.style.background = "rgba(0,0,0,0.7)";
+          shine.style.color = "#fff";
+        }, 300);
+        appendToChat("System", "CD SHINE ACTIVATED ✨");
+      }
+    });
+
+    // Modal click outside to close
+    document.getElementById("imageModal").addEventListener("click", function(e) {
+      if (e.target === this) this.style.display = "none";
+    });
 
     window.addEventListener('load', () => {
       document.getElementById("userInput").focus();
+      appendToChat("System", "AHOL Chatbot ready. Try {AI.cnxROBOT}[cat] or {shark}");
     });
   </script>
 </body>
