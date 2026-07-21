@@ -113,24 +113,29 @@
 
     function loadImageToSeriesViz(query) {
       svctx.clearRect(0, 0, sv.width, sv.height);
-      svctx.fillStyle = "#ccc";
+      svctx.fillStyle = "#aaa";
       svctx.font = "14px monospace";
-      svctx.fillText("Searching...", 80, 130);
+      svctx.fillText("Loading...", 85, 130);
+
+      const seed = query.trim().toLowerCase();
+      const hash = seed.split('').reduce((a, c) => a + c.charCodeAt(0), 0);
+      const imgUrl = `https://picsum.photos/id/${(hash % 1000) + 10}/260/260`;
 
       const img = new Image();
       img.crossOrigin = "anonymous";
-      img.src = `https://source.unsplash.com/260x260/?${encodeURIComponent(query)}&t=${Date.now()}`;
+      img.src = imgUrl;
 
       img.onload = () => {
         svctx.drawImage(img, 0, 0, 260, 260);
       };
+
       img.onerror = () => {
-        svctx.fillStyle = "red";
-        svctx.fillText("Image failed", 70, 130);
+        svctx.fillStyle = "#ff6666";
+        svctx.font = "13px monospace";
+        svctx.fillText("Image failed", 65, 130);
       };
     }
 
-    // Keep red/green dots as fallback or you can remove later
     function drawSeriesDots() {
       svctx.clearRect(0, 0, sv.width, sv.height);
       svctx.fillStyle = "red"; svctx.shadowBlur = 15; svctx.shadowColor = "red";
@@ -157,12 +162,13 @@
 
         if (command === "search" || command === "image" || command === "viz") {
           loadImageToSeriesViz(payload);
-          return `Loaded image for: ${payload}`;
+          return `Showing image for: ${payload}`;
         }
 
-        // Existing character commands...
-        if (command === "clear" && payload === "demo") return "Demo cleared.";
-        if (command === "spawn") return "Spawned characters.";
+        if (command === "clear" && payload === "demo") {
+          document.getElementById("demo").innerHTML = "";
+          return "Demo grid cleared.";
+        }
         return "Command received.";
       }
     };
@@ -189,7 +195,7 @@
       }
     });
 
-    // Initial dots
+    // Initial state
     drawSeriesDots();
   </script>
 </body>
