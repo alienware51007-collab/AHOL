@@ -138,6 +138,13 @@
       border: 1px solid #ccc;
       background: #111;
     }
+
+    /* Transparent middle box */
+    #seriesViz {
+      background: transparent !important;
+      border: 2px solid #ccc;
+      box-shadow: 0 0 15px rgba(255,255,255,0.15);
+    }
   </style>
 </head>
 <body>
@@ -154,7 +161,7 @@
     AHOL Chatbot <img src="ooo.png" style="width:22px; height:22px; image-rendering:crisp-edges;">
   </h2>
 
-  <div id="uSpecialCenter" style="display:flex; gap:20px; justify-content:center; flex-wrap:wrap;">
+  <div id="uSpecialCenter" style="display:flex; gap:30px; justify-content:center; flex-wrap:wrap; margin: 30px 0;">
     <div style="display:flex; flex-direction:column; gap:10px;">
       <div class="uRow"><span>x</span><span>難</span></div>
       <div class="uRow"><span>c</span><span>金</span></div>
@@ -216,16 +223,30 @@
       window.location.href = "https://alienware51007-collab.github.io/AHOL/Oppeenn.html";
     });
 
-    // ==================== SERIES VIZ CANVAS ====================
+    // ==================== SERIES VIZ (Middle Box) ====================
     const sv = document.getElementById("seriesViz");
     const svctx = sv.getContext("2d");
+
     function drawSeriesDots() {
       svctx.clearRect(0, 0, sv.width, sv.height);
+
+      // Red Dot
       svctx.fillStyle = "red";
-      svctx.beginPath(); svctx.arc(80, 80, 8, 0, Math.PI * 2); svctx.fill();
+      svctx.shadowColor = "red";
+      svctx.shadowBlur = 20;
+      svctx.beginPath();
+      svctx.arc(80, 80, 9, 0, Math.PI * 2);
+      svctx.fill();
+
+      // Lime Green Dot
       svctx.fillStyle = "lime";
-      svctx.beginPath(); svctx.arc(180, 180, 8, 0, Math.PI * 2); svctx.fill();
+      svctx.shadowColor = "lime";
+      svctx.shadowBlur = 20;
+      svctx.beginPath();
+      svctx.arc(180, 180, 9, 0, Math.PI * 2);
+      svctx.fill();
     }
+
     drawSeriesDots();
 
     // ==================== AI CANVAS & KEYBOARD CONTROLS ====================
