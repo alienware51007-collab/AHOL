@@ -14,8 +14,8 @@
       padding: 8px;
       background: black;
       border: 1px solid #ccc;
-      color:#ccc;
-      z-index:99999;
+      color: #ccc;
+      z-index: 99999;
       font-family: monospace;
     }
 
@@ -174,124 +174,25 @@
 
   <script>
     const ChatLink = {
-  chars: ["難", "金", "魂", "龍", "力", "火", "天", "神"],
+      chars: ["難", "金", "魂", "龍", "力", "火", "天", "神"],
 
-  // NEW: marker mapping for payload letters
-  markerMap: {
-    x: "難",
-    c: "金",
-    7: "魂",
-    q: "龍",
-    9: "力",
-    t: "火",
-    m: "天",
-    z: "神"
-  },
+      markerMap: {
+        x: "難", c: "金", 7: "魂", q: "龍",
+        9: "力", t: "火", m: "天", z: "神"
+      },
 
-  parse(msg) {
-    const cmdMatch = msg.match(/\{([^}]+)\}/);
-    const dataMatch = msg.match(/
+      parse(msg) {
+        const cmdMatch = msg.match(/\{([^}]+)\}/);
+        const dataMatch = msg.match(/\[([^\]]+)\]/);
+        return {
+          command: cmdMatch ? cmdMatch[1].trim() : null,
+          payload: dataMatch ? dataMatch[1].trim() : null
+        };
+      },
 
-\[([^\]
-
-]+)\]
-
-/);
-    return {
-      command: cmdMatch ? cmdMatch[1].trim() : null,
-      payload: dataMatch ? dataMatch[1].trim() : null
-    };
-  },
-
-  // NEW: drop a specific mapped character
-  async handleSpecificCharacter(ch) {
-    const demo = document.getElementById("demo");
-
-    const span = document.createElement("span");
-    span.textContent = ch;
-    span.style.fontSize = "38px";
-    span.style.color = "#ccc";
-    span.style.textShadow = "0 0 10px #ccc";
-    span.style.border = "1px solid #ccc";
-    span.style.background = "rgba(20,20,20,0.6)";
-    span.style.display = "flex";
-    span.style.alignItems = "center";
-    span.style.justifyContent = "center";
-    span.style.width = "100px";
-    span.style.height = "100px";
-
-    demo.appendChild(span);
-    return `Placed '${ch}'`;
-  },
-
-  async handleCharacterDrop() {
-    const demo = document.getElementById("demo");
-    const chosen = this.chars[Math.floor(Math.random() * this.chars.length)];
-
-    const span = document.createElement("span");
-    span.textContent = chosen;
-    span.style.fontSize = "38px";
-    span.style.color = "#ccc";
-    span.style.textShadow = "0 0 10px #ccc";
-    span.style.border = "1px solid #ccc";
-    span.style.background = "rgba(20,20,20,0.6)";
-    span.style.display = "flex";
-    span.style.alignItems = "center";
-    span.style.justifyContent = "center";
-    span.style.width = "100px";
-    span.style.height = "100px";
-
-    demo.appendChild(span);
-    return `Placed '${chosen}'`;
-  },
-
-  async handleClearDemo() {
-    document.getElementById("demo").innerHTML = "";
-    return "Demo grid cleared.";
-  },
-
-  async handleSpawn(count) {
-    count = parseInt(count);
-    if (isNaN(count) || count < 1) return "Invalid count.";
-    for (let i = 0; i < count; i++) await this.handleCharacterDrop();
-    return `Spawned ${count} characters.`;
-  },
-
-  async handleMoveLeft() {
-    const demo = document.getElementById("demo");
-    const items = Array.from(demo.children);
-    if (items.length < 2) return "Not enough items.";
-    demo.appendChild(items.shift());
-    return "Moved left.";
-  },
-
-  // ⭐ UPDATED DISPATCH — now supports payload → Chinese character
-  async dispatch(command, payload) {
-
-    // If payload matches one of the marker keys → drop mapped Chinese character
-    if (payload && this.markerMap[payload]) {
-      return this.handleSpecificCharacter(this.markerMap[payload]);
-    }
-
-    // Existing commands
-    if (command === "clear" && payload === "demo") return this.handleClearDemo();
-    if (command === "spawn") return this.handleSpawn(payload);
-    if (command === "move" && payload === "left") return this.handleMoveLeft();
-
-    // Default: drop random character
-    if (command) return this.handleCharacterDrop();
-
-    return "Invalid command. Use {command}[payload]";
-  }
-};
-    },
-
-      async handleCharacterDrop() {
-        const demo = document.getElementById("demo");
-        const chosen = this.chars[Math.floor(Math.random() * this.chars.length)];
-
+      createDemoSpan(text) {
         const span = document.createElement("span");
-        span.textContent = chosen;
+        span.textContent = text;
         span.style.fontSize = "38px";
         span.style.color = "#ccc";
         span.style.textShadow = "0 0 10px #ccc";
@@ -302,8 +203,19 @@
         span.style.justifyContent = "center";
         span.style.width = "100px";
         span.style.height = "100px";
+        return span;
+      },
 
-        demo.appendChild(span);
+      async handleSpecificCharacter(ch) {
+        const demo = document.getElementById("demo");
+        demo.appendChild(this.createDemoSpan(ch));
+        return `Placed '${ch}'`;
+      },
+
+      async handleCharacterDrop() {
+        const chosen = this.chars[Math.floor(Math.random() * this.chars.length)];
+        const demo = document.getElementById("demo");
+        demo.appendChild(this.createDemoSpan(chosen));
         return `Placed '${chosen}'`;
       },
 
@@ -328,10 +240,14 @@
       },
 
       async dispatch(command, payload) {
+        if (payload && this.markerMap[payload]) {
+          return this.handleSpecificCharacter(this.markerMap[payload]);
+        }
         if (command === "clear" && payload === "demo") return this.handleClearDemo();
         if (command === "spawn") return this.handleSpawn(payload);
         if (command === "move" && payload === "left") return this.handleMoveLeft();
         if (command) return this.handleCharacterDrop();
+
         return "Invalid command. Use {command}[payload]";
       }
     };
@@ -371,14 +287,16 @@
       const num = parseInt(e.target.value);
       const idx = numbers.indexOf(num);
       if (!isNaN(num) && idx !== -1) {
-        document.getElementById("demo").innerHTML = `<img src="${images[idx]}" style="width:100px;height:100px;border:1px solid #ccc;object-fit:cover;">`;
+        document.getElementById("demo").innerHTML = 
+          `<img src="${images[idx]}" style="width:100px;height:100px;border:1px solid #ccc;object-fit:cover;">`;
         e.target.value = "";
       }
     });
 
     // Mobile fallback
     if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
-      document.getElementById("demo").innerHTML = '<img src="tig.png" style="width:100px;height:100px;border:1px solid #ccc;">';
+      document.getElementById("demo").innerHTML = 
+        '<img src="tig.png" style="width:100px;height:100px;border:1px solid #ccc;">';
     }
 
     function goToBase() {
@@ -386,17 +304,26 @@
     }
 
     // Shine effect
-    document.getElementById("shineBox").addEventListener("click", function() {
+    const shineBox = document.getElementById("shineBox");
+    shineBox.addEventListener("click", function() {
       this.style.animation = "shineFlash 0.8s ease-out";
       setTimeout(() => this.style.animation = "", 900);
     });
-    document.addEventListener("keydown", e => { if (e.key === "1") document.getElementById("shineBox").click(); });
+    document.addEventListener("keydown", e => { 
+      if (e.key === "1") shineBox.click(); 
+    });
 
     // Canvas dots
     const sv = document.getElementById("seriesViz");
     const ctx = sv.getContext("2d");
-    ctx.fillStyle = "red"; ctx.beginPath(); ctx.arc(80, 80, 8, 0, Math.PI*2); ctx.fill();
-    ctx.fillStyle = "lime"; ctx.beginPath(); ctx.arc(180, 180, 8, 0, Math.PI*2); ctx.fill();
+    ctx.fillStyle = "red"; 
+    ctx.beginPath(); 
+    ctx.arc(80, 80, 8, 0, Math.PI*2); 
+    ctx.fill();
+    ctx.fillStyle = "lime"; 
+    ctx.beginPath(); 
+    ctx.arc(180, 180, 8, 0, Math.PI*2); 
+    ctx.fill();
 
     // AI Canvas
     const aiCanvas = document.getElementById("aiCanvas");
@@ -410,10 +337,12 @@
 
     function asdxCommand(cmd) {
       if (cmd === "a") {
-        const img = new Image(); img.src = "vrshark.png";
+        const img = new Image(); 
+        img.src = "vrshark.png";
         img.onload = () => aiCtx.drawImage(img, 60, 0, 180, 120);
       } else if (cmd === "s") {
-        const img = new Image(); img.src = "rty.png";
+        const img = new Image(); 
+        img.src = "rty.png";
         img.onload = () => aiCtx.drawImage(img, 160, 0, 80, 240);
       } else if (cmd === "d") {
         blendIndex = (blendIndex + 1) % blends.length;
