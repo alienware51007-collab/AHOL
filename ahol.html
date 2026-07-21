@@ -174,16 +174,117 @@
 
   <script>
     const ChatLink = {
-      chars: ["難", "金", "魂", "龍", "力", "火", "天", "神"],
+  chars: ["難", "金", "魂", "龍", "力", "火", "天", "神"],
 
-      parse(msg) {
-        const cmdMatch = msg.match(/\{([^}]+)\}/);
-        const dataMatch = msg.match(/\[([^\]]+)\]/);
-        return {
-          command: cmdMatch ? cmdMatch[1].trim() : null,
-          payload: dataMatch ? dataMatch[1].trim() : null
-        };
-      },
+  // NEW: marker mapping for payload letters
+  markerMap: {
+    x: "難",
+    c: "金",
+    7: "魂",
+    q: "龍",
+    9: "力",
+    t: "火",
+    m: "天",
+    z: "神"
+  },
+
+  parse(msg) {
+    const cmdMatch = msg.match(/\{([^}]+)\}/);
+    const dataMatch = msg.match(/
+
+\[([^\]
+
+]+)\]
+
+/);
+    return {
+      command: cmdMatch ? cmdMatch[1].trim() : null,
+      payload: dataMatch ? dataMatch[1].trim() : null
+    };
+  },
+
+  // NEW: drop a specific mapped character
+  async handleSpecificCharacter(ch) {
+    const demo = document.getElementById("demo");
+
+    const span = document.createElement("span");
+    span.textContent = ch;
+    span.style.fontSize = "38px";
+    span.style.color = "#ccc";
+    span.style.textShadow = "0 0 10px #ccc";
+    span.style.border = "1px solid #ccc";
+    span.style.background = "rgba(20,20,20,0.6)";
+    span.style.display = "flex";
+    span.style.alignItems = "center";
+    span.style.justifyContent = "center";
+    span.style.width = "100px";
+    span.style.height = "100px";
+
+    demo.appendChild(span);
+    return `Placed '${ch}'`;
+  },
+
+  async handleCharacterDrop() {
+    const demo = document.getElementById("demo");
+    const chosen = this.chars[Math.floor(Math.random() * this.chars.length)];
+
+    const span = document.createElement("span");
+    span.textContent = chosen;
+    span.style.fontSize = "38px";
+    span.style.color = "#ccc";
+    span.style.textShadow = "0 0 10px #ccc";
+    span.style.border = "1px solid #ccc";
+    span.style.background = "rgba(20,20,20,0.6)";
+    span.style.display = "flex";
+    span.style.alignItems = "center";
+    span.style.justifyContent = "center";
+    span.style.width = "100px";
+    span.style.height = "100px";
+
+    demo.appendChild(span);
+    return `Placed '${chosen}'`;
+  },
+
+  async handleClearDemo() {
+    document.getElementById("demo").innerHTML = "";
+    return "Demo grid cleared.";
+  },
+
+  async handleSpawn(count) {
+    count = parseInt(count);
+    if (isNaN(count) || count < 1) return "Invalid count.";
+    for (let i = 0; i < count; i++) await this.handleCharacterDrop();
+    return `Spawned ${count} characters.`;
+  },
+
+  async handleMoveLeft() {
+    const demo = document.getElementById("demo");
+    const items = Array.from(demo.children);
+    if (items.length < 2) return "Not enough items.";
+    demo.appendChild(items.shift());
+    return "Moved left.";
+  },
+
+  // ⭐ UPDATED DISPATCH — now supports payload → Chinese character
+  async dispatch(command, payload) {
+
+    // If payload matches one of the marker keys → drop mapped Chinese character
+    if (payload && this.markerMap[payload]) {
+      return this.handleSpecificCharacter(this.markerMap[payload]);
+    }
+
+    // Existing commands
+    if (command === "clear" && payload === "demo") return this.handleClearDemo();
+    if (command === "spawn") return this.handleSpawn(payload);
+    if (command === "move" && payload === "left") return this.handleMoveLeft();
+
+    // Default: drop random character
+    if (command) return this.handleCharacterDrop();
+
+    return "Invalid command. Use {command}[payload]";
+  }
+};
+    },
 
       async handleCharacterDrop() {
         const demo = document.getElementById("demo");
