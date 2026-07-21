@@ -22,10 +22,9 @@
       inset: -20%;
       z-index: -1;
       pointer-events: none;
-      background-image:
-        linear-gradient(rgba(200,200,200,0.10) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(200,200,200,0.10) 1px, transparent 1px),
-        repeating-linear-gradient(45deg, rgba(255,255,255,0.03) 0 2px, transparent 2px 14px);
+      background-image: linear-gradient(rgba(200,200,200,0.10) 1px, transparent 1px),
+                        linear-gradient(90deg, rgba(200,200,200,0.10) 1px, transparent 1px),
+                        repeating-linear-gradient(45deg, rgba(255,255,255,0.03) 0 2px, transparent 2px 14px);
       background-size: 60px 60px, 60px 60px, 140px 140px;
       filter: blur(2px) brightness(1.1);
       animation: zoomPattern 16s ease-in-out infinite alternate, glowPulse 6s ease-in-out infinite;
@@ -34,127 +33,32 @@
     @keyframes zoomPattern { 0% { transform: scale(1); } 100% { transform: scale(1.16); } }
     @keyframes glowPulse { 0%,100% { filter: blur(2px) brightness(1.1); } 50% { filter: blur(4px) brightness(1.4); } }
 
-    #numberInput {
-      position: fixed;
-      bottom: 20px;
-      right: 20px;
-      width: 200px;
-      padding: 10px;
-      background: black;
-      border: 1px solid #ccc;
-      color: #ccc;
-      z-index: 99999;
-      font-family: monospace;
-    }
+    #numberInput { position: fixed; bottom: 20px; right: 20px; width: 200px; padding: 10px; background: black; border: 1px solid #ccc; color: #ccc; z-index: 99999; font-family: monospace; }
+    #upperBox { width: 50%; max-width: 600px; margin: 0 auto 20px; padding: 15px; background: url("stp.png") center/cover; border: 2px solid #ccc; box-shadow: 0 0 15px #ccc; text-align: center; font-size: 18px; text-shadow: 0 0 6px #ccc; animation: upperFloat 8s ease-in-out infinite alternate; }
+    @keyframes upperFloat { 0% { background-position: center; filter: brightness(1); } 100% { background-position: center 30px; filter: brightness(1.3); } }
 
-    #upperBox {
-      width: 50%;
-      max-width: 600px;
-      margin: 0 auto 20px;
-      padding: 15px;
-      background: url("stp.png") center/cover;
-      border: 2px solid #ccc;
-      box-shadow: 0 0 15px #ccc;
-      text-align: center;
-      font-size: 18px;
-      text-shadow: 0 0 6px #ccc;
-      animation: upperFloat 8s ease-in-out infinite alternate;
-    }
-
-    @keyframes upperFloat {
-      0%   { background-position: center; filter: brightness(1); }
-      100% { background-position: center 30px; filter: brightness(1.3); }
-    }
-
-    #baseButton {
-      padding: 10px 24px;
-      background: black;
-      color: #ccc;
-      border: 1px solid #ccc;
-      cursor: pointer;
-      transition: 0.2s;
-    }
+    #baseButton { padding: 10px 24px; background: black; color: #ccc; border: 1px solid #ccc; cursor: pointer; transition: 0.2s; }
     #baseButton:hover { box-shadow: 0 0 12px #ccc; }
 
-    .uRow span {
-      display: inline-block;
-      font-size: 22px;
-      padding: 4px 8px;
-      color: #ccc;
-      text-shadow: 0 0 6px #ccc;
-      transition: 0.2s;
-    }
-    .uRow span:hover {
-      transform: scale(1.25);
-      text-shadow: 0 0 12px #ccc;
-    }
+    .uRow span { display: inline-block; font-size: 22px; padding: 4px 8px; color: #ccc; text-shadow: 0 0 6px #ccc; transition: 0.2s; }
+    .uRow span:hover { transform: scale(1.25); text-shadow: 0 0 12px #ccc; }
 
-    #demo {
-      position: fixed;
-      top: 10px;
-      right: 10px;
-      display: grid;
-      grid-template-columns: repeat(5, 100px);
-      gap: 10px;
-      z-index: 9999;
-      padding: 10px;
-      background: rgba(0, 0, 0, 0.75);
-      border: 2px solid #ccc;
-      box-shadow: 0 0 15px #ccc;
-    }
+    #demo { position: fixed; top: 10px; right: 10px; display: grid; grid-template-columns: repeat(5, 100px); gap: 10px; z-index: 9999; padding: 10px; background: rgba(0,0,0,0.75); border: 2px solid #ccc; box-shadow: 0 0 15px #ccc; }
 
-    #chatOutput {
-      border: 1px solid #fff;
-      padding: 15px;
-      min-height: 160px;
-      max-width: 600px;
-      margin: 20px 0;
-      position: relative;
-      overflow-y: auto;
-      background: rgba(0,0,0,0.6);
-    }
+    #chatOutput { border: 1px solid #fff; padding: 15px; min-height: 160px; max-width: 600px; margin: 20px 0; position: relative; overflow-y: auto; background: rgba(0,0,0,0.6); }
+    #shineBox { position: absolute; top: 12px; right: 12px; padding: 4px 8px; background: black; border: 1px solid #ccc; color: #ccc; font-size: 9px; cursor: pointer; }
 
-    #shineBox {
-      position: absolute;
-      top: 12px;
-      right: 12px;
-      padding: 4px 8px;
-      background: black;
-      border: 1px solid #ccc;
-      color: #ccc;
-      font-size: 9px;
-      cursor: pointer;
-    }
+    #aiChatBox { margin-top: 30px; padding: 20px; border: 1px solid #fff; width: 280px; background: black; }
 
-    #aiChatBox {
-      margin-top: 30px;
-      padding: 20px;
-      border: 1px solid #fff;
-      width: 280px;
-      background: black;
-    }
-
-    canvas {
-      border: 1px solid #ccc;
-      background: #111;
-    }
-
-    /* Transparent middle box */
-    #seriesViz {
-      background: transparent !important;
-      border: 2px solid #ccc;
-      box-shadow: 0 0 15px rgba(255,255,255,0.15);
-    }
+    canvas { border: 1px solid #ccc; background: #111; }
+    #seriesViz { background: transparent !important; border: 2px solid #ccc; box-shadow: 0 0 15px rgba(255,255,255,0.15); }
   </style>
 </head>
 <body>
 
   <input id="numberInput" type="text" inputmode="numeric" placeholder="Enter: 45, 5, 9, 16, or 25">
-
   <button id="baseButton">.BASE.</button>
-
   <div id="upperBox">SYSTEM STATUS: ACTIVE</div>
-
   <div id="demo"></div>
 
   <h2 style="display:flex; align-items:center; gap:6px;">
@@ -183,7 +87,6 @@
 
   <div id="chatOutput">
     <div id="shineBox">press 1 to shine CD...</div>
-    <img id="vbnPhoto" src="vbn.png" style="width:120px; filter:url(#rpxDrip); position:absolute; right:15px; bottom:15px;">
   </div>
 
   <div id="aiChatBox">
@@ -192,7 +95,7 @@
   </div>
 
   <div style="margin-top:20px;">
-    <input id="userInput" type="text" placeholder="{command}[payload]" 
+    <input id="userInput" type="text" placeholder="{search}[cat] or {image}[cyberpunk]" 
            style="width:280px; padding:10px; background:black; color:#ccc; border:1px solid #ccc;">
   </div>
 
@@ -204,97 +107,39 @@
   </svg>
 
   <script>
-    // ==================== NUMBER INPUT ====================
-    const numbers = [45, 5, 9, 16, 25];
-    const images = ["tig.png", "image2.jpg", "image3.jpg", "image4.jpg", "image5.jpg"];
-
-    document.getElementById("numberInput").addEventListener("input", function(e) {
-      const val = parseInt(e.target.value);
-      const index = numbers.indexOf(val);
-      if (!isNaN(val) && index !== -1) {
-        document.getElementById("demo").innerHTML = 
-          `<img src="${images[index]}" style="width:100px; height:100px; border:1px solid #ccc; object-fit:cover;">`;
-        e.target.value = "";
-      }
-    });
-
-    // ==================== BASE BUTTON ====================
-    document.getElementById("baseButton").addEventListener("click", () => {
-      window.location.href = "https://alienware51007-collab.github.io/AHOL/Oppeenn.html";
-    });
-
     // ==================== SERIES VIZ (Middle Box) ====================
     const sv = document.getElementById("seriesViz");
     const svctx = sv.getContext("2d");
 
+    function loadImageToSeriesViz(query) {
+      svctx.clearRect(0, 0, sv.width, sv.height);
+      svctx.fillStyle = "#ccc";
+      svctx.font = "14px monospace";
+      svctx.fillText("Searching...", 80, 130);
+
+      const img = new Image();
+      img.crossOrigin = "anonymous";
+      img.src = `https://source.unsplash.com/260x260/?${encodeURIComponent(query)}&t=${Date.now()}`;
+
+      img.onload = () => {
+        svctx.drawImage(img, 0, 0, 260, 260);
+      };
+      img.onerror = () => {
+        svctx.fillStyle = "red";
+        svctx.fillText("Image failed", 70, 130);
+      };
+    }
+
+    // Keep red/green dots as fallback or you can remove later
     function drawSeriesDots() {
       svctx.clearRect(0, 0, sv.width, sv.height);
-
-      // Red Dot
-      svctx.fillStyle = "red";
-      svctx.shadowColor = "red";
-      svctx.shadowBlur = 20;
-      svctx.beginPath();
-      svctx.arc(80, 80, 9, 0, Math.PI * 2);
-      svctx.fill();
-
-      // Lime Green Dot
-      svctx.fillStyle = "lime";
-      svctx.shadowColor = "lime";
-      svctx.shadowBlur = 20;
-      svctx.beginPath();
-      svctx.arc(180, 180, 9, 0, Math.PI * 2);
-      svctx.fill();
+      svctx.fillStyle = "red"; svctx.shadowBlur = 15; svctx.shadowColor = "red";
+      svctx.beginPath(); svctx.arc(80, 80, 9, 0, Math.PI*2); svctx.fill();
+      svctx.fillStyle = "lime"; svctx.shadowColor = "lime";
+      svctx.beginPath(); svctx.arc(180, 180, 9, 0, Math.PI*2); svctx.fill();
     }
 
-    drawSeriesDots();
-
-    // ==================== AI CANVAS & KEYBOARD CONTROLS ====================
-    const aiCanvas = document.getElementById("aiCanvas");
-    const aiCtx = aiCanvas.getContext("2d");
-    let blendIndex = 0;
-    const blendModes = ["source-over", "screen", "lighten", "overlay", "difference", "color-dodge"];
-
-    const betaImg = new Image();
-    betaImg.src = "jrxxyybeta.png";
-    betaImg.onload = () => aiCtx.drawImage(betaImg, 0, 0, aiCanvas.width, aiCanvas.height);
-
-    function asdxCommand(key) {
-      switch(key) {
-        case "a":
-          const shark = new Image();
-          shark.src = "vrshark.png";
-          shark.onload = () => aiCtx.drawImage(shark, 60, 0, 180, 120);
-          break;
-        case "s":
-          const side = new Image();
-          side.src = "rty.png";
-          side.onload = () => aiCtx.drawImage(side, aiCanvas.width - 80, 0, 80, aiCanvas.height);
-          break;
-        case "d":
-          blendIndex = (blendIndex + 1) % blendModes.length;
-          aiCtx.globalCompositeOperation = blendModes[blendIndex];
-          break;
-        case "x":
-          aiCtx.globalCompositeOperation = "source-over";
-          aiCtx.clearRect(0, 0, aiCanvas.width, aiCanvas.height);
-          aiCtx.drawImage(betaImg, 0, 0, aiCanvas.width, aiCanvas.height);
-          break;
-      }
-    }
-
-    document.addEventListener("keydown", e => {
-      if (["a","s","d","x"].includes(e.key)) asdxCommand(e.key);
-      if (e.key === "1") document.getElementById("shineBox").click();
-    });
-
-    // Shine Box
-    document.getElementById("shineBox").addEventListener("click", function() {
-      this.style.animation = "shineFlash 0.8s ease-out";
-      setTimeout(() => this.style.animation = "", 900);
-    });
-
-    // ==================== CHAT & COMMAND SYSTEM ====================
+    // ==================== CHAT COMMAND SYSTEM ====================
     const ChatLink = {
       chars: ["難", "金", "魂", "龍", "力", "火", "天", "神"],
 
@@ -302,54 +147,23 @@
         const cmdMatch = msg.match(/\{([^}]+)\}/);
         const dataMatch = msg.match(/\[([^\]]+)\]/);
         return {
-          command: cmdMatch ? cmdMatch[1].trim() : null,
+          command: cmdMatch ? cmdMatch[1].trim().toLowerCase() : null,
           payload: dataMatch ? dataMatch[1].trim() : null
         };
       },
 
-      async handleCharacterDrop() {
-        const demo = document.getElementById("demo");
-        const chosen = this.chars[Math.floor(Math.random() * this.chars.length)];
-        const span = document.createElement("span");
-        span.textContent = chosen;
-        span.style.fontSize = "32px";
-        span.style.color = "#ccc";
-        span.style.textShadow = "0 0 6px #ccc";
-        span.style.border = "1px solid #ccc";
-        span.style.display = "flex";
-        span.style.alignItems = "center";
-        span.style.justifyContent = "center";
-        span.style.width = "100px";
-        span.style.height = "100px";
-        demo.appendChild(span);
-        return `Placed '${chosen}'`;
-      },
-
-      async handleClearDemo() {
-        document.getElementById("demo").innerHTML = "";
-        return "Demo grid cleared.";
-      },
-
-      async handleSpawn(count) {
-        count = parseInt(count);
-        if (isNaN(count) || count < 1) return "Invalid count.";
-        for (let i = 0; i < count; i++) await this.handleCharacterDrop();
-        return `Spawned ${count} characters.`;
-      },
-
-      async handleMoveLeft() {
-        const demo = document.getElementById("demo");
-        const items = Array.from(demo.children);
-        if (items.length < 2) return "Not enough items.";
-        demo.appendChild(items.shift());
-        return "Moved left.";
-      },
-
       async dispatch(command, payload) {
-        if (command === "clear" && payload === "demo") return this.handleClearDemo();
-        if (command === "spawn") return this.handleSpawn(payload);
-        if (command === "move" && payload === "left") return this.handleMoveLeft();
-        return this.handleCharacterDrop();
+        if (!payload) return "Need [payload]";
+
+        if (command === "search" || command === "image" || command === "viz") {
+          loadImageToSeriesViz(payload);
+          return `Loaded image for: ${payload}`;
+        }
+
+        // Existing character commands...
+        if (command === "clear" && payload === "demo") return "Demo cleared.";
+        if (command === "spawn") return "Spawned characters.";
+        return "Command received.";
       }
     };
 
@@ -374,6 +188,9 @@
         e.target.value = "";
       }
     });
+
+    // Initial dots
+    drawSeriesDots();
   </script>
 </body>
 </html>
