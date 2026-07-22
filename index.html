@@ -1,0 +1,60 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>ControlNet Booster Pack — AI ChatBox</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body { font-family: Arial, sans-serif; background:#0b0b0b; color:#eaeaea; padding:20px; }
+    #aiChatBox { border:1px solid #333; padding:16px; width:640px; background:#070707; }
+    label { display:block; margin-top:10px; }
+    input[type=text], textarea { width:100%; padding:8px; background:#111; color:#ddd; border:1px solid #333 }
+    button { margin-top:10px; padding:8px 12px; }
+    .preview { margin-top:12px; display:flex; gap:12px; }
+    .preview img { max-width:300px; border:1px solid #222 }
+    #log { margin-top:8px; font-size:13px; color:#9aa; }
+  </style>
+</head>
+<body>
+  <h2>ControlNet Booster Pack — AI ChatBox (Local Automatic1111)</h2>
+  <div id="aiChatBox">
+    <label>Prompt
+      <textarea id="prompt" rows="3" placeholder="cyberpunk city, dramatic lighting, ultra-detailed"></textarea>
+    </label>
+
+    <label>Control image (pose/edge/segmentation). PNG/JPG. Use an open-pose or Canny edge image for best results.
+      <input id="controlFile" type="file" accept="image/*">
+    </label>
+
+    <label>ControlNet model
+      <input id="controlModel" type="text" value="control_v11p_sd15_openpose" placeholder="controlnet model name">
+    </label>
+
+    <label>Width × Height
+      <input id="size" type="text" value="512x512" placeholder="512x512">
+    </label>
+
+    <label>Steps / CFG
+      <input id="params" type="text" value="28|7.5" placeholder="steps|cfg">
+    </label>
+
+    <button id="generate">Generate (txt2img + ControlNet)</button>
+
+    <div id="log">Ready. Make sure Automatic1111 is running at <code>http://127.0.0.1:7860</code> with ControlNet extension enabled.</div>
+
+    <div class="preview">
+      <div>
+        <div style="font-size:13px; color:#9aa">Control image</div>
+        <img id="controlPreview" src="" alt="control preview">
+      </div>
+      <div>
+        <div style="font-size:13px; color:#9aa">Generated</div>
+        <img id="resultPreview" src="" alt="result preview">
+      </div>
+    </div>
+  </div>
+
+  <script src="booster.js"></script>
+</body>
+</html>
