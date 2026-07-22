@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -10,7 +9,8 @@
     #aiChatBox { border:1px solid #333; padding:16px; width:640px; background:#070707; }
     label { display:block; margin-top:10px; }
     input[type=text], textarea { width:100%; padding:8px; background:#111; color:#ddd; border:1px solid #333 }
-    button { margin-top:10px; padding:8px 12px; }
+    button { margin-top:10px; padding:8px 12px; background:#222; color:#ddd; border:1px solid #444; cursor:pointer; }
+    button:hover { background:#333; }
     .preview { margin-top:12px; display:flex; gap:12px; }
     .preview img { max-width:300px; border:1px solid #222 }
     #log { margin-top:8px; font-size:13px; color:#9aa; }
@@ -18,43 +18,150 @@
 </head>
 <body>
   <h2>ControlNet Booster Pack — AI ChatBox (Local Automatic1111)</h2>
+
   <div id="aiChatBox">
     <label>Prompt
       <textarea id="prompt" rows="3" placeholder="cyberpunk city, dramatic lighting, ultra-detailed"></textarea>
     </label>
 
-    <label>Control image (pose/edge/segmentation). PNG/JPG. Use an open-pose or Canny edge image for best results.
+    <label>Control image (pose/edge/segmentation)
       <input id="controlFile" type="file" accept="image/*">
     </label>
 
     <label>ControlNet model
-      <input id="controlModel" type="text" value="control_v11p_sd15_openpose" placeholder="controlnet model name">
+      <input id="controlModel" type="text" value="control_v11p_sd15_openpose">
     </label>
 
     <label>Width × Height
-      <input id="size" type="text" value="512x512" placeholder="512x512">
+      <input id="size" type="text" value="512x512">
     </label>
 
     <label>Steps / CFG
-      <input id="params" type="text" value="28|7.5" placeholder="steps|cfg">
+      <input id="params" type="text" value="28|7.5">
     </label>
 
     <button id="generate">Generate (txt2img + ControlNet)</button>
 
-    <div id="log">Ready. Make sure Automatic1111 is running at <code>http://127.0.0.1:7860</code> with ControlNet extension enabled.</div>
+    <div id="log">Ready. Automatic1111 must be running at <code>http://127.0.0.1:7860</code>.</div>
 
     <div class="preview">
       <div>
         <div style="font-size:13px; color:#9aa">Control image</div>
-        <img id="controlPreview" src="" alt="control preview">
+        <img id="controlPreview" src="">
       </div>
       <div>
         <div style="font-size:13px; color:#9aa">Generated</div>
-        <img id="resultPreview" src="" alt="result preview">
+        <img id="resultPreview" src="">
       </div>
     </div>
   </div>
 
-  <script src="booster.js"></script>
+  <script>
+  (function(){
+    const controlFile = document.getElementById('controlFile');
+    const controlPreview = document.getElementById('controlPreview');
+    const resultPreview = document.getElementById('resultPreview');
+    const generateBtn = document.getElementById('generate');
+    const log = document.getElementById('log');
+
+    controlFile.addEventListener('change', (e) => {
+      const f = e.target.files && e.target.files[0];
+      controlPreview.src = f ? URL.createObjectURL(f) : '';
+    });
+
+    function readFileAsBase64(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => {
+          const result = reader.result;
+          const idx = result.indexOf('base64,');
+          resolve(idx >= 0 ? result.substring(idx + 7) : result);
+        };
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+    }
+
+    async function generate() {
+      try {
+        log.textContent = 'Preparing request...';
+
+        const prompt = document.getElementById('prompt').value || 'A detailed painting';
+        const size = document.getElementById('size').value || '512x512';
+        const [wStr, hStr] = size.split('x');
+        const width = parseInt(wStr, 10) || 512;
+        const height = parseInt(hStr, 10) || 512;
+
+        const params = (document.getElementById('params').value || '28|7.5').split('|');
+        const steps = parseInt(params[0], 10) || 28;
+        const cfg = parseFloat(params[1]) || 7.5;
+
+        const controlModel = document.getElementById('controlModel').value || 'control_v11p_sd15_openpose';
+
+        let controlBase64 = null;
+        const f = controlFile.files && controlFile.files[0];
+        if (f) {
+          log.textContent = 'Reading control image...';
+          controlBase64 = await readFileAsBase64(f);
+        }
+
+        const payload = {
+          prompt,
+          steps,
+          width,
+          height,
+          sampler_index: 'Euler a',
+          cfg_scale: cfg,
+          seed: -1,
+          alwayson_scripts: {
+            controlnet: {
+              args: [
+                {
+                  enabled: !!controlBase64,
+                  module: 'none',
+                  model: controlModel,
+                  weight: 1.0,
+                  pixel_perfect: false,
+                  input_image: controlBase64 ? `data:image/png;base64,${controlBase64}` : '',
+                  resize_mode: 0,
+                  guidance_start: 0.0,
+                  guidance_end: 1.0
+                }
+              ]
+            }
+          }
+        };
+
+        log.textContent = 'Sending request to Automatic1111...';
+
+        const resp = await fetch('http://127.0.0.1:7860/sdapi/v1/txt2img', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+
+        if (!resp.ok) {
+          const text = await resp.text();
+          throw new Error(`Server error ${resp.status}: ${text}`);
+        }
+
+        const data = await resp.json();
+        if (data && Array.isArray(data.images) && data.images.length) {
+          resultPreview.src = 'data:image/png;base64,' + data.images[0];
+          log.textContent = 'Image generated successfully.';
+        } else {
+          log.textContent = 'No images returned.';
+        }
+
+      } catch (err) {
+        console.error(err);
+        log.textContent = 'Error: ' + err.message;
+      }
+    }
+
+    generateBtn.addEventListener('click', generate);
+  })();
+  </script>
+
 </body>
 </html>
