@@ -86,6 +86,10 @@
 
   <h2>CONart — Minimal Animation Gallery + 3D Function</h2>
 
+  <!-- Azure Image Search -->
+  <input id="searchBox" placeholder="Search images..." style="width:200px;">
+  <button id="azureBtn">Find Image</button>
+
   <div id="gallery">
     <img src="img1.png" onclick="CONart('img1')">
     <img src="img2.png" onclick="CONart('img2')">
@@ -105,6 +109,17 @@
   </div>
 
   <script>
+    // -----------------------------
+    // Azure Image Search Redirect
+    // -----------------------------
+    document.getElementById("azureBtn").onclick = () => {
+      const q = document.getElementById("searchBox").value.trim();
+      if (!q) return;
+
+      const url = "https://www.bing.com/images/search?q=" + encodeURIComponent(q);
+      window.open(url, "_blank");
+    };
+
     // -----------------------------
     // STD Animation Engine
     // -----------------------------
@@ -181,10 +196,10 @@
       LEB.make(60,  180, "ring");
 
       // Function-critical points
-      LEB.make(200, 200, "func"); // center
-      LEB.make(260, 140, "func"); // (+1,+1)
-      LEB.make(140, 260, "func"); // (-1,-1)
-      LEB.make(260, 260, "func"); // (+1,-1)
+      LEB.make(200, 200, "func");
+      LEB.make(260, 140, "func");
+      LEB.make(140, 260, "func");
+      LEB.make(260, 260, "func");
     };
 
     // -----------------------------
