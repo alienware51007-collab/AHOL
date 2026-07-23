@@ -79,6 +79,15 @@
 
     .leb.func { background: #ccc; }
     .leb.ring { background: #fff; }
+
+    /* Vibrate animation */
+    @keyframes vibrate {
+      0% { transform: translate(0px, 0px); }
+      25% { transform: translate(1px, -1px); }
+      50% { transform: translate(-1px, 1px); }
+      75% { transform: translate(1px, 1px); }
+      100% { transform: translate(-1px, -1px); }
+    }
   </style>
 </head>
 
@@ -86,9 +95,20 @@
 
   <h2>CONart — Minimal Animation Gallery + 3D Function</h2>
 
+  <!-- Back Button -->
+  <button onclick="window.location.href='https://alienware51007-collab.github.io/AHOL/'">
+    Back to AHOL
+  </button>
+
   <!-- Azure Image Search -->
+  <br><br>
   <input id="searchBox" placeholder="Search images..." style="width:200px;">
   <button id="azureBtn">Find Image</button>
+
+  <!-- Paste URL → Load → Vibrate -->
+  <br><br>
+  <input id="imageUrl" placeholder="Paste image URL..." style="width:300px;">
+  <button id="loadImageBtn">Load Image</button>
 
   <div id="gallery">
     <img src="img1.png" onclick="CONart('img1')">
@@ -118,6 +138,20 @@
 
       const url = "https://www.bing.com/images/search?q=" + encodeURIComponent(q);
       window.open(url, "_blank");
+    };
+
+    // -----------------------------
+    // Load Pasted Image + Vibrate
+    // -----------------------------
+    document.getElementById("loadImageBtn").onclick = () => {
+      const url = document.getElementById("imageUrl").value.trim();
+      if (!url) return;
+
+      const art = document.getElementById("artImage");
+      art.src = url;
+
+      // vibrate effect
+      art.style.animation = "vibrate 0.2s infinite";
     };
 
     // -----------------------------
@@ -209,6 +243,7 @@
       const art=document.getElementById("artImage");
       art.src=id+".png";
       art.style.transform="none";
+      art.style.animation="none"; // stop vibrate if switching images
       STD.clear();
 
       if(id==="img1") animateSpin(art);
