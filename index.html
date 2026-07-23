@@ -14,11 +14,8 @@
       font-family: monospace;
     }
 
-    h2 {
-      margin-bottom: 20px;
-    }
+    h2 { margin-bottom: 20px; }
 
-    /* Gallery */
     #gallery {
       display: flex;
       gap: 12px;
@@ -34,11 +31,8 @@
       transition: border-color 0.2s;
     }
 
-    #gallery img:hover {
-      border-color: #666;
-    }
+    #gallery img:hover { border-color: #666; }
 
-    /* Canvas Area */
     #canvasArea {
       width: 400px;
       height: 400px;
@@ -55,7 +49,7 @@
       object-fit: contain;
       left: 100px;
       top: 100px;
-      z-index: 10; /* stays above 3D function */
+      z-index: 10;
     }
 
     .formex {
@@ -70,6 +64,21 @@
     #formex-tr { top: 4px; right: 6px; }
     #formex-bl { bottom: 4px; left: 6px; }
     #formex-br { bottom: 4px; right: 6px; }
+
+    /* Lebesgue Points */
+    .leb {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      position: absolute;
+      background: #fff;
+      border: 2px solid #000;
+      cursor: pointer;
+      z-index: 20;
+    }
+
+    .leb.func { background: #ccc; }
+    .leb.ring { background: #fff; }
   </style>
 </head>
 
@@ -77,55 +86,39 @@
 
   <h2>CONart — Minimal Animation Gallery + 3D Function</h2>
 
-  <!-- Gallery -->
   <div id="gallery">
     <img src="img1.png" onclick="CONart('img1')">
     <img src="img2.png" onclick="CONart('img2')">
     <img src="img3.png" onclick="CONart('img3')">
   </div>
 
-  <!-- Canvas Area -->
   <div id="canvasArea">
-
-    <!-- 3D function canvas -->
     <canvas id="func3d" width="400" height="400"
             style="position:absolute; left:0; top:0; z-index:1;"></canvas>
 
-    <!-- Math formex in each corner -->
     <div id="formex-tl" class="formex">7xy / e^(x² + y²)</div>
     <div id="formex-tr" class="formex">7xy / e^(x² + y²)</div>
     <div id="formex-bl" class="formex">7xy / e^(x² + y²)</div>
     <div id="formex-br" class="formex">7xy / e^(x² + y²)</div>
 
-    <!-- Central art image -->
     <img id="artImage" src="">
   </div>
 
   <script>
     // -----------------------------
-    // STD Animation Engine (Minimal)
+    // STD Animation Engine
     // -----------------------------
     const STD = {
       objects: [],
-
-      add(obj) {
-        this.objects.push(obj);
-      },
-
-      clear() {
-        this.objects = [];
-      },
-
-      animate() {
-        for (const obj of STD.objects) {
-          if (typeof obj.update === "function") {
-            obj.update();
-          }
+      add(o){ this.objects.push(o); },
+      clear(){ this.objects = []; },
+      animate(){
+        for(const o of STD.objects){
+          if(o.update) o.update();
         }
         requestAnimationFrame(STD.animate);
       }
     };
-
     requestAnimationFrame(STD.animate);
 
     // -----------------------------
@@ -134,122 +127,120 @@
     function renderFunction3D() {
       const canvas = document.getElementById("func3d");
       const ctx = canvas.getContext("2d");
-      const w = canvas.width;
-      const h = canvas.height;
+      const w = canvas.width, h = canvas.height;
 
       ctx.fillStyle = "black";
       ctx.fillRect(0, 0, w, h);
 
-      const centerX = w / 2;
-      const centerY = h / 2;
+      const cx = w/2, cy = h/2;
+      const step = 0.15, zScale = 80;
 
-      const step = 0.15;
-      const zScale = 80;
-
-      for (let x = -2; x <= 2; x += step) {
-        for (let y = -2; y <= 2; y += step) {
-
-          const r2 = x * x + y * y;
-          const f = (7 * x * y) / Math.exp(r2);
-
-          // isometric projection
-          const sx = centerX + (x - y) * 40;
-          const sy = centerY - f * zScale + (x + y) * 10;
-
-          // grayscale based on height
-          const val = Math.max(0, Math.min(255, 128 + f * 120));
-          const gray = val | 0;
-
-          ctx.fillStyle = `rgb(${gray},${gray},${gray})`;
+      for(let x=-2; x<=2; x+=step){
+        for(let y=-2; y<=2; y+=step){
+          const f = (7*x*y)/Math.exp(x*x+y*y);
+          const sx = cx + (x-y)*40;
+          const sy = cy - f*zScale + (x+y)*10;
+          const g = Math.max(0, Math.min(255, 128 + f*120))|0;
+          ctx.fillStyle = `rgb(${g},${g},${g})`;
           ctx.fillRect(sx, sy, 2, 2);
         }
       }
     }
 
-    // Render once on load
+    // -----------------------------
+    // Lebesgue Points (Hybrid)
+    // -----------------------------
+    const LEB = {
+      make(x,y,cls){
+        const d=document.createElement("div");
+        d.className="leb "+cls;
+        d.style.left=x+"px";
+        d.style.top=y+"px";
+        canvasArea.appendChild(d);
+        d.onmousedown=e=>{
+          let ox=e.offsetX, oy=e.offsetY;
+          document.onmousemove=m=>{
+            d.style.left=(m.pageX-canvasArea.offsetLeft-ox)+"px";
+            d.style.top =(m.pageY-canvasArea.offsetTop -oy)+"px";
+          };
+          document.onmouseup=()=>document.onmousemove=null;
+        };
+      }
+    };
+
+    // -----------------------------
+    // On Load
+    // -----------------------------
     window.onload = () => {
       renderFunction3D();
+
+      // Ring points around image
+      LEB.make(180, 40,  "ring");
+      LEB.make(300, 180, "ring");
+      LEB.make(180, 320, "ring");
+      LEB.make(60,  180, "ring");
+
+      // Function-critical points
+      LEB.make(200, 200, "func"); // center
+      LEB.make(260, 140, "func"); // (+1,+1)
+      LEB.make(140, 260, "func"); // (-1,-1)
+      LEB.make(260, 260, "func"); // (+1,-1)
     };
 
     // -----------------------------
     // CONart Controller
     // -----------------------------
-    function CONart(id) {
-      const art = document.getElementById("artImage");
-
-      art.src = id + ".png";
-      art.style.transform = "none";
-
+    function CONart(id){
+      const art=document.getElementById("artImage");
+      art.src=id+".png";
+      art.style.transform="none";
       STD.clear();
 
-      if (id === "img1") animateSpin(art);
-      if (id === "img2") animatePulse(art);
-      if (id === "img3") animateSlide(art);
+      if(id==="img1") animateSpin(art);
+      if(id==="img2") animatePulse(art);
+      if(id==="img3") animateSlide(art);
 
       activateFormexAnimation();
     }
 
-    // -----------------------------
-    // Decisive Animation Functions
-    // -----------------------------
-    function animateSpin(el) {
-      const obj = {
-        angle: 0,
-        update() {
-          this.angle += 2;
-          el.style.transform = `rotate(${this.angle}deg)`;
-        }
-      };
-      STD.add(obj);
+    function animateSpin(el){
+      STD.add({
+        angle:0,
+        update(){ this.angle+=2; el.style.transform=`rotate(${this.angle}deg)`; }
+      });
     }
 
-    function animatePulse(el) {
-      const obj = {
-        scale: 1,
-        dir: 1,
-        update() {
-          this.scale += 0.01 * this.dir;
-          if (this.scale > 1.2 || this.scale < 0.8) this.dir *= -1;
-          el.style.transform = `scale(${this.scale})`;
+    function animatePulse(el){
+      STD.add({
+        scale:1, dir:1,
+        update(){
+          this.scale+=0.01*this.dir;
+          if(this.scale>1.2||this.scale<0.8) this.dir*=-1;
+          el.style.transform=`scale(${this.scale})`;
         }
-      };
-      STD.add(obj);
+      });
     }
 
-    function animateSlide(el) {
-      const obj = {
-        x: 0,
-        update() {
-          this.x += 1;
-          el.style.transform = `translateX(${this.x}px)`;
-        }
-      };
-      STD.add(obj);
+    function animateSlide(el){
+      STD.add({
+        x:0,
+        update(){ this.x+=1; el.style.transform=`translateX(${this.x}px)`; }
+      });
     }
 
-    // -----------------------------
-    // Formex Animation (subtle fade)
-    // -----------------------------
-    function activateFormexAnimation() {
-      const labels = [
-        document.getElementById("formex-tl"),
-        document.getElementById("formex-tr"),
-        document.getElementById("formex-bl"),
-        document.getElementById("formex-br")
-      ];
+    function activateFormexAnimation(){
+      const L=[
+        formex-tl, formex-tr, formex-bl, formex-br
+      ].map(id=>document.getElementById(id));
 
-      const obj = {
-        t: 0,
-        update() {
-          this.t += 0.03;
-          const alpha = 0.6 + 0.4 * Math.sin(this.t);
-          labels.forEach(l => {
-            l.style.opacity = alpha.toFixed(2);
-          });
+      STD.add({
+        t:0,
+        update(){
+          this.t+=0.03;
+          const a=0.6+0.4*Math.sin(this.t);
+          L.forEach(l=>l.style.opacity=a.toFixed(2));
         }
-      };
-
-      STD.add(obj);
+      });
     }
   </script>
 
