@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>AHOL — Minimal STD Base</title>
+  <title>CONart — Minimal Animation Gallery</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <style>
@@ -14,23 +14,66 @@
       font-family: monospace;
     }
 
-    #testBox {
-      width: 60px;
-      height: 60px;
-      background: #444;
+    h2 {
+      margin-bottom: 20px;
+    }
+
+    /* Gallery */
+    #gallery {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    #gallery img {
+      width: 120px;
+      height: 120px;
+      object-fit: cover;
+      cursor: pointer;
+      border: 2px solid #333;
+      transition: border-color 0.2s;
+    }
+
+    #gallery img:hover {
+      border-color: #666;
+    }
+
+    /* Canvas Area */
+    #canvasArea {
+      width: 400px;
+      height: 400px;
+      background: #222;
+      position: relative;
+      overflow: hidden;
+      border: 2px solid #333;
+    }
+
+    #artImage {
       position: absolute;
-      top: 40px;
-      left: 20px;
+      width: 200px;
+      height: 200px;
+      object-fit: contain;
+      left: 100px;
+      top: 100px;
     }
   </style>
 </head>
 
 <body>
 
-  <h2>AHOL — Minimal STD Base</h2>
-  <p>This is the clean foundation. STD animation engine is active.</p>
+  <h2>CONart — Minimal Animation Gallery</h2>
 
-  <div id="testBox"></div>
+  <!-- Gallery -->
+  <div id="gallery">
+    <img src="img1.png" onclick="CONart('img1')">
+    <img src="img2.png" onclick="CONart('img2')">
+    <img src="img3.png" onclick="CONart('img3')">
+  </div>
+
+  <!-- Canvas Area -->
+  <div id="canvasArea">
+    <img id="artImage" src="">
+  </div>
 
   <script>
     // -----------------------------
@@ -41,6 +84,10 @@
 
       add(obj) {
         this.objects.push(obj);
+      },
+
+      clear() {
+        this.objects = [];
       },
 
       animate() {
@@ -56,26 +103,63 @@
     requestAnimationFrame(STD.animate);
 
     // -----------------------------
-    // Test Object (moves slowly)
+    // CONart Controller
     // -----------------------------
-    const testBox = {
-      el: null,
-      x: 0,
+    function CONart(id) {
+      const art = document.getElementById("artImage");
 
-      init() {
-        this.el = document.getElementById("testBox");
-      },
+      // Load selected image
+      art.src = id + ".png";
 
-      update() {
-        this.x += 0.3;
-        this.el.style.transform = `translateX(${this.x}px)`;
-      }
-    };
+      // Reset transform
+      art.style.transform = "none";
 
-    window.onload = () => {
-      testBox.init();
-      STD.add(testBox);
-    };
+      // Clear previous animations
+      STD.clear();
+
+      // Assign decisive animation
+      if (id === "img1") animateSpin(art);
+      if (id === "img2") animatePulse(art);
+      if (id === "img3") animateSlide(art);
+    }
+
+    // -----------------------------
+    // Decisive Animation Functions
+    // -----------------------------
+    function animateSpin(el) {
+      const obj = {
+        angle: 0,
+        update() {
+          this.angle += 2;
+          el.style.transform = `rotate(${this.angle}deg)`;
+        }
+      };
+      STD.add(obj);
+    }
+
+    function animatePulse(el) {
+      const obj = {
+        scale: 1,
+        dir: 1,
+        update() {
+          this.scale += 0.01 * this.dir;
+          if (this.scale > 1.2 || this.scale < 0.8) this.dir *= -1;
+          el.style.transform = `scale(${this.scale})`;
+        }
+      };
+      STD.add(obj);
+    }
+
+    function animateSlide(el) {
+      const obj = {
+        x: 0,
+        update() {
+          this.x += 1;
+          el.style.transform = `translateX(${this.x}px)`;
+        }
+      };
+      STD.add(obj);
+    }
   </script>
 
 </body>
