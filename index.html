@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>CONart — Minimal Animation Gallery</title>
+  <title>CONart — Minimal Animation Gallery + 3D Function</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <style>
@@ -55,13 +55,27 @@
       object-fit: contain;
       left: 100px;
       top: 100px;
+      z-index: 10; /* stays above 3D function */
     }
+
+    .formex {
+      position: absolute;
+      font-size: 11px;
+      color: #ccc;
+      z-index: 1;
+      pointer-events: none;
+    }
+
+    #formex-tl { top: 4px; left: 6px; }
+    #formex-tr { top: 4px; right: 6px; }
+    #formex-bl { bottom: 4px; left: 6px; }
+    #formex-br { bottom: 4px; right: 6px; }
   </style>
 </head>
 
 <body>
 
-  <h2>CONart — Minimal Animation Gallery</h2>
+  <h2>CONart — Minimal Animation Gallery + 3D Function</h2>
 
   <!-- Gallery -->
   <div id="gallery">
@@ -72,6 +86,18 @@
 
   <!-- Canvas Area -->
   <div id="canvasArea">
+
+    <!-- 3D function canvas -->
+    <canvas id="func3d" width="400" height="400"
+            style="position:absolute; left:0; top:0; z-index:1;"></canvas>
+
+    <!-- Math formex in each corner -->
+    <div id="formex-tl" class="formex">7xy / e^(x² + y²)</div>
+    <div id="formex-tr" class="formex">7xy / e^(x² + y²)</div>
+    <div id="formex-bl" class="formex">7xy / e^(x² + y²)</div>
+    <div id="formex-br" class="formex">7xy / e^(x² + y²)</div>
+
+    <!-- Central art image -->
     <img id="artImage" src="">
   </div>
 
@@ -103,24 +129,64 @@
     requestAnimationFrame(STD.animate);
 
     // -----------------------------
+    // 3D Function Renderer
+    // -----------------------------
+    function renderFunction3D() {
+      const canvas = document.getElementById("func3d");
+      const ctx = canvas.getContext("2d");
+      const w = canvas.width;
+      const h = canvas.height;
+
+      ctx.fillStyle = "black";
+      ctx.fillRect(0, 0, w, h);
+
+      const centerX = w / 2;
+      const centerY = h / 2;
+
+      const step = 0.15;
+      const zScale = 80;
+
+      for (let x = -2; x <= 2; x += step) {
+        for (let y = -2; y <= 2; y += step) {
+
+          const r2 = x * x + y * y;
+          const f = (7 * x * y) / Math.exp(r2);
+
+          // isometric projection
+          const sx = centerX + (x - y) * 40;
+          const sy = centerY - f * zScale + (x + y) * 10;
+
+          // grayscale based on height
+          const val = Math.max(0, Math.min(255, 128 + f * 120));
+          const gray = val | 0;
+
+          ctx.fillStyle = `rgb(${gray},${gray},${gray})`;
+          ctx.fillRect(sx, sy, 2, 2);
+        }
+      }
+    }
+
+    // Render once on load
+    window.onload = () => {
+      renderFunction3D();
+    };
+
+    // -----------------------------
     // CONart Controller
     // -----------------------------
     function CONart(id) {
       const art = document.getElementById("artImage");
 
-      // Load selected image
       art.src = id + ".png";
-
-      // Reset transform
       art.style.transform = "none";
 
-      // Clear previous animations
       STD.clear();
 
-      // Assign decisive animation
       if (id === "img1") animateSpin(art);
       if (id === "img2") animatePulse(art);
       if (id === "img3") animateSlide(art);
+
+      activateFormexAnimation();
     }
 
     // -----------------------------
@@ -158,6 +224,31 @@
           el.style.transform = `translateX(${this.x}px)`;
         }
       };
+      STD.add(obj);
+    }
+
+    // -----------------------------
+    // Formex Animation (subtle fade)
+    // -----------------------------
+    function activateFormexAnimation() {
+      const labels = [
+        document.getElementById("formex-tl"),
+        document.getElementById("formex-tr"),
+        document.getElementById("formex-bl"),
+        document.getElementById("formex-br")
+      ];
+
+      const obj = {
+        t: 0,
+        update() {
+          this.t += 0.03;
+          const alpha = 0.6 + 0.4 * Math.sin(this.t);
+          labels.forEach(l => {
+            l.style.opacity = alpha.toFixed(2);
+          });
+        }
+      };
+
       STD.add(obj);
     }
   </script>
