@@ -199,20 +199,24 @@
     // -----------------------------
     // Lebesgue Points (Hybrid)
     // -----------------------------
+    const canvasArea = document.getElementById("canvasArea");   // ← fixed: proper reference
+
     const LEB = {
-      make(x,y,cls){
-        const d=document.createElement("div");
-        d.className="leb "+cls;
-        d.style.left=x+"px";
-        d.style.top=y+"px";
+      make(x, y, cls){
+        const d = document.createElement("div");
+        d.className = "leb " + cls;
+        d.style.left = x + "px";
+        d.style.top  = y + "px";
         canvasArea.appendChild(d);
-        d.onmousedown=e=>{
-          let ox=e.offsetX, oy=e.offsetY;
-          document.onmousemove=m=>{
-            d.style.left=(m.pageX-canvasArea.offsetLeft-ox)+"px";
-            d.style.top =(m.pageY-canvasArea.offsetTop -oy)+"px";
+
+        d.onmousedown = e => {
+          const ox = e.offsetX;
+          const oy = e.offsetY;
+          document.onmousemove = m => {
+            d.style.left = (m.pageX - canvasArea.offsetLeft - ox) + "px";
+            d.style.top  = (m.pageY - canvasArea.offsetTop  - oy) + "px";
           };
-          document.onmouseup=()=>document.onmousemove=null;
+          document.onmouseup = () => document.onmousemove = null;
         };
       }
     };
@@ -240,55 +244,67 @@
     // CONart Controller
     // -----------------------------
     function CONart(id){
-      const art=document.getElementById("artImage");
-      art.src=id+".png";
-      art.style.transform="none";
-      art.style.animation="none"; // stop vibrate if switching images
+      const art = document.getElementById("artImage");
+      art.src = id + ".png";
+      art.style.transform = "none";
+      art.style.animation = "none"; // stop vibrate if switching images
       STD.clear();
 
-      if(id==="img1") animateSpin(art);
-      if(id==="img2") animatePulse(art);
-      if(id==="img3") animateSlide(art);
+      if(id === "img1") animateSpin(art);
+      if(id === "img2") animatePulse(art);
+      if(id === "img3") animateSlide(art);
 
       activateFormexAnimation();
     }
 
     function animateSpin(el){
       STD.add({
-        angle:0,
-        update(){ this.angle+=2; el.style.transform=`rotate(${this.angle}deg)`; }
+        angle: 0,
+        update(){
+          this.angle += 2;
+          el.style.transform = `rotate(${this.angle}deg)`;
+        }
       });
     }
 
     function animatePulse(el){
       STD.add({
-        scale:1, dir:1,
+        scale: 1,
+        dir: 1,
         update(){
-          this.scale+=0.01*this.dir;
-          if(this.scale>1.2||this.scale<0.8) this.dir*=-1;
-          el.style.transform=`scale(${this.scale})`;
+          this.scale += 0.01 * this.dir;
+          if(this.scale > 1.2 || this.scale < 0.8) this.dir *= -1;
+          el.style.transform = `scale(${this.scale})`;
         }
       });
     }
 
     function animateSlide(el){
       STD.add({
-        x:0,
-        update(){ this.x+=1; el.style.transform=`translateX(${this.x}px)`; }
+        x: 0,
+        update(){
+          this.x += 1;
+          el.style.transform = `translateX(${this.x}px)`;
+        }
       });
     }
 
+    // -----------------------------
+    // Fixed Formex Animation
+    // -----------------------------
     function activateFormexAnimation(){
-      const L=[
-        formex-tl, formex-tr, formex-bl, formex-br
-      ].map(id=>document.getElementById(id));
+      const L = [
+        "formex-tl", "formex-tr", "formex-bl", "formex-br"
+      ].map(id => document.getElementById(id));
 
       STD.add({
-        t:0,
+        t: 0,
         update(){
-          this.t+=0.03;
-          const a=0.6+0.4*Math.sin(this.t);
-          L.forEach(l=>l.style.opacity=a.toFixed(2));
+          this.t += 0.03;
+          const a = 0.6 + 0.4 * Math.sin(this.t);
+          L.forEach(l => {
+            if (l) l.style.opacity = a.toFixed(2);
+          });
         }
       });
     }
