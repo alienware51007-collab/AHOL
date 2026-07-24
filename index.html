@@ -105,9 +105,11 @@
   <input id="searchBox" placeholder="Search images..." style="width:200px;">
   <button id="azureBtn">Find Image</button>
 
-  <!-- Paste URL → Load → Vibrate -->
+  <!-- Paste URL / data: → Load → Vibrate -->
   <br><br>
-  <input id="imageUrl" placeholder="Paste image URL..." style="width:300px;">
+  <textarea id="imageUrl" placeholder="Paste image URL or data:image/..." 
+            rows="3" style="width:400px; font-size:12px;"></textarea>
+  <br>
   <button id="loadImageBtn">Load Image</button>
 
   <div id="gallery">
@@ -171,7 +173,7 @@
       };
 
       temp.onerror = () => {
-        alert("Could not load image.\nMake sure the URL is a valid HTTPS image link.");
+        alert("Could not load image.\nMake sure the URL is a valid HTTPS image link or complete data: URL.");
       };
 
       temp.src = url;
@@ -222,7 +224,7 @@
     // -----------------------------
     // Lebesgue Points (Hybrid)
     // -----------------------------
-    const canvasArea = document.getElementById("canvasArea");   // ← fixed: proper reference
+    const canvasArea = document.getElementById("canvasArea");
 
     const LEB = {
       make(x, y, cls){
@@ -270,7 +272,7 @@
       const art = document.getElementById("artImage");
       art.src = id + ".png";
       art.style.transform = "none";
-      art.style.animation = "none"; // stop vibrate if switching images
+      art.style.animation = "none";
       STD.clear();
 
       if(id === "img1") animateSpin(art);
@@ -297,41 +299,4 @@
         update(){
           this.scale += 0.01 * this.dir;
           if(this.scale > 1.2 || this.scale < 0.8) this.dir *= -1;
-          el.style.transform = `scale(${this.scale})`;
-        }
-      });
-    }
-
-    function animateSlide(el){
-      STD.add({
-        x: 0,
-        update(){
-          this.x += 1;
-          el.style.transform = `translateX(${this.x}px)`;
-        }
-      });
-    }
-
-    // -----------------------------
-    // Fixed Formex Animation
-    // -----------------------------
-    function activateFormexAnimation(){
-      const L = [
-        "formex-tl", "formex-tr", "formex-bl", "formex-br"
-      ].map(id => document.getElementById(id));
-
-      STD.add({
-        t: 0,
-        update(){
-          this.t += 0.03;
-          const a = 0.6 + 0.4 * Math.sin(this.t);
-          L.forEach(l => {
-            if (l) l.style.opacity = a.toFixed(2);
-          });
-        }
-      });
-    }
-  </script>
-
-</body>
-</html>
+          el.style.transform = `scale(${this.scale})
