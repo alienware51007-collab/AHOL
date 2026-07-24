@@ -142,16 +142,39 @@
 
     // -----------------------------
     // Load Pasted Image + Vibrate
+    // Always forces HTTPS when needed + validates load
     // -----------------------------
     document.getElementById("loadImageBtn").onclick = () => {
-      const url = document.getElementById("imageUrl").value.trim();
+      let url = document.getElementById("imageUrl").value.trim();
       if (!url) return;
 
-      const art = document.getElementById("artImage");
-      art.src = url;
+      // Force correct HTTPS protocol so the image can load on HTTPS pages
+      if (url.startsWith("http://")) {
+        url = "https://" + url.slice(7);          // http → https
+      } else if (url.startsWith("//")) {
+        url = "https:" + url;                     // //example.com → https://example.com
+      }
+      // data: and blob: URLs are left untouched
 
-      // vibrate effect
-      art.style.animation = "vibrate 0.2s infinite";
+      const art = document.getElementById("artImage");
+
+      // Preload so we only show it after it has been successfully parsed
+      const temp = new Image();
+
+      temp.onload = () => {
+        art.style.animation = "none";
+        art.style.transform = "none";
+        STD.clear();
+
+        art.src = url;
+        art.style.animation = "vibrate 0.2s infinite";
+      };
+
+      temp.onerror = () => {
+        alert("Could not load image.\nMake sure the URL is a valid HTTPS image link.");
+      };
+
+      temp.src = url;
     };
 
     // -----------------------------
