@@ -299,4 +299,41 @@
         update(){
           this.scale += 0.01 * this.dir;
           if(this.scale > 1.2 || this.scale < 0.8) this.dir *= -1;
-          el.style.transform = `scale(${this.scale})
+          el.style.transform = `scale(${this.scale})`;
+        }
+      });
+    }
+
+    function animateSlide(el){
+      STD.add({
+        x: 0,
+        update(){
+          this.x += 1;
+          el.style.transform = `translateX(${this.x}px)`;
+        }
+      });
+    }
+
+    // -----------------------------
+    // Fixed Formex Animation
+    // -----------------------------
+    function activateFormexAnimation(){
+      const L = [
+        "formex-tl", "formex-tr", "formex-bl", "formex-br"
+      ].map(id => document.getElementById(id));
+
+      STD.add({
+        t: 0,
+        update(){
+          this.t += 0.03;
+          const a = 0.6 + 0.4 * Math.sin(this.t);
+          L.forEach(l => {
+            if (l) l.style.opacity = a.toFixed(2);
+          });
+        }
+      });
+    }
+  </script>
+
+</body>
+</html>
