@@ -33,6 +33,32 @@
 
     #gallery img:hover { border-color: #666; }
 
+    #tripleBox {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    .tripleImg {
+      width: 120px;
+      height: 120px;
+      object-fit: cover;
+      border: 2px solid #333;
+      background: #000;
+    }
+
+    #tripleInputs {
+      display: flex;
+      gap: 20px;
+      margin-bottom: 20px;
+    }
+
+    #tripleInputs div {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
     #canvasArea, #canvasArea2 {
       width: 400px;
       height: 400px;
@@ -99,20 +125,52 @@
   </button>
 
   <br><br>
+
+  <!-- MAIN SEARCH -->
   <input id="searchBox" placeholder="Search images..." style="width:200px;">
   <button id="azureBtn">Find Image</button>
 
   <br><br>
+
   <textarea id="imageUrl" placeholder="Paste image URL or data:image/..." 
             rows="3" style="width:400px; font-size:12px;"></textarea>
   <br>
   <button id="loadImageBtn">Load Image (as main)</button>
   <button id="blendBtn">Blend with Current Image</button>
 
+  <!-- ORIGINAL GALLERY -->
   <div id="gallery">
     <img src="img1.png" onclick="CONart('img1')">
     <img src="img2.png" onclick="CONart('img2')">
     <img src="img3.png" onclick="CONart('img3')">
+  </div>
+
+  <!-- NEW TRIPLE IMAGE BOXES -->
+  <div id="tripleBox">
+    <img id="box1" class="tripleImg" src="">
+    <img id="box2" class="tripleImg" src="">
+    <img id="box3" class="tripleImg" src="">
+  </div>
+
+  <!-- NEW TRIPLE INPUTS -->
+  <div id="tripleInputs">
+    <div>
+      <input id="url1" placeholder="Image URL for Box 1">
+      <button onclick="loadTripleImage(1)">Load</button>
+      <button onclick="searchTriple(1)">Search</button>
+    </div>
+
+    <div>
+      <input id="url2" placeholder="Image URL for Box 2">
+      <button onclick="loadTripleImage(2)">Load</button>
+      <button onclick="searchTriple(2)">Search</button>
+    </div>
+
+    <div>
+      <input id="url3" placeholder="Image URL for Box 3">
+      <button onclick="loadTripleImage(3)">Load</button>
+      <button onclick="searchTriple(3)">Search</button>
+    </div>
   </div>
 
   <!-- PRIMARY CANVAS -->
@@ -120,7 +178,6 @@
     <canvas id="func3d" width="400" height="400"
             style="position:absolute; left:0; top:0; z-index:1;"></canvas>
 
-    <!-- CALCULUS LABELS -->
     <div id="formex-tl" class="formex">7xy / e^(x² + y²)</div>
     <div id="formex-tr" class="formex">7xy / e^(x² + y²)</div>
     <div id="formex-bl" class="formex">7xy / e^(x² + y²)</div>
@@ -129,10 +186,15 @@
     <img id="artImage" src="">
   </div>
 
-  <!-- SECOND CANVAS -->
+  <!-- SECOND CANVAS (VIDEO AREA) -->
   <div id="canvasArea2">
     <canvas id="func3d2" width="400" height="400"
             style="position:absolute; left:0; top:0; z-index:1;"></canvas>
+
+    <!-- Video box (hidden until used later) -->
+    <video id="videoBox" width="400" height="400"
+           style="position:absolute; left:0; top:0; z-index:5; display:none;"
+           controls></video>
   </div>
 
   <script>
@@ -143,7 +205,7 @@
       window.open("https://www.bing.com/images/search?q=" + encodeURIComponent(q), "_blank");
     };
 
-    // Load single image (becomes Image 1)
+    // Load main image
     document.getElementById("loadImageBtn").onclick = () => {
       let url = document.getElementById("imageUrl").value.trim();
       if (!url) return;
@@ -164,7 +226,7 @@
       temp.src = url;
     };
 
-    // Blend current image (Image 1) + URL in box (Image 2)
+    // Blend main image
     document.getElementById("blendBtn").onclick = async () => {
       const art = document.getElementById("artImage");
       if (!art.src || art.src === window.location.href) {
@@ -235,6 +297,33 @@
       }
     };
     requestAnimationFrame(STD.animate);
+
+    // Triple search
+    function searchTriple(n) {
+      const q = document.getElementById("url" + n).value.trim();
+      if (!q) return;
+      window.open("https://www.bing.com/images/search?q=" + encodeURIComponent(q), "_blank");
+    }
+
+    // Triple loader
+    function loadTripleImage(n) {
+      let url = document.getElementById("url" + n).value.trim();
+      if (!url) return;
+
+      if (url.startsWith("http://")) url = "https://" + url.slice(7);
+      else if (url.startsWith("//")) url = "https:" + url;
+
+      const img = document.getElementById("box" + n);
+      const temp = new Image();
+
+      temp.onload = () => {
+        img.src = url;
+      };
+
+      temp.onerror = () => alert("Could not load image for Box " + n);
+
+      temp.src = url;
+    }
 
     // 3D renderer for primary canvas
     function renderFunction3D() {
