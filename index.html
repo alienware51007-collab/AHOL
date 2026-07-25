@@ -33,13 +33,14 @@
 
     #gallery img:hover { border-color: #666; }
 
-    #canvasArea {
+    #canvasArea, #canvasArea2 { /* NEW */
       width: 400px;
       height: 400px;
       background: #222;
       position: relative;
       overflow: hidden;
       border: 2px solid #333;
+      margin-bottom: 20px;
     }
 
     #artImage {
@@ -114,6 +115,7 @@
     <img src="img3.png" onclick="CONart('img3')">
   </div>
 
+  <!-- PRIMARY CANVAS -->
   <div id="canvasArea">
     <canvas id="func3d" width="400" height="400"
             style="position:absolute; left:0; top:0; z-index:1;"></canvas>
@@ -124,6 +126,12 @@
     <div id="formex-br" class="formex">7xy / e^(x² + y²)</div>
 
     <img id="artImage" src="">
+  </div>
+
+  <!-- SECOND CANVAS (NEW) -->
+  <div id="canvasArea2">
+    <canvas id="func3d2" width="400" height="400"
+            style="position:absolute; left:0; top:0; z-index:1;"></canvas>
   </div>
 
   <script>
@@ -232,6 +240,7 @@
     };
     requestAnimationFrame(STD.animate);
 
+    // 3D renderer for primary canvas
     function renderFunction3D() {
       const canvas = document.getElementById("func3d");
       const ctx = canvas.getContext("2d");
@@ -252,6 +261,28 @@
       }
     }
 
+    // 3D renderer for secondary canvas (NEW)
+    function renderFunction3D2() {
+      const canvas = document.getElementById("func3d2");
+      const ctx = canvas.getContext("2d");
+      const w = canvas.width, h = canvas.height;
+      ctx.fillStyle = "black";
+      ctx.fillRect(0, 0, w, h);
+      const cx = w/2, cy = h/2;
+      const step = 0.15, zScale = 80;
+      for(let x=-2; x<=2; x+=step){
+        for(let y=-2; y<=2; y+=step){
+          const f = (7*x*y)/Math.exp(x*x+y*y);
+          const sx = cx + (x-y)*40;
+          const sy = cy - f*zScale + (x+y)*10;
+          const g = Math.max(0, Math.min(255, 128 + f*120))|0;
+          ctx.fillStyle = `rgb(${g},${g},${g})`;
+          ctx.fillRect(sx, sy, 2, 2);
+        }
+      }
+    }
+
+    // Lebesgue draggable points
     const canvasArea = document.getElementById("canvasArea");
     const LEB = {
       make(x, y, cls){
@@ -272,8 +303,11 @@
       }
     };
 
+    // Load both canvases on startup
     window.onload = () => {
       renderFunction3D();
+      renderFunction3D2(); // NEW
+
       LEB.make(180, 40,  "ring");
       LEB.make(300, 180, "ring");
       LEB.make(180, 320, "ring");
@@ -283,6 +317,51 @@
       LEB.make(140, 260, "func");
       LEB.make(260, 260, "func");
     };
+
+    // Dual canvas sync engine (NEW)
+    const canvas1 = document.getElementById("func3d");
+    const ctx1 = canvas1.getContext("2d");
+
+    const canvas2 = document.getElementById("func3d2");
+    const ctx2 = canvas2.getContext("2d");
+
+    STD.add({
+      t: 0,
+      loaded: false,
+
+      update() {
+        if (!this.loaded) {
+          ctx1.fillStyle = "#0f0";
+          ctx1.font = "20px monospace";
+          ctx1.fillText("Loading...", 150, 200);
+
+          ctx2.fillStyle = "#0f0";
+          ctx2.font = "20px monospace";
+          ctx2.fillText("Loading...", 150, 200);
+
+          this.t += 0.05;
+          if (this.t > 2) this.loaded = true;
+          return;
+        }
+
+        this.t += 0.03;
+
+        const x = 200 + Math.sin(this.t) * 40;
+        const y = 200 + Math.cos(this.t) * 40;
+
+        ctx1.clearRect(0,0,400,400);
+        ctx2.clearRect(0,0,400,400);
+
+        ctx1.globalAlpha = 0.7;
+        ctx2.globalAlpha = 0.7;
+
+        ctx1.fillStyle = "lime";
+        ctx2.fillStyle = "lime";
+
+        ctx1.fillRect(x, y, 40, 40);
+        ctx2.fillRect(x, y, 40, 40);
+      }
+    });
 
     function CONart(id){
       const art = document.getElementById("artImage");
