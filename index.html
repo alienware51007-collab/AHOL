@@ -71,7 +71,7 @@
       margin-bottom: 20px;
     }
 
-    /* Layered movie box */
+    /* CORRECTED STACKING — 120×120 layered images */
     #layerStack {
       position: absolute;
       left: 0;
@@ -83,10 +83,11 @@
 
     .layeredImg {
       position: absolute;
-      width: 400px;
-      height: 400px;
+      width: 120px;
+      height: 120px;
       object-fit: cover;
-      opacity: 1;
+      left: 0;
+      top: 0;
     }
 
     #layer1 { z-index: 7; }
@@ -217,7 +218,7 @@
     <canvas id="func3d2" width="400" height="400"
             style="position:absolute; left:0; top:0; z-index:1;"></canvas>
 
-    <!-- LAYERED IMAGE STACK (INSIDE MOVIE BOX — OPTION A) -->
+    <!-- LAYERED IMAGE STACK (120×120 STACKED 1‑2‑3) -->
     <div id="layerStack">
       <img id="layer1" class="layeredImg">
       <img id="layer2" class="layeredImg">
@@ -232,6 +233,7 @@
 
   <!-- JAVASCRIPT SECTION STARTS IN SEGMENT C -->
   <script>
+<script>
 /* MAIN SEARCH */
 document.getElementById("azureBtn").onclick = () => {
   const q = document.getElementById("searchBox").value.trim();
@@ -340,7 +342,7 @@ function searchTriple(n) {
   window.open("https://www.bing.com/images/search?q=" + encodeURIComponent(q), "_blank");
 }
 
-/* TRIPLE LOADER + MOVIE BOX LAYER STACK */
+/* TRIPLE LOADER + MOVIE BOX STACKING */
 function loadTripleImage(n) {
   let url = document.getElementById("url" + n).value.trim();
   if (!url) return;
@@ -354,7 +356,7 @@ function loadTripleImage(n) {
   temp.onload = () => {
     img.src = url;
 
-    /* Load into layered movie box */
+    /* Load into layered movie box (120×120 stacked 1‑2‑3) */
     if (n === 1) document.getElementById("layer1").src = url;
     if (n === 2) document.getElementById("layer2").src = url;
     if (n === 3) document.getElementById("layer3").src = url;
@@ -512,5 +514,3 @@ function animateSlide(el){
 </script>
 </body>
 </html>
-
-
