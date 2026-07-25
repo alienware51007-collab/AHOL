@@ -33,7 +33,7 @@
 
     #gallery img:hover { border-color: #666; }
 
-    #canvasArea, #canvasArea2 { /* NEW */
+    #canvasArea, #canvasArea2 {
       width: 400px;
       height: 400px;
       background: #222;
@@ -120,6 +120,7 @@
     <canvas id="func3d" width="400" height="400"
             style="position:absolute; left:0; top:0; z-index:1;"></canvas>
 
+    <!-- RESTORED CALCULUS LABELS -->
     <div id="formex-tl" class="formex">7xy / e^(x² + y²)</div>
     <div id="formex-tr" class="formex">7xy / e^(x² + y²)</div>
     <div id="formex-bl" class="formex">7xy / e^(x² + y²)</div>
@@ -128,7 +129,7 @@
     <img id="artImage" src="">
   </div>
 
-  <!-- SECOND CANVAS (NEW) -->
+  <!-- SECOND CANVAS -->
   <div id="canvasArea2">
     <canvas id="func3d2" width="400" height="400"
             style="position:absolute; left:0; top:0; z-index:1;"></canvas>
@@ -226,7 +227,7 @@
       });
     }
 
-    // Original engine
+    // STD engine
     const STD = {
       objects: [],
       add(o){ this.objects.push(o); },
@@ -261,7 +262,7 @@
       }
     }
 
-    // 3D renderer for secondary canvas (NEW)
+    // 3D renderer for secondary canvas
     function renderFunction3D2() {
       const canvas = document.getElementById("func3d2");
       const ctx = canvas.getContext("2d");
@@ -306,7 +307,8 @@
     // Load both canvases on startup
     window.onload = () => {
       renderFunction3D();
-      renderFunction3D2(); // NEW
+      renderFunction3D2();
+      activateFormexAnimation();
 
       LEB.make(180, 40,  "ring");
       LEB.make(300, 180, "ring");
@@ -318,7 +320,21 @@
       LEB.make(260, 260, "func");
     };
 
-    // Dual canvas sync engine (NEW)
+    // Corner math animation
+    function activateFormexAnimation(){
+      const L = ["formex-tl","formex-tr","formex-bl","formex-br"]
+        .map(id => document.getElementById(id));
+      STD.add({
+        t: 0,
+        update(){
+          this.t += 0.03;
+          const a = 0.6 + 0.4 * Math.sin(this.t);
+          L.forEach(l => { if (l) l.style.opacity = a.toFixed(2); });
+        }
+      });
+    }
+
+    // Dual canvas sync engine
     const canvas1 = document.getElementById("func3d");
     const ctx1 = canvas1.getContext("2d");
 
@@ -400,18 +416,6 @@
       });
     }
 
-    function activateFormexAnimation(){
-      const L = ["formex-tl","formex-tr","formex-bl","formex-br"]
-        .map(id => document.getElementById(id));
-      STD.add({
-        t: 0,
-        update(){
-          this.t += 0.03;
-          const a = 0.6 + 0.4 * Math.sin(this.t);
-          L.forEach(l => { if (l) l.style.opacity = a.toFixed(2); });
-        }
-      });
-    }
   </script>
 
 </body>
