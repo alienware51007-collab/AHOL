@@ -33,6 +33,7 @@
 
     #gallery img:hover { border-color: #666; }
 
+    /* Triple image boxes */
     #tripleBox {
       display: flex;
       gap: 12px;
@@ -59,6 +60,7 @@
       gap: 6px;
     }
 
+    /* Canvas areas */
     #canvasArea, #canvasArea2 {
       width: 400px;
       height: 400px;
@@ -69,6 +71,29 @@
       margin-bottom: 20px;
     }
 
+    /* Layered bottom box */
+    #layerStack {
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 400px;
+      height: 400px;
+      z-index: 4;
+    }
+
+    .layeredImg {
+      position: absolute;
+      width: 400px;
+      height: 400px;
+      object-fit: cover;
+      opacity: 1;
+    }
+
+    #layer1 { z-index: 7; }
+    #layer2 { z-index: 6; }
+    #layer3 { z-index: 5; }
+
+    /* Main art image */
     #artImage {
       position: absolute;
       width: 200px;
@@ -79,6 +104,7 @@
       z-index: 10;
     }
 
+    /* Math labels */
     .formex {
       position: absolute;
       font-size: 11px;
@@ -92,6 +118,7 @@
     #formex-bl { bottom: 4px; left: 6px; }
     #formex-br { bottom: 4px; right: 6px; }
 
+    /* Lebesgue points */
     .leb {
       width: 10px;
       height: 10px;
@@ -186,10 +213,17 @@
     <img id="artImage" src="">
   </div>
 
-  <!-- SECOND CANVAS (VIDEO AREA) -->
+  <!-- SECOND CANVAS (VIDEO + LAYER STACK) -->
   <div id="canvasArea2">
     <canvas id="func3d2" width="400" height="400"
             style="position:absolute; left:0; top:0; z-index:1;"></canvas>
+
+    <!-- Layered image stack -->
+    <div id="layerStack">
+      <img id="layer1" class="layeredImg">
+      <img id="layer2" class="layeredImg">
+      <img id="layer3" class="layeredImg">
+    </div>
 
     <!-- Video box (hidden until used later) -->
     <video id="videoBox" width="400" height="400"
@@ -198,14 +232,14 @@
   </div>
 
   <script>
-    // Azure / Bing search
+    /* MAIN SEARCH */
     document.getElementById("azureBtn").onclick = () => {
       const q = document.getElementById("searchBox").value.trim();
       if (!q) return;
       window.open("https://www.bing.com/images/search?q=" + encodeURIComponent(q), "_blank");
     };
 
-    // Load main image
+    /* MAIN IMAGE LOADER */
     document.getElementById("loadImageBtn").onclick = () => {
       let url = document.getElementById("imageUrl").value.trim();
       if (!url) return;
@@ -226,7 +260,7 @@
       temp.src = url;
     };
 
-    // Blend main image
+    /* MAIN BLEND */
     document.getElementById("blendBtn").onclick = async () => {
       const art = document.getElementById("artImage");
       if (!art.src || art.src === window.location.href) {
@@ -274,6 +308,7 @@
       }
     };
 
+    /* IMAGE LOADER UTILITY */
     function loadImage(src) {
       return new Promise((resolve, reject) => {
         const img = new Image();
@@ -284,7 +319,7 @@
       });
     }
 
-    // STD engine
+    /* STD ENGINE */
     const STD = {
       objects: [],
       add(o){ this.objects.push(o); },
@@ -298,14 +333,14 @@
     };
     requestAnimationFrame(STD.animate);
 
-    // Triple search
+    /* TRIPLE SEARCH */
     function searchTriple(n) {
       const q = document.getElementById("url" + n).value.trim();
       if (!q) return;
       window.open("https://www.bing.com/images/search?q=" + encodeURIComponent(q), "_blank");
     }
 
-    // Triple loader
+    /* TRIPLE LOADER + LAYER STACK */
     function loadTripleImage(n) {
       let url = document.getElementById("url" + n).value.trim();
       if (!url) return;
@@ -318,6 +353,11 @@
 
       temp.onload = () => {
         img.src = url;
+
+        /* Load into layered stack */
+        if (n === 1) document.getElementById("layer1").src = url;
+        if (n === 2) document.getElementById("layer2").src = url;
+        if (n === 3) document.getElementById("layer3").src = url;
       };
 
       temp.onerror = () => alert("Could not load image for Box " + n);
@@ -325,7 +365,7 @@
       temp.src = url;
     }
 
-    // 3D renderer for primary canvas
+    /* 3D RENDER PRIMARY */
     function renderFunction3D() {
       const canvas = document.getElementById("func3d");
       const ctx = canvas.getContext("2d");
@@ -346,7 +386,7 @@
       }
     }
 
-    // 3D renderer for secondary canvas
+    /* 3D RENDER SECONDARY */
     function renderFunction3D2() {
       const canvas = document.getElementById("func3d2");
       const ctx = canvas.getContext("2d");
@@ -367,7 +407,7 @@
       }
     }
 
-    // Lebesgue draggable points
+    /* LEBESGUE POINTS */
     const canvasArea = document.getElementById("canvasArea");
     const LEB = {
       make(x, y, cls){
@@ -388,7 +428,7 @@
       }
     };
 
-    // Load both canvases on startup
+    /* ON LOAD */
     window.onload = () => {
       renderFunction3D();
       renderFunction3D2();
@@ -404,7 +444,7 @@
       LEB.make(260, 260, "func");
     };
 
-    // Corner math animation
+    /* MATH LABEL ANIMATION */
     function activateFormexAnimation(){
       const L = ["formex-tl","formex-tr","formex-bl","formex-br"]
         .map(id => document.getElementById(id));
@@ -418,13 +458,14 @@
       });
     }
 
-    // Dual canvas sync (NO loading, NO green box)
+    /* KEEP CANVAS STABLE */
     STD.add({
       update() {
-        // Do nothing — preserves calculus on both canvases
+        /* Do nothing — preserves calculus on both canvases */
       }
     });
 
+    /* ORIGINAL GALLERY ANIMATIONS */
     function CONart(id){
       const art = document.getElementById("artImage");
       art.src = id + ".png";
@@ -439,13 +480,17 @@
     function animateSpin(el){
       STD.add({
         angle: 0,
-        update(){ this.angle += 2; el.style.transform = `rotate(${this.angle}deg)`; }
+        update(){
+          this.angle += 2;
+          el.style.transform = `rotate(${this.angle}deg)`;
+        }
       });
     }
 
     function animatePulse(el){
       STD.add({
-        scale: 1, dir: 1,
+        scale: 1,
+        dir: 1,
         update(){
           this.scale += 0.01 * this.dir;
           if(this.scale > 1.2 || this.scale < 0.8) this.dir *= -1;
@@ -457,10 +502,12 @@
     function animateSlide(el){
       STD.add({
         x: 0,
-        update(){ this.x += 1; el.style.transform = `translateX(${this.x}px)`; }
+        update(){
+          this.x += 1;
+          el.style.transform = `translateX(${this.x}px)`;
+        }
       });
     }
-
   </script>
 
 </body>
