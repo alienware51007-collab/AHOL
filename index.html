@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>CONart — Minimal Animation Gallery + 3D Function</title>
+  <title>CONart — Minimal Animation Gallery + 3D Function + Movie</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <style>
@@ -71,7 +71,17 @@
       margin-bottom: 20px;
     }
 
-    /* Layered image stack */
+    /* Movie canvas sits on top of the 3-D background */
+    #movie {
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 400px;
+      height: 400px;
+      z-index: 5;
+    }
+
+    /* Layered image stack (still visible as reference) */
     #layerStack {
       position: absolute;
       left: 0;
@@ -79,20 +89,21 @@
       width: 400px;
       height: 400px;
       z-index: 4;
+      pointer-events: none;
+      opacity: 0.35;
     }
 
     .layeredImg {
       position: absolute;
-      width: 120px;
-      height: 120px;
+      width: 140px;
+      height: 140px;
       object-fit: cover;
-      left: 0;
-      top: 0;
+      border: 1px solid #555;
     }
 
-    #layer1 { z-index: 7; }
-    #layer2 { z-index: 6; }
-    #layer3 { z-index: 5; }
+    #layer1 { left: 40px;  top: 40px;  z-index: 7; }
+    #layer2 { left: 130px; top: 110px; z-index: 6; }
+    #layer3 { left: 220px; top: 180px; z-index: 5; }
 
     /* Main art image */
     #artImage {
@@ -127,18 +138,19 @@
       position: absolute;
       background: #fff;
       border: 2px solid #000;
-      cursor: pointer;
+      cursor: grab;
       z-index: 20;
+      user-select: none;
     }
 
     .leb.func { background: #ccc; }
     .leb.ring { background: #fff; }
 
     @keyframes vibrate {
-      0% { transform: translate(0px, 0px); }
-      25% { transform: translate(1px, -1px); }
-      50% { transform: translate(-1px, 1px); }
-      75% { transform: translate(1px, 1px); }
+      0%   { transform: translate(0px, 0px); }
+      25%  { transform: translate(1px, -1px); }
+      50%  { transform: translate(-1px, 1px); }
+      75%  { transform: translate(1px, 1px); }
       100% { transform: translate(-1px, -1px); }
     }
   </style>
@@ -146,7 +158,7 @@
 
 <body>
 
-  <h2>CONart — Minimal Animation Gallery + 3D Function</h2>
+  <h2>CONart — Minimal Animation Gallery + 3D Function + Movie</h2>
 
   <button onclick="window.location.href='https://alienware51007-collab.github.io/AHOL/'">
     Back to AHOL
@@ -166,11 +178,14 @@
   <button id="loadImageBtn">Load Image (as main)</button>
   <button id="blendBtn">Blend with Current Image</button>
 
-  <!-- ORIGINAL GALLERY -->
+  <!-- ORIGINAL GALLERY (placeholders) -->
   <div id="gallery">
-    <img src="img1.png" onclick="CONart('img1')">
-    <img src="img2.png" onclick="CONart('img2')">
-    <img src="img3.png" onclick="CONart('img3')">
+    <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Crect fill='%23444' width='120' height='120'/%3E%3Ctext x='50%25' y='50%25' fill='%23aaa' text-anchor='middle' dy='.3em' font-family='monospace'%3Eimg1%3C/text%3E%3C/svg%3E"
+         onclick="CONart('img1')" title="Spin">
+    <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Crect fill='%23355' width='120' height='120'/%3E%3Ctext x='50%25' y='50%25' fill='%23aaa' text-anchor='middle' dy='.3em' font-family='monospace'%3Eimg2%3C/text%3E%3C/svg%3E"
+         onclick="CONart('img2')" title="Pulse">
+    <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Crect fill='%23534' width='120' height='120'/%3E%3Ctext x='50%25' y='50%25' fill='%23aaa' text-anchor='middle' dy='.3em' font-family='monospace'%3Eimg3%3C/text%3E%3C/svg%3E"
+         onclick="CONart('img3')" title="Slide">
   </div>
 
   <!-- TRIPLE IMAGE BOXES -->
@@ -187,13 +202,11 @@
       <button onclick="loadTripleImage(1)">Load</button>
       <button onclick="searchTriple(1)">Search</button>
     </div>
-
     <div>
       <input id="url2" placeholder="Image URL for Box 2">
       <button onclick="loadTripleImage(2)">Load</button>
       <button onclick="searchTriple(2)">Search</button>
     </div>
-
     <div>
       <input id="url3" placeholder="Image URL for Box 3">
       <button onclick="loadTripleImage(3)">Load</button>
@@ -216,41 +229,40 @@
 
   <!-- MOVIE BOX (BOTTOM BOX) -->
   <div id="canvasArea2">
+    <!-- rotating 3-D background -->
     <canvas id="func3d2" width="400" height="400"
             style="position:absolute; left:0; top:0; z-index:1;"></canvas>
 
-    <!-- LAYERED IMAGE STACK -->
+    <!-- reference layer stack (semi-transparent) -->
     <div id="layerStack">
       <img id="layer1" class="layeredImg">
       <img id="layer2" class="layeredImg">
       <img id="layer3" class="layeredImg">
     </div>
 
-    <!-- Video box (hidden until used) -->
-    <video id="videoBox" width="400" height="400"
-           style="position:absolute; left:0; top:0; z-index:10; display:none;"
-           controls></video>
+    <!-- THE MOVIE CANVAS -->
+    <canvas id="movie" width="800" height="450"></canvas>
   </div>
 
   <script>
-    /* MAIN SEARCH */
+    /* ============================================================
+       ORIGINAL CONart LOGIC (kept intact)
+       ============================================================ */
+
     document.getElementById("azureBtn").onclick = () => {
       const q = document.getElementById("searchBox").value.trim();
       if (!q) return;
       window.open("https://www.bing.com/images/search?q=" + encodeURIComponent(q), "_blank");
     };
 
-    /* MAIN IMAGE LOADER */
     document.getElementById("loadImageBtn").onclick = () => {
       let url = document.getElementById("imageUrl").value.trim();
       if (!url) return;
-
       if (url.startsWith("http://")) url = "https://" + url.slice(7);
       else if (url.startsWith("//")) url = "https:" + url;
 
       const art = document.getElementById("artImage");
       const temp = new Image();
-
       temp.onload = () => {
         art.style.animation = "none";
         art.style.transform = "none";
@@ -261,60 +273,50 @@
       temp.src = url;
     };
 
-    /* MAIN BLEND */
     document.getElementById("blendBtn").onclick = async () => {
       const art = document.getElementById("artImage");
-      if (!art.src || art.src === window.location.href) {
+      if (!art.src || art.src === window.location.href || art.src.startsWith("data:image/svg")) {
         alert("First load or select an image (this will be Image 1)");
         return;
       }
-
       let url2 = document.getElementById("imageUrl").value.trim();
       if (!url2) {
         alert("Paste a second image URL in the box above");
         return;
       }
-
       if (url2.startsWith("http://")) url2 = "https://" + url2.slice(7);
       else if (url2.startsWith("//")) url2 = "https:" + url2;
 
       try {
         const img1 = await loadImage(art.src);
         const img2 = await loadImage(url2);
-
         const canvas = document.createElement("canvas");
-        canvas.width = Math.max(img1.width, img2.width);
+        canvas.width  = Math.max(img1.width, img2.width);
         canvas.height = Math.max(img1.height, img2.height);
         const ctx = canvas.getContext("2d");
-
         ctx.drawImage(img1, 0, 0, canvas.width, canvas.height);
-
         ctx.globalCompositeOperation = "overlay";
         ctx.globalAlpha = 0.7;
         ctx.drawImage(img2, 0, 0, canvas.width, canvas.height);
-
         ctx.globalCompositeOperation = "source-over";
         ctx.filter = "contrast(1.25) saturate(1.4) hue-rotate(12deg)";
         ctx.drawImage(canvas, 0, 0);
         ctx.filter = "none";
-
         art.style.animation = "none";
         art.style.transform = "none";
         art.src = canvas.toDataURL("image/png");
         art.style.animation = "vibrate 0.2s infinite";
-
       } catch (err) {
-        alert("Blend failed – try a different second image URL");
+        alert("Blend failed – try a different second image URL (CORS issues are common)");
         console.error(err);
       }
     };
 
-    /* IMAGE LOADER UTILITY */
     function loadImage(src) {
       return new Promise((resolve, reject) => {
         const img = new Image();
         img.crossOrigin = "anonymous";
-        img.onload = () => resolve(img);
+        img.onload  = () => resolve(img);
         img.onerror = reject;
         img.src = src;
       });
@@ -326,112 +328,371 @@
       add(o){ this.objects.push(o); },
       clear(){ this.objects = []; },
       animate(){
-        for(const o of STD.objects){
-          if(o.update) o.update();
-        }
-        requestAnimationFrame(STD.animate);
+        for (const o of this.objects) if (o.update) o.update();
+        requestAnimationFrame(() => STD.animate());
       }
     };
-    requestAnimationFrame(STD.animate);
+    requestAnimationFrame(() => STD.animate());
 
-    /* TRIPLE SEARCH */
     function searchTriple(n) {
       const q = document.getElementById("url" + n).value.trim();
       if (!q) return;
       window.open("https://www.bing.com/images/search?q=" + encodeURIComponent(q), "_blank");
     }
 
-    /* TRIPLE LOADER + MOVIE BOX STACKING */
     function loadTripleImage(n) {
       let url = document.getElementById("url" + n).value.trim();
       if (!url) return;
-
       if (url.startsWith("http://")) url = "https://" + url.slice(7);
       else if (url.startsWith("//")) url = "https:" + url;
 
       const img = document.getElementById("box" + n);
       const temp = new Image();
-
       temp.onload = () => {
         img.src = url;
-
-        /* Load into layered movie box */
         if (n === 1) document.getElementById("layer1").src = url;
         if (n === 2) document.getElementById("layer2").src = url;
         if (n === 3) document.getElementById("layer3").src = url;
-      };
 
+        // Also feed the movie scenes when images are loaded
+        updateMovieScenesFromTriple();
+      };
       temp.onerror = () => alert("Could not load image for Box " + n);
       temp.src = url;
     }
 
-    /* 3D RENDER PRIMARY */
-    function renderFunction3D() {
-      const canvas = document.getElementById("func3d");
+    /* ========== ROTATING 3-D SURFACES ========== */
+    let rotAngle = 0;
+
+    function renderFunction3D(canvasId) {
+      const canvas = document.getElementById(canvasId);
       const ctx = canvas.getContext("2d");
       const w = canvas.width, h = canvas.height;
-      ctx.fillStyle = "black";
+      ctx.fillStyle = "#000";
       ctx.fillRect(0, 0, w, h);
-      const cx = w/2, cy = h/2;
-      const step = 0.15, zScale = 80;
-      for(let x=-2; x<=2; x+=step){
-        for(let y=-2; y<=2; y+=step){
-          const f = (7*x*y)/Math.exp(x*x+y*y);
-          const sx = cx + (x-y)*40;
-          const sy = cy - f*zScale + (x+y)*10;
-          const g = Math.max(0, Math.min(255, 128 + f*120))|0;
+
+      const cx = w / 2, cy = h / 2;
+      const step = 0.12;
+      const zScale = 70;
+      const cosA = Math.cos(rotAngle);
+      const sinA = Math.sin(rotAngle);
+
+      for (let x = -2; x <= 2; x += step) {
+        for (let y = -2; y <= 2; y += step) {
+          const f = (7 * x * y) / Math.exp(x * x + y * y);
+          const xr = x * cosA - y * sinA;
+          const yr = x * sinA + y * cosA;
+          const sx = cx + (xr - yr) * 38;
+          const sy = cy - f * zScale + (xr + yr) * 9;
+          const light = 110 + f * 90 + xr * 15;
+          const g = Math.max(0, Math.min(255, light)) | 0;
           ctx.fillStyle = `rgb(${g},${g},${g})`;
-          ctx.fillRect(sx, sy, 2, 2);
+          ctx.fillRect(sx, sy, 2.2, 2.2);
         }
       }
     }
 
-    /* 3D RENDER SECONDARY */
-    function renderFunction3D2() {
-      const canvas = document.getElementById("func3d2");
-      const ctx = canvas.getContext("2d");
-      const w = canvas.width, h = canvas.height;
-      ctx.fillStyle = "black";
-      ctx.fillRect(0, 0, w, h);
-      const cx = w/2, cy = h/2;
-      const step = 0.15, zScale = 80;
-      for(let x=-2; x<=2; x+=step){
-        for(let y=-2; y<=2; y+=step){
-          const f = (7*x*y)/Math.exp(x*x+y*y);
-          const sx = cx + (x-y)*40;
-          const sy = cy - f*zScale + (x+y)*10;
-          const g = Math.max(0, Math.min(255, 128 + f*120))|0;
-          ctx.fillStyle = `rgb(${g},${g},${g})`;
-          ctx.fillRect(sx, sy, 2, 2);
-        }
+    STD.add({
+      update() {
+        rotAngle += 0.008;
+        renderFunction3D("func3d");
+        renderFunction3D("func3d2");
       }
-    }
+    });
 
     /* LEBESGUE POINTS */
     const canvasArea = document.getElementById("canvasArea");
     const LEB = {
-      make(x, y, cls){
+      make(x, y, cls) {
         const d = document.createElement("div");
         d.className = "leb " + cls;
         d.style.left = x + "px";
         d.style.top  = y + "px";
         canvasArea.appendChild(d);
         d.onmousedown = e => {
-          const ox = e.offsetX;
-          const oy = e.offsetY;
-          document.onmousemove = m => {
-            d.style.left = (m.pageX - canvasArea.offsetLeft - ox) + "px";
-            d.style.top  = (m.pageY - canvasArea.offsetTop  - oy) + "px";
+          e.preventDefault();
+          const rect = canvasArea.getBoundingClientRect();
+          const ox = e.clientX - rect.left - parseFloat(d.style.left);
+          const oy = e.clientY - rect.top  - parseFloat(d.style.top);
+          const move = m => {
+            d.style.left = (m.clientX - rect.left - ox) + "px";
+            d.style.top  = (m.clientY - rect.top  - oy) + "px";
           };
-          document.onmouseup = () => document.onmousemove = null;
+          const up = () => {
+            document.removeEventListener("mousemove", move);
+            document.removeEventListener("mouseup", up);
+          };
+          document.addEventListener("mousemove", move);
+          document.addEventListener("mouseup", up);
         };
       }
     };
 
-    /* ON LOAD */
+    /* MATH LABEL ANIMATION */
+    let formexActive = false;
+    function activateFormexAnimation() {
+      if (formexActive) return;
+      formexActive = true;
+      const L = ["formex-tl","formex-tr","formex-bl","formex-br"]
+        .map(id => document.getElementById(id));
+      STD.add({
+        t: 0,
+        update() {
+          this.t += 0.03;
+          const a = 0.55 + 0.45 * Math.sin(this.t);
+          L.forEach(l => { if (l) l.style.opacity = a.toFixed(2); });
+        }
+      });
+    }
+
+    /* GALLERY ANIMATIONS */
+    function CONart(id) {
+      const art = document.getElementById("artImage");
+      STD.clear();
+      STD.add({
+        update() {
+          rotAngle += 0.008;
+          renderFunction3D("func3d");
+          renderFunction3D("func3d2");
+        }
+      });
+      formexActive = false;
+      activateFormexAnimation();
+
+      const colors = { img1: "%23444", img2: "%23355", img3: "%23534" };
+      art.src = `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Crect fill='${colors[id]}' width='200' height='200'/%3E%3Ctext x='50%25' y='50%25' fill='%23ccc' text-anchor='middle' dy='.3em' font-family='monospace' font-size='24'%3E${id}%3C/text%3E%3C/svg%3E`;
+      art.style.transform = "none";
+      art.style.animation = "none";
+
+      if (id === "img1") animateSpin(art);
+      if (id === "img2") animatePulse(art);
+      if (id === "img3") animateSlide(art);
+    }
+
+    function animateSpin(el) {
+      STD.add({ angle: 0, update(){ this.angle += 2; el.style.transform = `rotate(${this.angle}deg)`; } });
+    }
+    function animatePulse(el) {
+      STD.add({ scale: 1, dir: 1, update(){
+        this.scale += 0.012 * this.dir;
+        if (this.scale > 1.25 || this.scale < 0.75) this.dir *= -1;
+        el.style.transform = `scale(${this.scale})`;
+      }});
+    }
+    function animateSlide(el) {
+      STD.add({ x: 0, update(){
+        this.x = (this.x + 1.5) % 220;
+        el.style.transform = `translateX(${this.x - 60}px)`;
+      }});
+    }
+
+    /* ============================================================
+       YOUR MOVIE / SCENE SYSTEM (integrated)
+       ============================================================ */
+
+    const movieCanvas = document.getElementById("movie");
+    const movieCtx    = movieCanvas.getContext("2d");
+
+    // scale the 800×450 movie canvas down to the 400×400 box
+    movieCanvas.style.width  = "400px";
+    movieCanvas.style.height = "400px";
+
+    class Scene {
+      constructor(layers, scripts = [], duration = 3000, transition = "fade") {
+        this.layers     = layers;
+        this.scripts    = scripts;
+        this.duration   = duration;
+        this.transition = transition;
+        this.startTime  = null;
+      }
+    }
+
+    let scenes = [];
+    let currentScene = 0;
+    let transitioning = false;
+    let transitionProgress = 0;
+
+    // helper that creates a colored placeholder when real images are missing
+    function makePlaceholder(label, color) {
+      const c = document.createElement("canvas");
+      c.width = 800; c.height = 450;
+      const cx = c.getContext("2d");
+      cx.fillStyle = color;
+      cx.fillRect(0, 0, 800, 450);
+      cx.fillStyle = "#ccc";
+      cx.font = "48px monospace";
+      cx.textAlign = "center";
+      cx.fillText(label, 400, 240);
+      const img = new Image();
+      img.src = c.toDataURL();
+      return img;
+    }
+
+    async function initMovie() {
+      // default placeholders (will be replaced when user loads real images)
+      const pic1 = makePlaceholder("Scene 1", "#1a1a2e");
+      const pic2 = makePlaceholder("Scene 2", "#16213e");
+      const pic3 = makePlaceholder("Scene 3", "#0f3460");
+      const overlay = makePlaceholder("Overlay", "#e94560");
+
+      scenes = [
+        new Scene(
+          [pic1],
+          [
+            (ctx, layers, t) => {
+              ctx.globalAlpha = 1;
+              ctx.drawImage(layers[0], 0, 0, movieCanvas.width, movieCanvas.height);
+            }
+          ],
+          3000,
+          "fade"
+        ),
+        new Scene(
+          [pic2],
+          [
+            (ctx, layers, t) => {
+              ctx.globalAlpha = Math.sin(t * 0.002) * 0.5 + 0.5;
+              ctx.drawImage(layers[0], 0, 0, movieCanvas.width, movieCanvas.height);
+            }
+          ],
+          3000,
+          "slide"
+        ),
+        new Scene(
+          [pic3, overlay],
+          [
+            (ctx, layers, t) => {
+              ctx.globalAlpha = 1;
+              ctx.drawImage(layers[0], 0, 0, movieCanvas.width, movieCanvas.height);
+            },
+            (ctx, layers, t) => {
+              ctx.globalAlpha = 0.5;
+              ctx.globalCompositeOperation = "screen";
+              ctx.drawImage(layers[1], 100, 100, 600, 300);
+              ctx.globalCompositeOperation = "source-over";
+            }
+          ],
+          3000,
+          "dissolve"
+        )
+      ];
+
+      requestAnimationFrame(movieLoop);
+    }
+
+    // called whenever the user loads new images into the triple boxes
+    function updateMovieScenesFromTriple() {
+      const l1 = document.getElementById("layer1");
+      const l2 = document.getElementById("layer2");
+      const l3 = document.getElementById("layer3");
+
+      if (!l1.src && !l2.src && !l3.src) return;
+
+      // rebuild scenes using the loaded images (or keep placeholders)
+      const img1 = l1.src ? l1 : makePlaceholder("Scene 1", "#1a1a2e");
+      const img2 = l2.src ? l2 : makePlaceholder("Scene 2", "#16213e");
+      const img3 = l3.src ? l3 : makePlaceholder("Scene 3", "#0f3460");
+
+      scenes = [
+        new Scene([img1], [
+          (ctx, layers, t) => {
+            ctx.globalAlpha = 1;
+            ctx.drawImage(layers[0], 0, 0, movieCanvas.width, movieCanvas.height);
+          }
+        ], 3000, "fade"),
+
+        new Scene([img2], [
+          (ctx, layers, t) => {
+            ctx.globalAlpha = Math.sin(t * 0.002) * 0.5 + 0.5;
+            ctx.drawImage(layers[0], 0, 0, movieCanvas.width, movieCanvas.height);
+          }
+        ], 3000, "slide"),
+
+        new Scene([img3, img1], [   // use img1 as a simple overlay
+          (ctx, layers, t) => {
+            ctx.globalAlpha = 1;
+            ctx.drawImage(layers[0], 0, 0, movieCanvas.width, movieCanvas.height);
+          },
+          (ctx, layers, t) => {
+            ctx.globalAlpha = 0.45;
+            ctx.globalCompositeOperation = "screen";
+            ctx.drawImage(layers[1], 80, 80, 640, 320);
+            ctx.globalCompositeOperation = "source-over";
+          }
+        ], 3000, "dissolve")
+      ];
+
+      // restart from the first scene
+      currentScene = 0;
+      transitioning = false;
+      transitionProgress = 0;
+      scenes[0].startTime = null;
+    }
+
+    function drawScene(scene, t) {
+      for (let script of scene.scripts) {
+        script(movieCtx, scene.layers, t);
+      }
+    }
+
+    function applyTransition(type, progress, nextScene) {
+      if (type === "fade" || type === "dissolve") {
+        movieCtx.globalAlpha = progress;
+        drawScene(nextScene, 0);
+        movieCtx.globalAlpha = 1;
+      }
+      if (type === "slide") {
+        const offset = movieCanvas.width * (1 - progress);
+        movieCtx.save();
+        movieCtx.translate(offset, 0);
+        drawScene(nextScene, 0);
+        movieCtx.restore();
+      }
+    }
+
+    function movieLoop(timestamp) {
+      if (scenes.length === 0) {
+        requestAnimationFrame(movieLoop);
+        return;
+      }
+
+      const scene = scenes[currentScene];
+      if (!scene.startTime) scene.startTime = timestamp;
+      const t = timestamp - scene.startTime;
+
+      movieCtx.clearRect(0, 0, movieCanvas.width, movieCanvas.height);
+
+      // Draw current scene
+      drawScene(scene, t);
+
+      // Handle transitions
+      if (transitioning) {
+        transitionProgress += 0.02;
+        const nextScene = scenes[(currentScene + 1) % scenes.length];
+        applyTransition(scene.transition, transitionProgress, nextScene);
+
+        if (transitionProgress >= 1) {
+          transitioning = false;
+          transitionProgress = 0;
+          currentScene = (currentScene + 1) % scenes.length;
+          scenes[currentScene].startTime = timestamp;
+        }
+      }
+
+      // Auto advance
+      if (!transitioning && t > scene.duration) {
+        transitioning = true;
+      }
+
+      requestAnimationFrame(movieLoop);
+    }
+
+    /* ============================================================
+       BOOT
+       ============================================================ */
     window.onload = () => {
-      renderFunction3D();
-      renderFunction3D2();
+      renderFunction3D("func3d");
+      renderFunction3D("func3d2");
       activateFormexAnimation();
 
       LEB.make(180, 40,  "ring");
@@ -442,72 +703,10 @@
       LEB.make(260, 140, "func");
       LEB.make(140, 260, "func");
       LEB.make(260, 260, "func");
+
+      // start the movie system
+      initMovie();
     };
-
-    /* MATH LABEL ANIMATION */
-    function activateFormexAnimation(){
-      const L = ["formex-tl","formex-tr","formex-bl","formex-br"]
-        .map(id => document.getElementById(id));
-      STD.add({
-        t: 0,
-        update(){
-          this.t += 0.03;
-          const a = 0.6 + 0.4 * Math.sin(this.t);
-          L.forEach(l => { if (l) l.style.opacity = a.toFixed(2); });
-        }
-      });
-    }
-
-    /* KEEP CANVAS STABLE */
-    STD.add({
-      update() {
-        /* Do nothing — preserves calculus on both canvases */
-      }
-    });
-
-    /* ORIGINAL GALLERY ANIMATIONS */
-    function CONart(id){
-      const art = document.getElementById("artImage");
-      art.src = id + ".png";
-      art.style.transform = "none";
-      art.style.animation = "none";
-      if(id === "img1") animateSpin(art);
-      if(id === "img2") animatePulse(art);
-      if(id === "img3") animateSlide(art);
-      activateFormexAnimation();
-    }
-
-    function animateSpin(el){
-      STD.add({
-        angle: 0,
-        update(){
-          this.angle += 2;
-          el.style.transform = `rotate(${this.angle}deg)`;
-        }
-      });
-    }
-
-    function animatePulse(el){
-      STD.add({
-        scale: 1,
-        dir: 1,
-        update(){
-          this.scale += 0.01 * this.dir;
-          if(this.scale > 1.2 || this.scale < 0.8) this.dir *= -1;
-          el.style.transform = `scale(${this.scale})`;
-        }
-      });
-    }
-
-    function animateSlide(el){
-      STD.add({
-        x: 0,
-        update(){
-          this.x += 1;
-          el.style.transform = `translateX(${this.x}px)`;
-        }
-      });
-    }
   </script>
 </body>
 </html>
