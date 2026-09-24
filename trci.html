@@ -1,0 +1,675 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Universal Place Explorer</title>
+    <style>
+        * { box-sizing: border-box; }
+        html, body {
+            width: 100%;
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            background: #050505;
+            color: white;
+            font-family: Arial, Helvetica, sans-serif;
+        }
+        body { overflow: hidden; }
+        #page {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            gap: 20px;
+        }
+        #pageTitle {
+            font-size: 24px;
+            letter-spacing: 2px;
+            text-align: center;
+        }
+        #appendNewObject {
+            padding: 12px 20px;
+            background: #151515;
+            color: white;
+            border: 1px solid #666;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        #appendNewObject:hover { background: #252525; }
+        #placeExplorer {
+            position: fixed;
+            inset: 0;
+            z-index: 100000;
+            display: none;
+            background: rgba(0, 0, 0, 0.92);
+        }
+        #placeExplorerWindow {
+            position: absolute;
+            inset: 30px;
+            display: flex;
+            flex-direction: column;
+            min-height: 0;
+            background: #101010;
+            border: 1px solid #555;
+            box-shadow: 0 0 40px rgba(0, 0, 0, 0.9);
+        }
+        #placeExplorerHeader {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 16px;
+            background: #181818;
+            border-bottom: 1px solid #444;
+            flex-shrink: 0;
+        }
+        #placeExplorerHeader strong { letter-spacing: 1px; }
+        #closePlaceExplorer {
+            width: 34px;
+            height: 30px;
+            background: #222;
+            color: white;
+            border: 1px solid #666;
+            cursor: pointer;
+        }
+        #closePlaceExplorer:hover { background: #333; }
+        #placeSearchBar {
+            display: flex;
+            gap: 8px;
+            padding: 12px;
+            background: #111;
+            border-bottom: 1px solid #333;
+            flex-shrink: 0;
+        }
+        #placeSearch {
+            flex: 1;
+            min-width: 0;
+            padding: 10px;
+            background: #080808;
+            color: white;
+            border: 1px solid #555;
+            outline: none;
+        }
+        #placeSearch:focus { border-color: white; }
+        #loadPlaceButton {
+            padding: 10px 16px;
+            background: #222;
+            color: white;
+            border: 1px solid #666;
+            cursor: pointer;
+        }
+        #loadPlaceButton:hover { background: #333; }
+        #loadPlaceButton:disabled {
+            opacity: 0.5;
+            cursor: wait;
+        }
+        #placeView {
+            position: relative;
+            flex: 1;
+            min-height: 300px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            background: #050505;
+        }
+        #placeImage {
+            display: none;
+            max-width: 100%;
+            max-height: 100%;
+            width: auto;
+            height: auto;
+            object-fit: contain;
+        }
+        #placeLoading {
+            color: #aaa;
+            text-align: center;
+            padding: 30px;
+            max-width: 600px;
+            line-height: 1.5;
+        }
+        #placeHUD {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 10px;
+            padding: 12px;
+            background: #151515;
+            border-top: 1px solid #444;
+            border-bottom: 1px solid #333;
+            font-size: 12px;
+            flex-shrink: 0;
+        }
+        #placeHUD div {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            min-width: 0;
+        }
+        #placeHUD span {
+            color: #888;
+            font-size: 10px;
+        }
+        #placeHUD strong {
+            color: white;
+            word-break: break-word;
+        }
+        #placeNavigation {
+            padding: 12px;
+            text-align: center;
+            background: #111;
+            flex-shrink: 0;
+        }
+        #placeNavigation button {
+            min-width: 45px;
+            min-height: 35px;
+            margin: 3px;
+            background: #222;
+            color: white;
+            border: 1px solid #555;
+            cursor: not-allowed;
+        }
+        #placeNavigation button:disabled {
+            opacity: 0.35;
+            cursor: not-allowed;
+        }
+        #placeNavigation small {
+            display: block;
+            margin-top: 8px;
+            color: #777;
+        }
+        #placeStatus {
+            padding: 8px 12px;
+            background: #080808;
+            color: #888;
+            font-size: 11px;
+            flex-shrink: 0;
+            min-height: 30px;
+        }
+        @media (max-width: 700px) {
+            body { overflow: auto; }
+            #placeExplorerWindow {
+                inset: 10px;
+                overflow-y: auto;
+            }
+            #placeView {
+                min-height: 250px;
+                flex: none;
+                height: 40vh;
+            }
+            #placeHUD { grid-template-columns: repeat(2, 1fr); }
+            #placeSearchBar { flex-direction: column; }
+            #loadPlaceButton { width: 100%; }
+        }
+    </style>
+</head>
+<body>
+    <main id="page">
+        <div id="pageTitle">UNIVERSAL PLACE EXPLORER</div>
+        <button id="appendNewObject" type="button">APPEND NEW OBJECT</button>
+    </main>
+
+    <div id="placeExplorer" aria-hidden="true">
+        <div id="placeExplorerWindow">
+            <header id="placeExplorerHeader">
+                <strong>UNIVERSAL PLACE EXPLORER</strong>
+                <button id="closePlaceExplorer" type="button" aria-label="Close Universal Place Explorer">X</button>
+            </header>
+            <div id="placeSearchBar">
+                <input
+                    id="placeSearch"
+                    type="text"
+                    placeholder="Type a popular destination..."
+                    autocomplete="off"
+                    spellcheck="false"
+                >
+                <button id="loadPlaceButton" type="button">LOAD PLACE</button>
+            </div>
+            <div id="placeView">
+                <img id="placeImage" src="" alt="">
+                <div id="placeLoading">Type a destination above.</div>
+            </div>
+            <div id="placeHUD">
+                <div>
+                    <span>UNIVERSAL ID</span>
+                    <strong id="placeUniversalID">—</strong>
+                </div>
+                <div>
+                    <span>PLACE</span>
+                    <strong id="placeTitle">—</strong>
+                </div>
+                <div>
+                    <span>CLASSIFICATION</span>
+                    <strong id="placeClassification">UNDEFINED</strong>
+                </div>
+                <div>
+                    <span>LATITUDE</span>
+                    <strong id="placeLatitude">—</strong>
+                </div>
+                <div>
+                    <span>LONGITUDE</span>
+                    <strong id="placeLongitude">—</strong>
+                </div>
+            </div>
+            <div id="placeNavigation">
+                <button type="button" data-direction="up" disabled aria-label="Move up">↑</button>
+                <br>
+                <button type="button" data-direction="left" disabled aria-label="Move left">←</button>
+                <button type="button" data-direction="down" disabled aria-label="Move down">↓</button>
+                <button type="button" data-direction="right" disabled aria-label="Move right">→</button>
+                <small>WALKING / NAVIGATION SYSTEM — RESERVED FOR FUTURE DEVELOPMENT</small>
+            </div>
+            <div id="placeStatus">READY</div>
+        </div>
+    </div>
+
+    <script>
+        "use strict";
+
+        const UNIVERSAL_OBJECTS = [];
+        window.__UNIVERSAL_OBJECTS__ = UNIVERSAL_OBJECTS;
+
+        let placeRequestNumber = 0;
+        let placeSearchInProgress = false;
+
+        const DESTINATION_CLASSIFICATIONS = {
+            "eiffel tower": "LANDMARK",
+            "statue of liberty": "LANDMARK",
+            "times square": "URBAN",
+            "central park": "PARK",
+            "grand canyon": "NATURAL",
+            "yellowstone": "NATIONAL PARK",
+            "mount everest": "MOUNTAIN",
+            "tokyo": "CITY",
+            "new york city": "CITY",
+            "new york": "CITY",
+            "paris": "CITY",
+            "london": "CITY",
+            "rome": "CITY",
+            "venice": "CITY",
+            "dubai": "CITY",
+            "sydney": "CITY",
+            "los angeles": "CITY",
+            "chicago": "CITY",
+            "las vegas": "CITY"
+        };
+
+        function createUniversalID() {
+            const now = new Date();
+            const date =
+                now.getFullYear().toString() +
+                String(now.getMonth() + 1).padStart(2, "0") +
+                String(now.getDate()).padStart(2, "0");
+            const random = Math.random().toString(36).substring(2, 8).toUpperCase();
+            return "UO-" + date + "-" + random;
+        }
+
+        function normalizePlaceName(value) {
+            return String(value || "")
+                .trim()
+                .toLowerCase()
+                .replace(/\s+/g, " ");
+        }
+
+        function classifyPlace(title, userInput) {
+            const normalizedTitle = normalizePlaceName(title);
+            const normalizedInput = normalizePlaceName(userInput);
+            if (DESTINATION_CLASSIFICATIONS[normalizedTitle]) {
+                return DESTINATION_CLASSIFICATIONS[normalizedTitle];
+            }
+            if (DESTINATION_CLASSIFICATIONS[normalizedInput]) {
+                return DESTINATION_CLASSIFICATIONS[normalizedInput];
+            }
+            return "UNDEFINED";
+        }
+
+        function wikiFetch(url) {
+            // Do not set custom headers. An Accept header forces a CORS
+            // preflight, and Wikipedia often omits ACAO on OPTIONS.
+            return fetch(url, { method: "GET" });
+        }
+
+        function openPlaceExplorer() {
+            const explorer = document.getElementById("placeExplorer");
+            if (!explorer) return;
+            explorer.style.display = "block";
+            explorer.setAttribute("aria-hidden", "false");
+            const search = document.getElementById("placeSearch");
+            if (search) {
+                window.setTimeout(function () {
+                    search.focus();
+                }, 50);
+            }
+        }
+
+        function closePlaceExplorer() {
+            const explorer = document.getElementById("placeExplorer");
+            if (!explorer) return;
+            explorer.style.display = "none";
+            explorer.setAttribute("aria-hidden", "true");
+        }
+
+        function resetPlaceDisplay() {
+            const image = document.getElementById("placeImage");
+            const loading = document.getElementById("placeLoading");
+            const universalID = document.getElementById("placeUniversalID");
+            const title = document.getElementById("placeTitle");
+            const classification = document.getElementById("placeClassification");
+            const latitude = document.getElementById("placeLatitude");
+            const longitude = document.getElementById("placeLongitude");
+
+            if (image) {
+                image.onload = null;
+                image.onerror = null;
+                image.removeAttribute("src");
+                image.alt = "";
+                image.style.display = "none";
+            }
+            if (loading) {
+                loading.style.display = "block";
+                loading.textContent = "Searching...";
+            }
+            if (universalID) universalID.textContent = "—";
+            if (title) title.textContent = "—";
+            if (classification) classification.textContent = "UNDEFINED";
+            if (latitude) latitude.textContent = "—";
+            if (longitude) longitude.textContent = "—";
+        }
+
+        function parseCoordinates(page) {
+            let latitude = null;
+            let longitude = null;
+            const list = page && page.coordinates;
+            if (Array.isArray(list) && list.length > 0) {
+                const coordinate = list[0];
+                const lat = Number(coordinate && coordinate.lat);
+                const lon = Number(coordinate && coordinate.lon);
+                if (Number.isFinite(lat) && Number.isFinite(lon)) {
+                    latitude = lat;
+                    longitude = lon;
+                }
+            }
+            return { latitude: latitude, longitude: longitude };
+        }
+
+        function parseImage(page) {
+            if (page && page.original && page.original.source) {
+                return page.original.source;
+            }
+            if (page && page.thumbnail && page.thumbnail.source) {
+                return page.thumbnail.source;
+            }
+            return "";
+        }
+
+        function pageToResult(page, fallbackTitle) {
+            let url = page.fullurl || "";
+            if (!url && page.title) {
+                url =
+                    "https://en.wikipedia.org/wiki/" +
+                    encodeURIComponent(String(page.title).replace(/ /g, "_"));
+            }
+            const coords = parseCoordinates(page);
+            return {
+                pageID: page.pageid || null,
+                title: page.title || fallbackTitle,
+                url: url,
+                image: parseImage(page),
+                latitude: coords.latitude,
+                longitude: coords.longitude
+            };
+        }
+
+        async function searchWikipediaPlace(place) {
+            const cleanPlace = String(place || "").trim();
+            if (!cleanPlace) {
+                throw new Error("Please enter a destination.");
+            }
+
+            const encodedPlace = encodeURIComponent(cleanPlace);
+            const apiURL =
+                "https://en.wikipedia.org/w/api.php" +
+                "?action=query" +
+                "&generator=search" +
+                "&gsrsearch=" + encodedPlace +
+                "&gsrnamespace=0" +
+                "&gsrlimit=5" +
+                "&prop=pageimages|info|coordinates" +
+                "&inprop=url" +
+                "&piprop=thumbnail|original" +
+                "&pithumbsize=1600" +
+                "&redirects=1" +
+                "&format=json" +
+                "&formatversion=2" +
+                "&origin=*";
+
+            const response = await wikiFetch(apiURL);
+            if (!response.ok) {
+                throw new Error(
+                    "Wikipedia request failed with HTTP " + response.status + "."
+                );
+            }
+
+            const data = await response.json();
+            const pages = data && data.query && Array.isArray(data.query.pages)
+                ? data.query.pages
+                : [];
+
+            if (!pages.length) {
+                throw new Error(
+                    'No Wikipedia result was found for "' + cleanPlace + '".'
+                );
+            }
+
+            let page = pages.find(function (item) {
+                return item && item.missing !== true && !item.invalid;
+            });
+
+            if (!page) {
+                throw new Error("The requested Wikipedia page could not be found.");
+            }
+
+            // Prefer a result that already has coordinates when the top hit does not.
+            if (!parseCoordinates(page).latitude) {
+                const withCoords = pages.find(function (item) {
+                    return item && parseCoordinates(item).latitude !== null;
+                });
+                if (withCoords) page = withCoords;
+            }
+
+            return pageToResult(page, cleanPlace);
+        }
+
+        function displayPlaceResult(universalObject, result) {
+            const image = document.getElementById("placeImage");
+            const loading = document.getElementById("placeLoading");
+            const universalID = document.getElementById("placeUniversalID");
+            const title = document.getElementById("placeTitle");
+            const classification = document.getElementById("placeClassification");
+            const latitude = document.getElementById("placeLatitude");
+            const longitude = document.getElementById("placeLongitude");
+            const status = document.getElementById("placeStatus");
+
+            if (universalID) universalID.textContent = universalObject.universalID;
+            if (title) title.textContent = result.title;
+            if (classification) classification.textContent = universalObject.classification;
+            if (latitude) {
+                latitude.textContent =
+                    result.latitude !== null ? String(result.latitude) : "N/A";
+            }
+            if (longitude) {
+                longitude.textContent =
+                    result.longitude !== null ? String(result.longitude) : "N/A";
+            }
+
+            if (result.image && image) {
+                image.onload = function () {
+                    image.style.display = "block";
+                    if (loading) loading.style.display = "none";
+                };
+                image.onerror = function () {
+                    image.style.display = "none";
+                    if (loading) {
+                        loading.style.display = "block";
+                        loading.textContent =
+                            "The destination was found, but its image could not be loaded.";
+                    }
+                };
+                image.src = result.image;
+                image.alt = result.title;
+            } else if (loading) {
+                loading.style.display = "block";
+                loading.textContent =
+                    "Wikipedia found the place, but no image was available.";
+            }
+
+            if (status) status.textContent = "PLACE LOADED";
+        }
+
+        async function loadRequestedPlace() {
+            if (placeSearchInProgress) return;
+
+            const search = document.getElementById("placeSearch");
+            const status = document.getElementById("placeStatus");
+            const loadButton = document.getElementById("loadPlaceButton");
+            const loading = document.getElementById("placeLoading");
+            if (!search) return;
+
+            const userInput = search.value.trim();
+            if (!userInput) {
+                if (status) status.textContent = "ENTER A DESTINATION";
+                search.focus();
+                return;
+            }
+
+            const currentRequest = ++placeRequestNumber;
+            placeSearchInProgress = true;
+
+            if (loadButton) {
+                loadButton.disabled = true;
+                loadButton.textContent = "LOADING...";
+            }
+
+            resetPlaceDisplay();
+            if (status) status.textContent = "SEARCHING WIKIPEDIA...";
+            if (loading) {
+                loading.style.display = "block";
+                loading.textContent = "Searching for " + userInput + "...";
+            }
+
+            try {
+                const result = await searchWikipediaPlace(userInput);
+                if (currentRequest !== placeRequestNumber) return;
+
+                const classification = classifyPlace(result.title, userInput);
+                const universalObject = {
+                    universalID: createUniversalID(),
+                    objectType: "PLACE",
+                    userInput: userInput,
+                    wikipedia: {
+                        pageID: result.pageID,
+                        title: result.title,
+                        url: result.url,
+                        image: result.image
+                    },
+                    location: {
+                        latitude: result.latitude,
+                        longitude: result.longitude
+                    },
+                    classification: classification,
+                    navigation: {
+                        mode: "IMAGE",
+                        walking: false,
+                        forward: null,
+                        backward: null,
+                        left: null,
+                        right: null
+                    },
+                    status: {
+                        loaded: true,
+                        explored: false
+                    },
+                    createdAt: new Date().toISOString()
+                };
+
+                UNIVERSAL_OBJECTS.push(universalObject);
+                window.__UNIVERSAL_OBJECTS__ = UNIVERSAL_OBJECTS;
+                displayPlaceResult(universalObject, result);
+                console.log("UNIVERSAL OBJECT CREATED:", universalObject);
+            } catch (error) {
+                console.error("PLACE EXPLORER ERROR:", error);
+                if (status) status.textContent = "ERROR";
+                if (loading) {
+                    loading.style.display = "block";
+                    loading.textContent =
+                        error && error.message
+                            ? error.message
+                            : "Unable to load destination.";
+                }
+            } finally {
+                if (currentRequest === placeRequestNumber) {
+                    placeSearchInProgress = false;
+                    if (loadButton) {
+                        loadButton.disabled = false;
+                        loadButton.textContent = "LOAD PLACE";
+                    }
+                }
+            }
+        }
+
+        function getUniversalObject(universalID) {
+            return UNIVERSAL_OBJECTS.find(function (object) {
+                return object.universalID === universalID;
+            });
+        }
+
+        function getLatestUniversalObject() {
+            if (UNIVERSAL_OBJECTS.length === 0) return null;
+            return UNIVERSAL_OBJECTS[UNIVERSAL_OBJECTS.length - 1];
+        }
+
+        function handleExplorerKeydown(event) {
+            if (event.key === "Escape") {
+                closePlaceExplorer();
+                return;
+            }
+            if (event.key === "Enter") {
+                const target = event.target;
+                if (target && target.id === "placeSearch") {
+                    event.preventDefault();
+                    loadRequestedPlace();
+                }
+            }
+        }
+
+        document.addEventListener("DOMContentLoaded", function () {
+            const appendButton = document.getElementById("appendNewObject");
+            const closeButton = document.getElementById("closePlaceExplorer");
+            const loadButton = document.getElementById("loadPlaceButton");
+
+            if (appendButton) {
+                appendButton.addEventListener("click", openPlaceExplorer);
+            }
+            if (closeButton) {
+                closeButton.addEventListener("click", closePlaceExplorer);
+            }
+            if (loadButton) {
+                loadButton.addEventListener("click", loadRequestedPlace);
+            }
+            document.addEventListener("keydown", handleExplorerKeydown);
+        });
+
+        window.createUniversalID = createUniversalID;
+        window.openPlaceExplorer = openPlaceExplorer;
+        window.closePlaceExplorer = closePlaceExplorer;
+        window.loadRequestedPlace = loadRequestedPlace;
+        window.searchWikipediaPlace = searchWikipediaPlace;
+        window.getUniversalObject = getUniversalObject;
+        window.getLatestUniversalObject = getLatestUniversalObject;
+        window.classifyPlace = classifyPlace;
+
+        console.log("UNIVERSAL PLACE EXPLORER LOADED");
+    </script>
+</body>
+</html>
