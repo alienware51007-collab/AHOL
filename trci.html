@@ -83,7 +83,8 @@
             border-bottom: 1px solid #333;
             flex-shrink: 0;
         }
-        #placeSearch {
+        #placeSearch,
+        #walkCommand {
             flex: 1;
             min-width: 0;
             padding: 10px;
@@ -92,16 +93,20 @@
             border: 1px solid #555;
             outline: none;
         }
-        #placeSearch:focus { border-color: white; }
-        #loadPlaceButton {
+        #placeSearch:focus,
+        #walkCommand:focus { border-color: white; }
+        #loadPlaceButton,
+        #walkGoButton {
             padding: 10px 16px;
             background: #222;
             color: white;
             border: 1px solid #666;
             cursor: pointer;
         }
-        #loadPlaceButton:hover { background: #333; }
-        #loadPlaceButton:disabled {
+        #loadPlaceButton:hover,
+        #walkGoButton:hover { background: #333; }
+        #loadPlaceButton:disabled,
+        #walkGoButton:disabled {
             opacity: 0.5;
             cursor: wait;
         }
@@ -114,6 +119,21 @@
             justify-content: center;
             overflow: hidden;
             background: #050505;
+            perspective: 900px;
+        }
+        #placeWalkLayer {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transform-style: preserve-3d;
+            will-change: transform;
+            transition: transform 220ms ease-out;
+            pointer-events: none;
+        }
+        #placeWalkLayer.is-walking {
+            pointer-events: auto;
         }
         #placeImage {
             display: none;
@@ -122,8 +142,19 @@
             width: auto;
             height: auto;
             object-fit: contain;
+            transform-origin: center center;
+            user-select: none;
+            -webkit-user-drag: none;
+        }
+        #placeWalkLayer.is-walking #placeImage {
+            max-width: none;
+            max-height: none;
+            width: 140%;
+            height: auto;
         }
         #placeLoading {
+            position: relative;
+            z-index: 2;
             color: #aaa;
             text-align: center;
             padding: 30px;
@@ -168,16 +199,26 @@
             background: #222;
             color: white;
             border: 1px solid #555;
-            cursor: not-allowed;
+            cursor: pointer;
         }
         #placeNavigation button:disabled {
             opacity: 0.35;
             cursor: not-allowed;
         }
+        #placeNavigation button:not(:disabled):hover {
+            background: #333;
+        }
         #placeNavigation small {
             display: block;
             margin-top: 8px;
             color: #777;
+        }
+        #walkCommandBar {
+            display: flex;
+            gap: 8px;
+            padding: 0 12px 12px;
+            background: #111;
+            flex-shrink: 0;
         }
         #placeStatus {
             padding: 8px 12px;
@@ -199,8 +240,10 @@
                 height: 40vh;
             }
             #placeHUD { grid-template-columns: repeat(2, 1fr); }
-            #placeSearchBar { flex-direction: column; }
-            #loadPlaceButton { width: 100%; }
+            #placeSearchBar,
+            #walkCommandBar { flex-direction: column; }
+            #loadPlaceButton,
+            #walkGoButton { width: 100%; }
         }
     </style>
 </head>
@@ -227,7 +270,14 @@
                 <button id="loadPlaceButton" type="button">LOAD PLACE</button>
             </div>
             <div id="placeView">
-                <img id="placeImage" src="" alt="">
+                <div
+                    id="placeWalkLayer"
+                    data-placement="move"
+                    data-vector="0,0,1"
+                    data-heading="0"
+                >
+                    <img id="placeImage" src="" alt="">
+                </div>
                 <div id="placeLoading">Type a destination above.</div>
             </div>
             <div id="placeHUD">
@@ -253,12 +303,23 @@
                 </div>
             </div>
             <div id="placeNavigation">
-                <button type="button" data-direction="up" disabled aria-label="Move up">↑</button>
+                <button type="button" data-direction="up" disabled aria-label="Move forward">↑</button>
                 <br>
-                <button type="button" data-direction="left" disabled aria-label="Move left">←</button>
-                <button type="button" data-direction="down" disabled aria-label="Move down">↓</button>
-                <button type="button" data-direction="right" disabled aria-label="Move right">→</button>
-                <small>WALKING / NAVIGATION SYSTEM — RESERVED FOR FUTURE DEVELOPMENT</small>
+                <button type="button" data-direction="left" disabled aria-label="Look left">←</button>
+                <button type="button" data-direction="down" disabled aria-label="Move back">↓</button>
+                <button type="button" data-direction="right" disabled aria-label="Look right">→</button>
+                <small id="walkHint">WALKING — type:in forward / back / left / right / look / reset</small>
+            </div>
+            <div id="walkCommandBar">
+                <input
+                    id="walkCommand"
+                    type="text"
+                    placeholder="type:in forward"
+                    autocomplete="off"
+                    spellcheck="false"
+                    disabled
+                >
+                <button id="walkGoButton" type="button" disabled>WALK</button>
             </div>
             <div id="placeStatus">READY</div>
         </div>
@@ -272,6 +333,21 @@
 
         let placeRequestNumber = 0;
         let placeSearchInProgress = false;
+
+        const walkState = {
+            enabled: false,
+            x: 0,
+            y: 0,
+            zoom: 1,
+            heading: 0
+        };
+
+        const WALK_STEP = 48;
+        const WALK_ZOOM_STEP = 0.18;
+        const WALK_TURN = 12;
+        const WALK_ZOOM_MIN = 1;
+        const WALK_ZOOM_MAX = 4.5;
+        const WALK_PAN_MAX = 420;
 
         const DESTINATION_CLASSIFICATIONS = {
             "eiffel tower": "LANDMARK",
@@ -325,9 +401,196 @@
         }
 
         function wikiFetch(url) {
-            // Do not set custom headers. An Accept header forces a CORS
-            // preflight, and Wikipedia often omits ACAO on OPTIONS.
             return fetch(url, { method: "GET" });
+        }
+
+        function clamp(value, min, max) {
+            return Math.min(max, Math.max(min, value));
+        }
+
+        function headingToRadians(deg) {
+            return (deg * Math.PI) / 180;
+        }
+
+        function applyWalkTransform() {
+            const layer = document.getElementById("placeWalkLayer");
+            if (!layer) return;
+
+            const x = walkState.x;
+            const y = walkState.y;
+            const zoom = walkState.zoom;
+            const heading = walkState.heading;
+
+            layer.dataset.placement = "move";
+            layer.dataset.vector = x.toFixed(1) + "," + y.toFixed(1) + "," + zoom.toFixed(2);
+            layer.dataset.heading = String(heading);
+
+            layer.style.transform =
+                "translate(" + x + "px, " + y + "px) " +
+                "rotateY(" + heading + "deg) " +
+                "scale(" + zoom + ")";
+
+            const latest = getLatestUniversalObject();
+            if (latest && latest.navigation) {
+                latest.navigation.mode = "WALK";
+                latest.navigation.walking = walkState.enabled;
+                latest.navigation.vector = {
+                    x: walkState.x,
+                    y: walkState.y,
+                    zoom: walkState.zoom,
+                    heading: walkState.heading
+                };
+                latest.navigation.forward = "up";
+                latest.navigation.backward = "down";
+                latest.navigation.left = "left";
+                latest.navigation.right = "right";
+            }
+        }
+
+        function resetWalkState() {
+            walkState.enabled = false;
+            walkState.x = 0;
+            walkState.y = 0;
+            walkState.zoom = 1;
+            walkState.heading = 0;
+            applyWalkTransform();
+        }
+
+        function setWalkingEnabled(enabled) {
+            walkState.enabled = !!enabled;
+            const layer = document.getElementById("placeWalkLayer");
+            const buttons = document.querySelectorAll("#placeNavigation button[data-direction]");
+            const command = document.getElementById("walkCommand");
+            const go = document.getElementById("walkGoButton");
+
+            if (layer) {
+                layer.classList.toggle("is-walking", walkState.enabled);
+            }
+            buttons.forEach(function (button) {
+                button.disabled = !walkState.enabled;
+            });
+            if (command) command.disabled = !walkState.enabled;
+            if (go) go.disabled = !walkState.enabled;
+
+            if (walkState.enabled) {
+                applyWalkTransform();
+            }
+        }
+
+        function moveWalk(direction, steps) {
+            if (!walkState.enabled) return false;
+
+            const count = Number.isFinite(steps) && steps > 0 ? steps : 1;
+            const rad = headingToRadians(walkState.heading);
+            const forwardX = Math.sin(rad);
+            const forwardY = -Math.cos(rad);
+
+            for (let i = 0; i < count; i += 1) {
+                if (direction === "up" || direction === "forward") {
+                    walkState.x -= forwardX * WALK_STEP;
+                    walkState.y -= forwardY * WALK_STEP * 0.35;
+                    walkState.zoom = clamp(
+                        walkState.zoom + WALK_ZOOM_STEP,
+                        WALK_ZOOM_MIN,
+                        WALK_ZOOM_MAX
+                    );
+                } else if (direction === "down" || direction === "back" || direction === "backward") {
+                    walkState.x += forwardX * WALK_STEP;
+                    walkState.y += forwardY * WALK_STEP * 0.35;
+                    walkState.zoom = clamp(
+                        walkState.zoom - WALK_ZOOM_STEP,
+                        WALK_ZOOM_MIN,
+                        WALK_ZOOM_MAX
+                    );
+                } else if (direction === "left") {
+                    walkState.heading = walkState.heading - WALK_TURN;
+                    walkState.x += WALK_STEP * 0.55;
+                } else if (direction === "right") {
+                    walkState.heading = walkState.heading + WALK_TURN;
+                    walkState.x -= WALK_STEP * 0.55;
+                } else if (direction === "look-left") {
+                    walkState.heading = walkState.heading - WALK_TURN * 1.6;
+                } else if (direction === "look-right") {
+                    walkState.heading = walkState.heading + WALK_TURN * 1.6;
+                } else if (direction === "reset") {
+                    walkState.x = 0;
+                    walkState.y = 0;
+                    walkState.zoom = 1;
+                    walkState.heading = 0;
+                } else {
+                    return false;
+                }
+            }
+
+            walkState.x = clamp(walkState.x, -WALK_PAN_MAX, WALK_PAN_MAX);
+            walkState.y = clamp(walkState.y, -WALK_PAN_MAX, WALK_PAN_MAX);
+            walkState.heading = ((walkState.heading + 180) % 360 + 360) % 360 - 180;
+
+            applyWalkTransform();
+
+            const status = document.getElementById("placeStatus");
+            if (status) {
+                status.textContent =
+                    "WALK " +
+                    walkState.x.toFixed(0) + "," +
+                    walkState.y.toFixed(0) + "," +
+                    walkState.zoom.toFixed(2) +
+                    "  H" + walkState.heading.toFixed(0);
+            }
+            return true;
+        }
+
+        function parseWalkCommand(raw) {
+            let text = String(raw || "").trim().toLowerCase();
+            if (!text) return null;
+            if (text.indexOf("type:in") === 0) {
+                text = text.replace(/^type:\s*in\s*/, "").trim();
+            } else if (text.indexOf("type in") === 0) {
+                text = text.replace(/^type\s+in\s*/, "").trim();
+            }
+
+            const parts = text.split(/\s+/);
+            const action = parts[0] || "";
+            const extra = parts[1] || "";
+            const steps = Number(parts[parts.length - 1]);
+
+            if (action === "forward" || action === "f" || action === "w" || action === "up") {
+                return { direction: "forward", steps: steps };
+            }
+            if (action === "back" || action === "backward" || action === "s" || action === "down") {
+                return { direction: "back", steps: steps };
+            }
+            if (action === "left" || action === "a") {
+                return { direction: "left", steps: steps };
+            }
+            if (action === "right" || action === "d") {
+                return { direction: "right", steps: steps };
+            }
+            if (action === "look" && (extra === "left" || extra === "right")) {
+                return { direction: "look-" + extra, steps: steps };
+            }
+            if (action === "look-left" || action === "look-right") {
+                return { direction: action, steps: steps };
+            }
+            if (action === "reset" || action === "center" || action === "stop") {
+                return { direction: "reset", steps: 1 };
+            }
+            return null;
+        }
+
+        function runTypedWalkCommand() {
+            const input = document.getElementById("walkCommand");
+            if (!input) return;
+            const parsed = parseWalkCommand(input.value);
+            if (!parsed) {
+                const status = document.getElementById("placeStatus");
+                if (status) {
+                    status.textContent =
+                        "USE type:in forward | back | left | right | look left | reset";
+                }
+                return;
+            }
+            moveWalk(parsed.direction, parsed.steps);
         }
 
         function openPlaceExplorer() {
@@ -358,6 +621,9 @@
             const classification = document.getElementById("placeClassification");
             const latitude = document.getElementById("placeLatitude");
             const longitude = document.getElementById("placeLongitude");
+
+            resetWalkState();
+            setWalkingEnabled(false);
 
             if (image) {
                 image.onload = null;
@@ -470,7 +736,6 @@
                 throw new Error("The requested Wikipedia page could not be found.");
             }
 
-            // Prefer a result that already has coordinates when the top hit does not.
             if (!parseCoordinates(page).latitude) {
                 const withCoords = pages.find(function (item) {
                     return item && parseCoordinates(item).latitude !== null;
@@ -490,6 +755,7 @@
             const latitude = document.getElementById("placeLatitude");
             const longitude = document.getElementById("placeLongitude");
             const status = document.getElementById("placeStatus");
+            const walkInput = document.getElementById("walkCommand");
 
             if (universalID) universalID.textContent = universalObject.universalID;
             if (title) title.textContent = result.title;
@@ -507,9 +773,20 @@
                 image.onload = function () {
                     image.style.display = "block";
                     if (loading) loading.style.display = "none";
+                    resetWalkState();
+                    setWalkingEnabled(true);
+                    if (walkInput) {
+                        walkInput.value = "";
+                        walkInput.focus();
+                    }
+                    if (status) {
+                        status.textContent =
+                            "PLACE LOADED — type:in forward to walk the image";
+                    }
                 };
                 image.onerror = function () {
                     image.style.display = "none";
+                    setWalkingEnabled(false);
                     if (loading) {
                         loading.style.display = "block";
                         loading.textContent =
@@ -519,12 +796,13 @@
                 image.src = result.image;
                 image.alt = result.title;
             } else if (loading) {
+                setWalkingEnabled(false);
                 loading.style.display = "block";
                 loading.textContent =
                     "Wikipedia found the place, but no image was available.";
             }
 
-            if (status) status.textContent = "PLACE LOADED";
+            if (status && !result.image) status.textContent = "PLACE LOADED";
         }
 
         async function loadRequestedPlace() {
@@ -581,10 +859,11 @@
                     navigation: {
                         mode: "IMAGE",
                         walking: false,
-                        forward: null,
-                        backward: null,
-                        left: null,
-                        right: null
+                        vector: { x: 0, y: 0, zoom: 1, heading: 0 },
+                        forward: "up",
+                        backward: "down",
+                        left: "left",
+                        right: "right"
                     },
                     status: {
                         loaded: true,
@@ -634,12 +913,49 @@
                 closePlaceExplorer();
                 return;
             }
+
+            const target = event.target;
+            const typingInSearch = target && target.id === "placeSearch";
+            const typingInWalk = target && target.id === "walkCommand";
+
             if (event.key === "Enter") {
-                const target = event.target;
-                if (target && target.id === "placeSearch") {
+                if (typingInSearch) {
                     event.preventDefault();
                     loadRequestedPlace();
+                    return;
                 }
+                if (typingInWalk) {
+                    event.preventDefault();
+                    runTypedWalkCommand();
+                    return;
+                }
+            }
+
+            if (typingInSearch || typingInWalk) return;
+            if (!walkState.enabled) return;
+
+            const key = event.key.toLowerCase();
+            if (key === "arrowup" || key === "w") {
+                event.preventDefault();
+                moveWalk("forward");
+            } else if (key === "arrowdown" || key === "s") {
+                event.preventDefault();
+                moveWalk("back");
+            } else if (key === "arrowleft" || key === "a") {
+                event.preventDefault();
+                moveWalk("left");
+            } else if (key === "arrowright" || key === "d") {
+                event.preventDefault();
+                moveWalk("right");
+            } else if (key === "q") {
+                event.preventDefault();
+                moveWalk("look-left");
+            } else if (key === "e") {
+                event.preventDefault();
+                moveWalk("look-right");
+            } else if (key === "r") {
+                event.preventDefault();
+                moveWalk("reset");
             }
         }
 
@@ -647,6 +963,8 @@
             const appendButton = document.getElementById("appendNewObject");
             const closeButton = document.getElementById("closePlaceExplorer");
             const loadButton = document.getElementById("loadPlaceButton");
+            const walkGo = document.getElementById("walkGoButton");
+            const nav = document.getElementById("placeNavigation");
 
             if (appendButton) {
                 appendButton.addEventListener("click", openPlaceExplorer);
@@ -656,6 +974,16 @@
             }
             if (loadButton) {
                 loadButton.addEventListener("click", loadRequestedPlace);
+            }
+            if (walkGo) {
+                walkGo.addEventListener("click", runTypedWalkCommand);
+            }
+            if (nav) {
+                nav.addEventListener("click", function (event) {
+                    const button = event.target.closest("button[data-direction]");
+                    if (!button || button.disabled) return;
+                    moveWalk(button.getAttribute("data-direction"));
+                });
             }
             document.addEventListener("keydown", handleExplorerKeydown);
         });
@@ -668,6 +996,7 @@
         window.getUniversalObject = getUniversalObject;
         window.getLatestUniversalObject = getLatestUniversalObject;
         window.classifyPlace = classifyPlace;
+        window.moveWalk = moveWalk;
 
         console.log("UNIVERSAL PLACE EXPLORER LOADED");
     </script>
