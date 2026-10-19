@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Custom PCP · Portable-Clinch-Code</title>
+<style>
+  :root {
+    --bg: #ffffff;
+    --panel: #f5f5f5;
+    --border: #000000;
+    --accent: #000000;
+    --text: #000000;
+    --muted: #333333;
+    --code-bg: #eeeeee;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.55;
+  }
+  header {
+    padding: 1.5rem 1.5rem 1rem;
+    border-bottom: 1px solid var(--border);
+    background: #ffffff;
+  }
+  header h1 { margin: 0 0 .25rem; font-size: 1.6rem; font-weight: 650; }
+  header p { margin: 0; color: var(--muted); font-size: .95rem; }
+  main { max-width: 960px; margin: 0 auto; padding: 1.25rem; }
+  section {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1.1rem 1.2rem;
+    margin-bottom: 1.1rem;
+  }
+  h2 { margin: 0 0 .75rem; font-size: 1.15rem; color: var(--accent); }
+  pre, code {
+    font-family: ui-monospace, SFMono-Regular, Consolas, "Liberation Mono", monospace;
+    font-size: .84rem;
+  }
+  pre {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: .9rem 1rem;
+    overflow-x: auto;
+    margin: .4rem 0 0;
+  }
+  .lang { color: var(--muted); font-size: .75rem; text-transform: uppercase; letter-spacing: .04em; }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: .9rem;
+  }
+  th, td {
+    text-align: left;
+    padding: .55rem .6rem;
+    border-bottom: 1px solid var(--border);
+  }
+  th { color: var(--accent); font-weight: 600; }
+  .demo-row { display: flex; gap: .6rem; flex-wrap: wrap; align-items: center; }
+  input[type="text"] {
+    flex: 1;
+    min-width: 180px;
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    color: var(--text);
+    border-radius: 8px;
+    padding: .5rem .7rem;
+    font-family: inherit;
+  }
+  button {
+    background: #000000;
+    color: #ffffff;
+    border: 1px solid #000000;
+    border-radius: 8px;
+    padding: .5rem 1rem;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  button:hover { background: #333333; }
+  #out {
+    margin-top: .7rem;
+    font-family: ui-monospace, monospace;
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: .7rem 1rem;
+    min-height: 2.4rem;
+  }
+  .note { color: var(--muted); font-size: .85rem; margin-top: .6rem; }
+</style>
+</head>
+<body>
+<header>
+  <h1>Custom PCP · Portable-Clinch-Code</h1>
+  <p>Zero → 0* rewrite · $ operational token · Parent model + cookie storage</p>
+</header>
+
+<main>
+  <section>
+    <h2>Interactive Clinch Demo (JavaScript)</h2>
+    <div class="demo-row">
+      <input type="text" id="src" value="010$10" placeholder="enter string with 0 and $">
+      <button onclick="runClinch()">Clinch zeros</button>
+    </div>
+    <div id="out">result appears here</div>
+    <p class="note">Every <code>0</code> becomes <code>0*</code>. The <code>$</code> token is left intact so a parent model can still mutate it.</p>
+  </section>
+
+  <section>
+    <div class="lang">C — half-coded zero handler</div>
+    <pre><code>#include &lt;stdio.h&gt;
+#include &lt;string.h&gt;
+#include &lt;stdlib.h&gt;
+
+#define MAX 256
+
+static char op_token = '$';
+
+/* Half-coded: turns every 0 into 0* ; leaves $ untouched */
+char *clinches_zeros(const char *src) {
+    char *dst = malloc(MAX);
+    int j = 0;
+    for (int i = 0; src[i] &amp;&amp; j &lt; MAX-2; i++) {
+        if (src[i] == '0') {
+            dst[j++] = '0';
+            dst[j++] = '*';
+        } else if (src[i] == op_token) {
+            dst[j++] = op_token;
+        } else {
+            dst[j++] = src[i];
+        }
+    }
+    dst[j] = '\\0';
+    return dst;
+}
+
+void demo(void) {
+    const char *top    = "010$10";
+    const char *bottom = "0$1001";
+    char *t = clinches_zeros(top);
+    char *b = clinches_zeros(bottom);
+    printf("PCP top:    %s\\n", t);
+    printf("PCP bottom: %s\\n", b);
+    free(t); free(b);
+}</code></pre>
+  </section>
+
+  <section>
+    <div class="lang">Python — cookies + parent model</div>
+    <pre><code># 3 lines of cookies that collect the clinched zeros
+import http.cookies
+c = http.cookies.SimpleCookie(); c['zeros'] = '0*0*0*'; c['op'] = '$'
+print(c.output())   # Set-Cookie headers ready for storage
+
+# Parent model for the $ function — keeps the operational token mutable
+class ParentPCP:
+    def dollar(self, token: str) -> str:
+        return token if token == '$' else token
+
+class LinuxMutation(ParentPCP):
+    def dollar(self, token: str) -> str:
+        if token == '$':
+            return '$→'          # figurative mutation
+        return super().dollar(token)
+
+m = LinuxMutation()
+print(m.dollar('$'))</code></pre>
+  </section>
+
+  <section>
+    <h2>Figurative analysis table</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Symbol</th>
+          <th>C treatment</th>
+          <th>Python parent model</th>
+          <th>Cookie storage</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><code>0</code></td>
+          <td>rewritten to <code>0*</code></td>
+          <td>ignored (data only)</td>
+          <td><code>zeros=0*0*0*</code></td>
+        </tr>
+        <tr>
+          <td><code>$</code></td>
+          <td>left intact</td>
+          <td><code>ParentPCP.dollar</code></td>
+          <td><code>op=$</code></td>
+        </tr>
+        <tr>
+          <td>other</td>
+          <td>copied</td>
+          <td>pass-through</td>
+          <td>—</td>
+        </tr>
+      </tbody>
+    </table>
+    <p class="note">The C half implements the zero→0* rewrite and deliberately leaves $ free. The three-line Python cookie fragment stores the result; the ParentPCP / LinuxMutation pair keeps $ behaviour open for mutation.</p>
+  </section>
+</main>
+
+<script>
+function clinchesZeros(src) {
+  let out = '';
+  for (let i = 0; i < src.length; i++) {
+    const ch = src[i];
+    if (ch === '0') {
+      out += '0*';
+    } else {
+      out += ch;   // $ and everything else preserved
+    }
+  }
+  return out;
+}
+
+function runClinch() {
+  const src = document.getElementById('src').value;
+  const result = clinchesZeros(src);
+  document.getElementById('out').textContent = result || '(empty)';
+}
+
+// auto-run on load with the default example
+document.addEventListener('DOMContentLoaded', runClinch);
+</script>
+</body>
+</html>
