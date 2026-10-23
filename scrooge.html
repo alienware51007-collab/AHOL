@@ -154,7 +154,7 @@
       <button onclick="runClinch()">Clinch zeros</button>
     </div>
     <div id="out">result appears here</div>
-    <p class="note">Every <code>0</code> becomes <code>0*</code>. The <code>$</code> token is left intact. Each press generates a new metacharacter-defined Wikidata-style item ID.</p>
+    <p class="note">Every <code>0</code> becomes <code>0*</code>. The <code>$</code> token is left intact. Serial exec() exempts pages over 10,000 words and lists the .com address as a string literal in the output.</p>
   </section>
 
   <section>
@@ -250,7 +250,7 @@ print(m.dollar('$'))</code></pre>
         </tr>
       </tbody>
     </table>
-    <p class="note">The C half implements the zero→0* rewrite and deliberately leaves $ free. The three-line Python cookie fragment stores the result; the ParentPCP / LinuxMutation pair keeps $ behaviour open for mutation. New layer: each press stamps a metacharacter-generated Wikidata-style ID and a cookie date/stroke-time pair matched by the (a|b) alternative regex.</p>
+    <p class="note">The C half implements the zero→0* rewrite and deliberately leaves $ free. The three-line Python cookie fragment stores the result; the ParentPCP / LinuxMutation pair keeps $ behaviour open for mutation. Serial exec() layer exempts >10k-word pages and surfaces the .com address as a string literal next to the clinched zeros.</p>
   </section>
 </main>
 
@@ -312,6 +312,27 @@ function generateMetaWikidataId() {
   };
 }
 
+// Serial exec() function — exempts any page over 10,000 words
+// Uses a serial document / at the beginning of the search
+function serialExec(itemId) {
+  // Simulate word count from the ID (deterministic-ish for demo)
+  // Real crawling not possible client-side; this stands in for the check
+  const seed = itemId.replace(/\D/g, '');
+  const simulatedWordCount = (parseInt(seed.slice(-6), 10) || 0) % 25000;
+  const overLimit = simulatedWordCount > 10000;
+
+  // serial document / prefix
+  const serialDoc = 'serial document /';
+
+  return {
+    overLimit,
+    wordCount: simulatedWordCount,
+    serialPrefix: serialDoc,
+    // .com address for matching zeros
+    comAddress: overLimit ? `https://${itemId.toLowerCase()}.com` : null
+  };
+}
+
 // Non-word character (also metacharacter-adjacent) from Wikipedia-style source
 const nonWordChars = ['·', '—', '…', '•', '†', '‡', '§'];
 function pickNonWord() {
@@ -354,17 +375,42 @@ function runClinch() {
   // Generate new Wikidata-style item purely via metacharacters every button press
   if (zeroCount > 0 || true) {  // always generate a new one on press
     const item = generateMetaWikidataId();
-    const nonWord = pickNonWord();
-    const link = document.getElementById('wikidataLink');
-    link.textContent = item.id + nonWord;
-    link.href = item.url;                    // takes user to the Wikidata page
-    link.dataset.id = item.id;
-    link.dataset.label = item.label;
-    link.dataset.wiki = item.wiki;
-    link.dataset.nonword = nonWord;
+    const serial = serialExec(item.id);   // serial document / check
 
-    document.getElementById('meta').textContent =
-      `Cookie date: ${circulatedDate} · stroke: ${strokeTime} · (a|b) hits: ${alts.join(', ') || 'none'} · zeros clinched: ${zeroCount} · item: ${item.label} (meta)`;
+    // Exempt pages over 10,000 words from the Generated Wikidata-style item search
+    if (serial.overLimit) {
+      // List it in the Clinch zeros as a string literal so zeros can be matched
+      // "match" refers to the .com address
+      const literal = `"${serial.comAddress}"`;
+      const updatedResult = result + ' ' + literal;
+      document.getElementById('out').textContent = updatedResult;
+
+      document.getElementById('meta').textContent =
+        `${serial.serialPrefix} EXEMPT (>10k words: ${serial.wordCount}) · Cookie date: ${circulatedDate} · stroke: ${strokeTime} · (a|b) hits: ${alts.join(', ') || 'none'} · zeros clinched: ${zeroCount} · .com match: ${serial.comAddress}`;
+
+      // Still show the ID but mark as exempt
+      const nonWord = pickNonWord();
+      const link = document.getElementById('wikidataLink');
+      link.textContent = item.id + nonWord + ' (exempt)';
+      link.href = serial.comAddress || item.url;
+      link.dataset.id = item.id;
+      link.dataset.label = 'exempt-' + item.label;
+      link.dataset.wiki = item.wiki;
+      link.dataset.nonword = nonWord;
+    } else {
+      // Normal path — under 10k words, include in search
+      const nonWord = pickNonWord();
+      const link = document.getElementById('wikidataLink');
+      link.textContent = item.id + nonWord;
+      link.href = item.url;
+      link.dataset.id = item.id;
+      link.dataset.label = item.label;
+      link.dataset.wiki = item.wiki;
+      link.dataset.nonword = nonWord;
+
+      document.getElementById('meta').textContent =
+        `${serial.serialPrefix} included (${serial.wordCount} words) · Cookie date: ${circulatedDate} · stroke: ${strokeTime} · (a|b) hits: ${alts.join(', ') || 'none'} · zeros clinched: ${zeroCount} · item: ${item.label} (meta)`;
+    }
   }
 }
 
