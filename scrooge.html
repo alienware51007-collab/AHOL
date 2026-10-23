@@ -289,11 +289,35 @@ function extractAlternatives(str) {
   return matches;
 }
 
-// Generate a new Wikidata-style ID every time a zero is written as a string
-function generateWikidataId() {
-  // Inspired by Q92767453; produce a fresh Q + 8-digit number
-  const num = Math.floor(10000000 + Math.random() * 90000000);
-  return 'Q' + num;
+// Pool of real Wikidata items from different pages
+const wikidataPool = [
+  { id: 'Q92767453', label: 'GPX2 (disambiguation)', url: 'https://www.wikidata.org/wiki/Q92767453', wiki: 'https://en.wikipedia.org/wiki/GPX2' },
+  { id: 'Q42', label: 'Douglas Adams', url: 'https://www.wikidata.org/wiki/Q42', wiki: 'https://en.wikipedia.org/wiki/Douglas_Adams' },
+  { id: 'Q5', label: 'human', url: 'https://www.wikidata.org/wiki/Q5', wiki: 'https://en.wikipedia.org/wiki/Human' },
+  { id: 'Q1', label: 'universe', url: 'https://www.wikidata.org/wiki/Q1', wiki: 'https://en.wikipedia.org/wiki/Universe' },
+  { id: 'Q2', label: 'Earth', url: 'https://www.wikidata.org/wiki/Q2', wiki: 'https://en.wikipedia.org/wiki/Earth' },
+  { id: 'Q30', label: 'United States', url: 'https://www.wikidata.org/wiki/Q30', wiki: 'https://en.wikipedia.org/wiki/United_States' },
+  { id: 'Q145', label: 'United Kingdom', url: 'https://www.wikidata.org/wiki/Q145', wiki: 'https://en.wikipedia.org/wiki/United_Kingdom' },
+  { id: 'Q142', label: 'France', url: 'https://www.wikidata.org/wiki/Q142', wiki: 'https://en.wikipedia.org/wiki/France' },
+  { id: 'Q183', label: 'Germany', url: 'https://www.wikidata.org/wiki/Q183', wiki: 'https://en.wikipedia.org/wiki/Germany' },
+  { id: 'Q96', label: 'Mexico', url: 'https://www.wikidata.org/wiki/Q96', wiki: 'https://en.wikipedia.org/wiki/Mexico' },
+  { id: 'Q414', label: 'Argentina', url: 'https://www.wikidata.org/wiki/Q414', wiki: 'https://en.wikipedia.org/wiki/Argentina' },
+  { id: 'Q155', label: 'Brazil', url: 'https://www.wikidata.org/wiki/Q155', wiki: 'https://en.wikipedia.org/wiki/Brazil' },
+  { id: 'Q668', label: 'India', url: 'https://www.wikidata.org/wiki/Q668', wiki: 'https://en.wikipedia.org/wiki/India' },
+  { id: 'Q148', label: 'China', url: 'https://www.wikidata.org/wiki/Q148', wiki: 'https://en.wikipedia.org/wiki/China' },
+  { id: 'Q17', label: 'Japan', url: 'https://www.wikidata.org/wiki/Q17', wiki: 'https://en.wikipedia.org/wiki/Japan' },
+  { id: 'Q884', label: 'South Korea', url: 'https://www.wikidata.org/wiki/Q884', wiki: 'https://en.wikipedia.org/wiki/South_Korea' }
+];
+
+let lastIndex = -1;
+
+function pickNewWikidataItem() {
+  let idx;
+  do {
+    idx = Math.floor(Math.random() * wikidataPool.length);
+  } while (idx === lastIndex && wikidataPool.length > 1);
+  lastIndex = idx;
+  return wikidataPool[idx];
 }
 
 // Non-word character pulled from Wikipedia page source style (punctuation / symbols)
@@ -335,29 +359,49 @@ function runClinch() {
   setCookie('pcp_zero_meta', cookiePayload);
   setCookie('pcp_alts', alts.join(','));
 
-  // Generate new Wikidata-style ID for each clinch that wrote zeros
-  if (zeroCount > 0) {
-    const newId = generateWikidataId();
+  // Generate new real Wikidata item from a different page every button press
+  if (zeroCount > 0 || true) {  // always generate a new one on press
+    const item = pickNewWikidataItem();
     const nonWord = pickNonWord();
     const link = document.getElementById('wikidataLink');
-    link.textContent = newId + nonWord;
-    link.href = 'https://www.wikidata.org/wiki/' + newId;
-    link.dataset.id = newId;
+    link.textContent = item.id + nonWord;
+    link.href = item.url;                    // takes user to the Wikidata page
+    link.dataset.id = item.id;
+    link.dataset.label = item.label;
+    link.dataset.wiki = item.wiki;
     link.dataset.nonword = nonWord;
 
     document.getElementById('meta').textContent =
-      `Cookie date: ${circulatedDate} · stroke: ${strokeTime} · (a|b) hits: ${alts.join(', ') || 'none'} · zeros clinched: ${zeroCount}`;
+      `Cookie date: ${circulatedDate} · stroke: ${strokeTime} · (a|b) hits: ${alts.join(', ') || 'none'} · zeros clinched: ${zeroCount} · item: ${item.label}`;
   }
 }
 
-// Clickable link above the button opens a popup
+// Clickable link above the button opens a popup, and the link itself goes to the real page
 document.getElementById('wikidataLink').addEventListener('click', function(e) {
-  e.preventDefault();
-  const id = this.dataset.id || this.textContent.replace(/[^\w]/g, '');
+  // Allow normal navigation if they want; also show popup briefly or update popup content
+  const id = this.dataset.id;
+  const label = this.dataset.label || '';
+  const wiki = this.dataset.wiki || '';
   const nw = this.dataset.nonword || '·';
-  document.getElementById('popupId').textContent = id;
+  document.getElementById('popupId').textContent = id + ' — ' + label;
   document.getElementById('nonWord').textContent = nw;
+  const src = document.getElementById('popupSource');
+  src.href = this.href;
+  src.textContent = this.href;
+  // Optional second link to Wikipedia
+  let wikiLink = document.getElementById('popupWiki');
+  if (!wikiLink) {
+    wikiLink = document.createElement('p');
+    wikiLink.id = 'popupWiki';
+    wikiLink.innerHTML = 'Wikipedia: <a id="popupWikiA" href="#" target="_blank"></a>';
+    document.getElementById('wikiPopup').appendChild(wikiLink);
+  }
+  const a = document.getElementById('popupWikiA');
+  a.href = wiki;
+  a.textContent = wiki;
   document.getElementById('wikiPopup').classList.add('show');
+  // Do not preventDefault so the link still navigates if desired; or keep prevent if popup is preferred
+  // e.preventDefault();  // uncomment if you only want the popup, not navigation
 });
 
 // auto-run on load with the default example
