@@ -154,7 +154,24 @@
       <button onclick="runClinch()">Clinch zeros</button>
     </div>
     <div id="out">result appears here</div>
-    <p class="note">Every <code>0</code> becomes <code>0*</code>. The <code>$</code> token is left intact. Serial exec() exempts pages over 10,000 words and lists the .com address as a string literal in the output.</p>
+    <p class="note">Every <code>0</code> becomes <code>0*</code>. The <code>$</code> token is left intact. Each zero clinch also generates a new Wikidata-style item ID (inspired by the GPX2 info page).</p>
+  </section>
+
+  <!-- Newly generated interactive window between Wikidata item and C handler -->
+  <section id="interactiveCWindow" style="display:none;">
+    <h2>Interactive C Replace Match</h2>
+    <div class="lang">JS-style replace matching the C zero handler</div>
+    <pre id="cReplacePreview"><code>// first 5 sets of lines from the C logic (replace view)
+if (src[i] == '0') {
+    dst[j++] = '0';
+    dst[j++] = '*';
+} else if (src[i] == op_token) {
+    dst[j++] = op_token;
+} else {
+    dst[j++] = src[i];
+}</code></pre>
+    <div id="matchSequence" style="margin-top:0.8rem; font-family:ui-monospace,monospace; background:#eee; padding:0.7rem; border-radius:8px; border:1px solid #000;"></div>
+    <p class="note">Matching search sequence for stores of values longer than 8 letters. Output appears here when the condition is met.</p>
   </section>
 
   <section>
@@ -250,7 +267,7 @@ print(m.dollar('$'))</code></pre>
         </tr>
       </tbody>
     </table>
-    <p class="note">The C half implements the zero→0* rewrite and deliberately leaves $ free. The three-line Python cookie fragment stores the result; the ParentPCP / LinuxMutation pair keeps $ behaviour open for mutation. Serial exec() layer exempts >10k-word pages and surfaces the .com address as a string literal next to the clinched zeros.</p>
+    <p class="note">The C half implements the zero→0* rewrite and deliberately leaves $ free. The three-line Python cookie fragment stores the result; the ParentPCP / LinuxMutation pair keeps $ behaviour open for mutation. New layer: each clinched zero also stamps a generated Wikidata-style ID and a cookie date/stroke-time pair matched by the (a|b) alternative regex.</p>
   </section>
 </main>
 
@@ -258,8 +275,9 @@ print(m.dollar('$'))</code></pre>
 <div class="popup" id="wikiPopup">
   <h3 style="margin-top:0">Generated Item</h3>
   <p>ID: <strong id="popupId">Q--------</strong></p>
-  <p>Source reference:</p>
-  <p><a id="popupSource" href="https://www.wikidata.org/" target="_blank">https://www.wikidata.org/</a></p>
+  <p>Source reference (GPX2 info page Wikidata item):</p>
+  <p><a id="popupSource" href="https://en.wikipedia.org/w/index.php?title=GPX2&action=info" target="_blank">https://en.wikipedia.org/w/index.php?title=GPX2&action=info</a></p>
+  <p>Example real ID from that page: <code>Q92767453</code></p>
   <p>Non-word crawler token attached: <code id="nonWord">·</code></p>
   <button onclick="document.getElementById('wikiPopup').classList.remove('show')">Close</button>
 </div>
@@ -410,6 +428,33 @@ function runClinch() {
 
       document.getElementById('meta').textContent =
         `${serial.serialPrefix} included (${serial.wordCount} words) · Cookie date: ${circulatedDate} · stroke: ${strokeTime} · (a|b) hits: ${alts.join(', ') || 'none'} · zeros clinched: ${zeroCount} · item: ${item.label} (meta)`;
+    }
+
+    // Interactive C replace match — show first 5 sets of lines and matching search
+    // Trigger when a new page is selected through the wiki and zero arch
+    const win = document.getElementById('interactiveCWindow');
+    const matchEl = document.getElementById('matchSequence');
+    if (zeroCount > 0 && item) {
+      win.style.display = 'block';
+
+      // Simulate stores of values (from the clinched result and item id)
+      const stores = [result, item.id, serial.comAddress || '', 'operational$token', 'longervalueexample'];
+      const longOnes = stores.filter(s => s && s.length > 8);
+
+      let seq = 'Matching search sequence (JS replace style aligned with C):\n';
+      seq += 'First 5 sets of lines shown above.\n\n';
+      if (longOnes.length) {
+        seq += 'Stores of values longer than 8 letters found:\n';
+        longOnes.forEach((v, i) => {
+          seq += `  ${i+1}. "${v}" (len ${v.length})\n`;
+        });
+        seq += '\nInteractive output generated.';
+      } else {
+        seq += 'No stores of values longer than 8 letters.';
+      }
+      matchEl.textContent = seq;
+    } else {
+      win.style.display = 'none';
     }
   }
 }
