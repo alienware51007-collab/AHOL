@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Custom PCP · Portable-Clinch-Code</title>
+<title>Custom PCP · Portable-Clinch-Code + Wikidata Layer</title>
 <style>
   :root {
     --bg: #ffffff;
@@ -93,23 +93,68 @@
     min-height: 2.4rem;
   }
   .note { color: var(--muted); font-size: .85rem; margin-top: .6rem; }
+  .wikidata-layer {
+    margin-bottom: 0.8rem;
+    padding: 0.6rem 0.8rem;
+    background: #fff;
+    border: 1px dashed #000;
+    border-radius: 8px;
+    font-size: 0.9rem;
+  }
+  .wikidata-link {
+    display: inline-block;
+    color: #0645ad;
+    text-decoration: underline;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  .wikidata-link:hover { color: #0b0080; }
+  #meta {
+    font-size: 0.8rem;
+    color: var(--muted);
+    margin-top: 0.4rem;
+  }
+  .popup {
+    display: none;
+    position: fixed;
+    top: 20%;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #fff;
+    border: 2px solid #000;
+    border-radius: 12px;
+    padding: 1.2rem;
+    z-index: 1000;
+    max-width: 420px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.25);
+  }
+  .popup.show { display: block; }
+  .popup a { color: #0645ad; }
 </style>
 </head>
 <body>
 <header>
   <h1>Custom PCP · Portable-Clinch-Code</h1>
-  <p>Zero → 0* rewrite · $ operational token · Parent model + cookie storage</p>
+  <p>Zero → 0* rewrite · $ operational token · Parent model + cookie storage · Wikidata item layer</p>
 </header>
 
 <main>
   <section>
     <h2>Interactive Clinch Demo (JavaScript)</h2>
+
+    <!-- Wikidata / crawler layer sits above the Clinch button -->
+    <div class="wikidata-layer" id="wikidataLayer">
+      <strong>Generated Wikidata-style item:</strong>
+      <a class="wikidata-link" id="wikidataLink" href="#" target="_blank">Q--------</a>
+      <div id="meta">Click the ID to open a popup with the source link.</div>
+    </div>
+
     <div class="demo-row">
       <input type="text" id="src" value="010$10" placeholder="enter string with 0 and $">
       <button onclick="runClinch()">Clinch zeros</button>
     </div>
     <div id="out">result appears here</div>
-    <p class="note">Every <code>0</code> becomes <code>0*</code>. The <code>$</code> token is left intact so a parent model can still mutate it.</p>
+    <p class="note">Every <code>0</code> becomes <code>0*</code>. The <code>$</code> token is left intact. Each zero clinch also generates a new Wikidata-style item ID (inspired by the GPX2 info page).</p>
   </section>
 
   <section>
@@ -205,29 +250,115 @@ print(m.dollar('$'))</code></pre>
         </tr>
       </tbody>
     </table>
-    <p class="note">The C half implements the zero→0* rewrite and deliberately leaves $ free. The three-line Python cookie fragment stores the result; the ParentPCP / LinuxMutation pair keeps $ behaviour open for mutation.</p>
+    <p class="note">The C half implements the zero→0* rewrite and deliberately leaves $ free. The three-line Python cookie fragment stores the result; the ParentPCP / LinuxMutation pair keeps $ behaviour open for mutation. New layer: each clinched zero also stamps a generated Wikidata-style ID and a cookie date/stroke-time pair matched by the (a|b) alternative regex.</p>
   </section>
 </main>
 
+<!-- Popup for the generated Wikidata link -->
+<div class="popup" id="wikiPopup">
+  <h3 style="margin-top:0">Generated Item</h3>
+  <p>ID: <strong id="popupId">Q--------</strong></p>
+  <p>Source reference (GPX2 info page Wikidata item):</p>
+  <p><a id="popupSource" href="https://en.wikipedia.org/w/index.php?title=GPX2&action=info" target="_blank">https://en.wikipedia.org/w/index.php?title=GPX2&action=info</a></p>
+  <p>Example real ID from that page: <code>Q92767453</code></p>
+  <p>Non-word crawler token attached: <code id="nonWord">·</code></p>
+  <button onclick="document.getElementById('wikiPopup').classList.remove('show')">Close</button>
+</div>
+
 <script>
+// Cookie helpers
+function setCookie(name, value, days = 7) {
+  const d = new Date();
+  d.setTime(d.getTime() + (days * 24 * 60 * 60 * 1000));
+  document.cookie = `${name}=${encodeURIComponent(value)};expires=${d.toUTCString()};path=/`;
+}
+function getCookie(name) {
+  const m = document.cookie.match(new RegExp('(?:^|; )' + name + '=([^;]*)'));
+  return m ? decodeURIComponent(m[1]) : null;
+}
+
+// Regex (a|b) — "any of the specified alternatives"
+// Used to pull cookie date of the 0 circulated and the stroke time in between
+function extractAlternatives(str) {
+  const re = /(a|b)/g;
+  const matches = [];
+  let m;
+  while ((m = re.exec(str)) !== null) {
+    matches.push(m[1]);
+  }
+  return matches;
+}
+
+// Generate a new Wikidata-style ID every time a zero is written as a string
+function generateWikidataId() {
+  // Inspired by Q92767453; produce a fresh Q + 8-digit number
+  const num = Math.floor(10000000 + Math.random() * 90000000);
+  return 'Q' + num;
+}
+
+// Non-word character pulled from Wikipedia page source style (punctuation / symbols)
+const nonWordChars = ['·', '—', '…', '•', '†', '‡', '§'];
+function pickNonWord() {
+  return nonWordChars[Math.floor(Math.random() * nonWordChars.length)];
+}
+
 function clinchesZeros(src) {
   let out = '';
+  let zeroCount = 0;
   for (let i = 0; i < src.length; i++) {
     const ch = src[i];
     if (ch === '0') {
       out += '0*';
+      zeroCount++;
     } else {
       out += ch;   // $ and everything else preserved
     }
   }
-  return out;
+  return { result: out, zeroCount };
 }
 
 function runClinch() {
   const src = document.getElementById('src').value;
-  const result = clinchesZeros(src);
+  const { result, zeroCount } = clinchesZeros(src);
   document.getElementById('out').textContent = result || '(empty)';
+
+  // Cookie date of the 0 circulated + stroke time in between
+  const now = new Date();
+  const circulatedDate = now.toISOString().slice(0, 10);          // YYYY-MM-DD
+  const strokeTime = now.toTimeString().slice(0, 8);               // HH:MM:SS
+  const cookiePayload = `circulated=${circulatedDate}|stroke=${strokeTime}|zeros=${result}`;
+
+  // Apply (a|b) regex over a synthetic string that contains the alternatives
+  const probe = `a${circulatedDate}b${strokeTime}a`;
+  const alts = extractAlternatives(probe);
+
+  setCookie('pcp_zero_meta', cookiePayload);
+  setCookie('pcp_alts', alts.join(','));
+
+  // Generate new Wikidata-style ID for each clinch that wrote zeros
+  if (zeroCount > 0) {
+    const newId = generateWikidataId();
+    const nonWord = pickNonWord();
+    const link = document.getElementById('wikidataLink');
+    link.textContent = newId + nonWord;
+    link.href = 'https://www.wikidata.org/wiki/' + newId;
+    link.dataset.id = newId;
+    link.dataset.nonword = nonWord;
+
+    document.getElementById('meta').textContent =
+      `Cookie date: ${circulatedDate} · stroke: ${strokeTime} · (a|b) hits: ${alts.join(', ') || 'none'} · zeros clinched: ${zeroCount}`;
+  }
 }
+
+// Clickable link above the button opens a popup
+document.getElementById('wikidataLink').addEventListener('click', function(e) {
+  e.preventDefault();
+  const id = this.dataset.id || this.textContent.replace(/[^\w]/g, '');
+  const nw = this.dataset.nonword || '·';
+  document.getElementById('popupId').textContent = id;
+  document.getElementById('nonWord').textContent = nw;
+  document.getElementById('wikiPopup').classList.add('show');
+});
 
 // auto-run on load with the default example
 document.addEventListener('DOMContentLoaded', runClinch);
