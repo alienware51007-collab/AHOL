@@ -154,7 +154,7 @@
       <button onclick="runClinch()">Clinch zeros</button>
     </div>
     <div id="out">result appears here</div>
-    <p class="note">Every <code>0</code> becomes <code>0*</code>. The <code>$</code> token is left intact. Each zero clinch also generates a new Wikidata-style item ID (inspired by the GPX2 info page).</p>
+    <p class="note">Every <code>0</code> becomes <code>0*</code>. The <code>$</code> token is left intact. Each press generates a new metacharacter-defined Wikidata-style item ID.</p>
   </section>
 
   <section>
@@ -250,7 +250,7 @@ print(m.dollar('$'))</code></pre>
         </tr>
       </tbody>
     </table>
-    <p class="note">The C half implements the zero→0* rewrite and deliberately leaves $ free. The three-line Python cookie fragment stores the result; the ParentPCP / LinuxMutation pair keeps $ behaviour open for mutation. New layer: each clinched zero also stamps a generated Wikidata-style ID and a cookie date/stroke-time pair matched by the (a|b) alternative regex.</p>
+    <p class="note">The C half implements the zero→0* rewrite and deliberately leaves $ free. The three-line Python cookie fragment stores the result; the ParentPCP / LinuxMutation pair keeps $ behaviour open for mutation. New layer: each press stamps a metacharacter-generated Wikidata-style ID and a cookie date/stroke-time pair matched by the (a|b) alternative regex.</p>
   </section>
 </main>
 
@@ -258,9 +258,8 @@ print(m.dollar('$'))</code></pre>
 <div class="popup" id="wikiPopup">
   <h3 style="margin-top:0">Generated Item</h3>
   <p>ID: <strong id="popupId">Q--------</strong></p>
-  <p>Source reference (GPX2 info page Wikidata item):</p>
-  <p><a id="popupSource" href="https://en.wikipedia.org/w/index.php?title=GPX2&action=info" target="_blank">https://en.wikipedia.org/w/index.php?title=GPX2&action=info</a></p>
-  <p>Example real ID from that page: <code>Q92767453</code></p>
+  <p>Source reference:</p>
+  <p><a id="popupSource" href="https://www.wikidata.org/" target="_blank">https://www.wikidata.org/</a></p>
   <p>Non-word crawler token attached: <code id="nonWord">·</code></p>
   <button onclick="document.getElementById('wikiPopup').classList.remove('show')">Close</button>
 </div>
@@ -289,38 +288,31 @@ function extractAlternatives(str) {
   return matches;
 }
 
-// Pool of real Wikidata items from different pages
-const wikidataPool = [
-  { id: 'Q92767453', label: 'GPX2 (disambiguation)', url: 'https://www.wikidata.org/wiki/Q92767453', wiki: 'https://en.wikipedia.org/wiki/GPX2' },
-  { id: 'Q42', label: 'Douglas Adams', url: 'https://www.wikidata.org/wiki/Q42', wiki: 'https://en.wikipedia.org/wiki/Douglas_Adams' },
-  { id: 'Q5', label: 'human', url: 'https://www.wikidata.org/wiki/Q5', wiki: 'https://en.wikipedia.org/wiki/Human' },
-  { id: 'Q1', label: 'universe', url: 'https://www.wikidata.org/wiki/Q1', wiki: 'https://en.wikipedia.org/wiki/Universe' },
-  { id: 'Q2', label: 'Earth', url: 'https://www.wikidata.org/wiki/Q2', wiki: 'https://en.wikipedia.org/wiki/Earth' },
-  { id: 'Q30', label: 'United States', url: 'https://www.wikidata.org/wiki/Q30', wiki: 'https://en.wikipedia.org/wiki/United_States' },
-  { id: 'Q145', label: 'United Kingdom', url: 'https://www.wikidata.org/wiki/Q145', wiki: 'https://en.wikipedia.org/wiki/United_Kingdom' },
-  { id: 'Q142', label: 'France', url: 'https://www.wikidata.org/wiki/Q142', wiki: 'https://en.wikipedia.org/wiki/France' },
-  { id: 'Q183', label: 'Germany', url: 'https://www.wikidata.org/wiki/Q183', wiki: 'https://en.wikipedia.org/wiki/Germany' },
-  { id: 'Q96', label: 'Mexico', url: 'https://www.wikidata.org/wiki/Q96', wiki: 'https://en.wikipedia.org/wiki/Mexico' },
-  { id: 'Q414', label: 'Argentina', url: 'https://www.wikidata.org/wiki/Q414', wiki: 'https://en.wikipedia.org/wiki/Argentina' },
-  { id: 'Q155', label: 'Brazil', url: 'https://www.wikidata.org/wiki/Q155', wiki: 'https://en.wikipedia.org/wiki/Brazil' },
-  { id: 'Q668', label: 'India', url: 'https://www.wikidata.org/wiki/Q668', wiki: 'https://en.wikipedia.org/wiki/India' },
-  { id: 'Q148', label: 'China', url: 'https://www.wikidata.org/wiki/Q148', wiki: 'https://en.wikipedia.org/wiki/China' },
-  { id: 'Q17', label: 'Japan', url: 'https://www.wikidata.org/wiki/Q17', wiki: 'https://en.wikipedia.org/wiki/Japan' },
-  { id: 'Q884', label: 'South Korea', url: 'https://www.wikidata.org/wiki/Q884', wiki: 'https://en.wikipedia.org/wiki/South_Korea' }
-];
+// Metacharacter-driven generation of Wikidata-style item IDs
+// No predetermined list — only regex metacharacters define the shape
+const metaPattern = /Q\d{6,9}/;          // metacharacter pattern: Q + 6-9 digits
+const digitClass = /\d/;                 // metacharacter class for digits
+const quantifier = '{6,9}';              // quantifier metacharacter
 
-let lastIndex = -1;
-
-function pickNewWikidataItem() {
-  let idx;
-  do {
-    idx = Math.floor(Math.random() * wikidataPool.length);
-  } while (idx === lastIndex && wikidataPool.length > 1);
-  lastIndex = idx;
-  return wikidataPool[idx];
+function generateMetaWikidataId() {
+  // Build a random ID purely from the metacharacter pattern
+  const len = 6 + Math.floor(Math.random() * 4); // 6 to 9 digits
+  let digits = '';
+  for (let i = 0; i < len; i++) {
+    digits += Math.floor(Math.random() * 10);    // each digit satisfies \d
+  }
+  const id = 'Q' + digits;
+  // Verify it matches the metacharacter pattern
+  if (!metaPattern.test(id)) return generateMetaWikidataId(); // retry if somehow fails
+  return {
+    id: id,
+    label: 'meta-generated',
+    url: 'https://www.wikidata.org/wiki/' + id,
+    wiki: 'https://en.wikipedia.org/wiki/Special:Search?search=' + id
+  };
 }
 
-// Non-word character pulled from Wikipedia page source style (punctuation / symbols)
+// Non-word character (also metacharacter-adjacent) from Wikipedia-style source
 const nonWordChars = ['·', '—', '…', '•', '†', '‡', '§'];
 function pickNonWord() {
   return nonWordChars[Math.floor(Math.random() * nonWordChars.length)];
@@ -359,9 +351,9 @@ function runClinch() {
   setCookie('pcp_zero_meta', cookiePayload);
   setCookie('pcp_alts', alts.join(','));
 
-  // Generate new real Wikidata item from a different page every button press
+  // Generate new Wikidata-style item purely via metacharacters every button press
   if (zeroCount > 0 || true) {  // always generate a new one on press
-    const item = pickNewWikidataItem();
+    const item = generateMetaWikidataId();
     const nonWord = pickNonWord();
     const link = document.getElementById('wikidataLink');
     link.textContent = item.id + nonWord;
@@ -372,13 +364,12 @@ function runClinch() {
     link.dataset.nonword = nonWord;
 
     document.getElementById('meta').textContent =
-      `Cookie date: ${circulatedDate} · stroke: ${strokeTime} · (a|b) hits: ${alts.join(', ') || 'none'} · zeros clinched: ${zeroCount} · item: ${item.label}`;
+      `Cookie date: ${circulatedDate} · stroke: ${strokeTime} · (a|b) hits: ${alts.join(', ') || 'none'} · zeros clinched: ${zeroCount} · item: ${item.label} (meta)`;
   }
 }
 
 // Clickable link above the button opens a popup, and the link itself goes to the real page
 document.getElementById('wikidataLink').addEventListener('click', function(e) {
-  // Allow normal navigation if they want; also show popup briefly or update popup content
   const id = this.dataset.id;
   const label = this.dataset.label || '';
   const wiki = this.dataset.wiki || '';
@@ -400,7 +391,6 @@ document.getElementById('wikidataLink').addEventListener('click', function(e) {
   a.href = wiki;
   a.textContent = wiki;
   document.getElementById('wikiPopup').classList.add('show');
-  // Do not preventDefault so the link still navigates if desired; or keep prevent if popup is preferred
   // e.preventDefault();  // uncomment if you only want the popup, not navigation
 });
 
