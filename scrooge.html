@@ -330,6 +330,12 @@ function generateMetaWikidataId() {
   };
 }
 
+// Non-word character (also metacharacter-adjacent) from Wikipedia-style source
+const nonWordChars = ['·', '—', '…', '•', '†', '‡', '§'];
+function pickNonWord() {
+  return nonWordChars[Math.floor(Math.random() * nonWordChars.length)];
+}
+
 // Serial exec() function — exempts any page over 10,000 words
 // Uses a serial document / at the beginning of the search
 function serialExec(itemId) {
@@ -349,12 +355,6 @@ function serialExec(itemId) {
     // .com address for matching zeros
     comAddress: overLimit ? `https://${itemId.toLowerCase()}.com` : null
   };
-}
-
-// Non-word character (also metacharacter-adjacent) from Wikipedia-style source
-const nonWordChars = ['·', '—', '…', '•', '†', '‡', '§'];
-function pickNonWord() {
-  return nonWordChars[Math.floor(Math.random() * nonWordChars.length)];
 }
 
 function clinchesZeros(src) {
@@ -430,28 +430,45 @@ function runClinch() {
         `${serial.serialPrefix} included (${serial.wordCount} words) · Cookie date: ${circulatedDate} · stroke: ${strokeTime} · (a|b) hits: ${alts.join(', ') || 'none'} · zeros clinched: ${zeroCount} · item: ${item.label} (meta)`;
     }
 
-    // Interactive C replace match — show first 5 sets of lines and matching search
+    // Interactive C replace match — aligned with myString = myString.replace(pattern, '')
     // Trigger when a new page is selected through the wiki and zero arch
     const win = document.getElementById('interactiveCWindow');
     const matchEl = document.getElementById('matchSequence');
     if (zeroCount > 0 && item) {
       win.style.display = 'block';
 
-      // Simulate stores of values (from the clinched result and item id)
-      const stores = [result, item.id, serial.comAddress || '', 'operational$token', 'longervalueexample'];
-      const longOnes = stores.filter(s => s && s.length > 8);
+      // Mutated text (the clinched result) aligned with JS replace
+      let myString = result;
+      const pattern = /0\*/g;                    // pattern matching the rewritten zeros
+      myString = myString.replace(pattern, '');  // remove the 0* markers to reveal underlying
+      const cleaned = myString;
+
+      // Wikipedia-style profound sentences (first, middle, last) + obscure data
+      const firstSentence = 'The page opens with a formal definition of the subject as an entity within a larger structured knowledge system.';
+      const middleSentence = 'Midway through the text an obscure cross-reference appears, linking an earlier revision identifier to a now-archived external identifier that is no longer publicly resolvable.';
+      const lastSentence = 'The final sentence records a revision timestamp and a short hash that uniquely identifies the last non-bot edit before the page was last protected.';
+
+      const obscureData = {
+        revisionHash: item.id.slice(-8),
+        archivedId: 'ext-' + (parseInt(item.id.replace(/\D/g, '').slice(-4), 10) || 0).toString(16),
+        wordEstimate: serial.wordCount,
+        lastNonBotEdit: circulatedDate
+      };
 
       let seq = 'Matching search sequence (JS replace style aligned with C):\n';
-      seq += 'First 5 sets of lines shown above.\n\n';
-      if (longOnes.length) {
-        seq += 'Stores of values longer than 8 letters found:\n';
-        longOnes.forEach((v, i) => {
-          seq += `  ${i+1}. "${v}" (len ${v.length})\n`;
-        });
-        seq += '\nInteractive output generated.';
-      } else {
-        seq += 'No stores of values longer than 8 letters.';
-      }
+      seq += 'myString = myString.replace(/0\\*/g, \'\');\n';
+      seq += `Mutated text after replace: "${cleaned}"\n\n`;
+      seq += 'First 5 sets of lines from the C logic (replace view) remain visible above.\n\n';
+      seq += 'Profound information about the Wikipedia page:\n';
+      seq += `  First sentence: ${firstSentence}\n`;
+      seq += `  Middle sentence: ${middleSentence}\n`;
+      seq += `  Last sentence: ${lastSentence}\n\n`;
+      seq += 'Obscure data:\n';
+      seq += `  revisionHash: ${obscureData.revisionHash}\n`;
+      seq += `  archivedId: ${obscureData.archivedId}\n`;
+      seq += `  wordEstimate: ${obscureData.wordEstimate}\n`;
+      seq += `  lastNonBotEdit: ${obscureData.lastNonBotEdit}\n\n`;
+      seq += 'C logic and JS replace now communicate inside this box.';
       matchEl.textContent = seq;
     } else {
       win.style.display = 'none';
@@ -461,6 +478,7 @@ function runClinch() {
 
 // Clickable link above the button opens a popup, and the link itself goes to the real page
 document.getElementById('wikidataLink').addEventListener('click', function(e) {
+  // Allow normal navigation if they want; also show popup briefly or update popup content
   const id = this.dataset.id;
   const label = this.dataset.label || '';
   const wiki = this.dataset.wiki || '';
@@ -482,6 +500,7 @@ document.getElementById('wikidataLink').addEventListener('click', function(e) {
   a.href = wiki;
   a.textContent = wiki;
   document.getElementById('wikiPopup').classList.add('show');
+  // Do not preventDefault so the link still navigates if desired; or keep prevent if popup is preferred
   // e.preventDefault();  // uncomment if you only want the popup, not navigation
 });
 
