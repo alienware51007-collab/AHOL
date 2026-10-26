@@ -83,7 +83,7 @@
     cursor: pointer;
   }
   button:hover { background: #333333; }
-  #out {
+  #out, #dollarOut {
     margin-top: .7rem;
     font-family: ui-monospace, monospace;
     background: var(--code-bg);
@@ -91,6 +91,7 @@
     border-radius: 8px;
     padding: .7rem 1rem;
     min-height: 2.4rem;
+    white-space: pre-wrap;
   }
   .note { color: var(--muted); font-size: .85rem; margin-top: .6rem; }
   .wikidata-layer {
@@ -142,7 +143,6 @@
   <section>
     <h2>Interactive Clinch Demo (JavaScript)</h2>
 
-    <!-- Wikidata / crawler layer sits above the Clinch button -->
     <div class="wikidata-layer" id="wikidataLayer">
       <strong>Generated Wikidata-style item:</strong>
       <a class="wikidata-link" id="wikidataLink" href="#" target="_blank">Q--------</a>
@@ -157,7 +157,6 @@
     <p class="note">Every <code>0</code> becomes <code>0*</code>. The <code>$</code> token is left intact. Each zero clinch also generates a new Wikidata-style item ID (inspired by the GPX2 info page).</p>
   </section>
 
-  <!-- Newly generated interactive window between Wikidata item and C handler -->
   <section id="interactiveCWindow" style="display:none;">
     <h2>Interactive C Replace Match</h2>
     <div class="lang">JS-style replace matching the C zero handler</div>
@@ -213,26 +212,22 @@ void demo(void) {
 }</code></pre>
   </section>
 
+  <!-- UPDATED: Live Wikipedia $ replace (replaces old Python section) -->
   <section>
-    <div class="lang">Python — cookies + parent model</div>
-    <pre><code># 3 lines of cookies that collect the clinched zeros
-import http.cookies
-c = http.cookies.SimpleCookie(); c['zeros'] = '0*0*0*'; c['op'] = '$'
-print(c.output())   # Set-Cookie headers ready for storage
+    <h2>Interactive $ Replace (first 3 of 5) — Live Wikipedia</h2>
+    <div class="lang">JS — myString.replace style · live page data</div>
 
-# Parent model for the $ function — keeps the operational token mutable
-class ParentPCP:
-    def dollar(self, token: str) -> str:
-        return token if token == '$' else token
+    <div class="demo-row" style="margin-bottom:0.8rem;">
+      <input type="text" id="wikiTitle" value="Ebenezer Scrooge" placeholder="Wikipedia page title">
+      <button onclick="runDollarReplace()">Select page & replace first 3 $</button>
+    </div>
 
-class LinuxMutation(ParentPCP):
-    def dollar(self, token: str) -> str:
-        if token == '$':
-            return '$→'          # figurative mutation
-        return super().dollar(token)
+    <div id="dollarOut">Waiting for page selection…</div>
 
-m = LinuxMutation()
-print(m.dollar('$'))</code></pre>
+    <p class="note">
+      Fetches the live Wikipedia extract, computes the most-used word + most-used special character from that page, then replaces only the first 3 of 5 <code>$</code> tokens.<br>
+      Result is shown here before any popup or navigation.
+    </p>
   </section>
 
   <section>
@@ -271,7 +266,6 @@ print(m.dollar('$'))</code></pre>
   </section>
 </main>
 
-<!-- Popup for the generated Wikidata link -->
 <div class="popup" id="wikiPopup">
   <h3 style="margin-top:0">Generated Item</h3>
   <p>ID: <strong id="popupId">Q--------</strong></p>
@@ -283,7 +277,7 @@ print(m.dollar('$'))</code></pre>
 </div>
 
 <script>
-// Cookie helpers
+// ---------- existing helpers (unchanged) ----------
 function setCookie(name, value, days = 7) {
   const d = new Date();
   d.setTime(d.getTime() + (days * 24 * 60 * 60 * 1000));
@@ -293,120 +287,71 @@ function getCookie(name) {
   const m = document.cookie.match(new RegExp('(?:^|; )' + name + '=([^;]*)'));
   return m ? decodeURIComponent(m[1]) : null;
 }
-
-// Regex (a|b) — "any of the specified alternatives"
-// Used to pull cookie date of the 0 circulated and the stroke time in between
 function extractAlternatives(str) {
   const re = /(a|b)/g;
   const matches = [];
   let m;
-  while ((m = re.exec(str)) !== null) {
-    matches.push(m[1]);
-  }
+  while ((m = re.exec(str)) !== null) matches.push(m[1]);
   return matches;
 }
-
-// Metacharacter-driven generation of Wikidata-style item IDs
-// No predetermined list — only regex metacharacters define the shape
-const metaPattern = /Q\d{6,9}/;          // metacharacter pattern: Q + 6-9 digits
-const digitClass = /\d/;                 // metacharacter class for digits
-const quantifier = '{6,9}';              // quantifier metacharacter
-
+const metaPattern = /Q\d{6,9}/;
 function generateMetaWikidataId() {
-  // Build a random ID purely from the metacharacter pattern
-  const len = 6 + Math.floor(Math.random() * 4); // 6 to 9 digits
+  const len = 6 + Math.floor(Math.random() * 4);
   let digits = '';
-  for (let i = 0; i < len; i++) {
-    digits += Math.floor(Math.random() * 10);    // each digit satisfies \d
-  }
+  for (let i = 0; i < len; i++) digits += Math.floor(Math.random() * 10);
   const id = 'Q' + digits;
-  // Verify it matches the metacharacter pattern
-  if (!metaPattern.test(id)) return generateMetaWikidataId(); // retry if somehow fails
+  if (!metaPattern.test(id)) return generateMetaWikidataId();
   return {
-    id: id,
-    label: 'meta-generated',
+    id, label: 'meta-generated',
     url: 'https://www.wikidata.org/wiki/' + id,
     wiki: 'https://en.wikipedia.org/wiki/Special:Search?search=' + id
   };
 }
-
-// Non-word character (also metacharacter-adjacent) from Wikipedia-style source
 const nonWordChars = ['·', '—', '…', '•', '†', '‡', '§'];
 function pickNonWord() {
   return nonWordChars[Math.floor(Math.random() * nonWordChars.length)];
 }
-
-// Serial exec() function — exempts any page over 10,000 words
-// Uses a serial document / at the beginning of the search
 function serialExec(itemId) {
-  // Simulate word count from the ID (deterministic-ish for demo)
-  // Real crawling not possible client-side; this stands in for the check
   const seed = itemId.replace(/\D/g, '');
   const simulatedWordCount = (parseInt(seed.slice(-6), 10) || 0) % 25000;
   const overLimit = simulatedWordCount > 10000;
-
-  // serial document / prefix
-  const serialDoc = 'serial document /';
-
   return {
-    overLimit,
-    wordCount: simulatedWordCount,
-    serialPrefix: serialDoc,
-    // .com address for matching zeros
+    overLimit, wordCount: simulatedWordCount,
+    serialPrefix: 'serial document /',
     comAddress: overLimit ? `https://${itemId.toLowerCase()}.com` : null
   };
 }
-
 function clinchesZeros(src) {
-  let out = '';
-  let zeroCount = 0;
+  let out = '', zeroCount = 0;
   for (let i = 0; i < src.length; i++) {
     const ch = src[i];
-    if (ch === '0') {
-      out += '0*';
-      zeroCount++;
-    } else {
-      out += ch;   // $ and everything else preserved
-    }
+    if (ch === '0') { out += '0*'; zeroCount++; }
+    else out += ch;
   }
   return { result: out, zeroCount };
 }
-
 function runClinch() {
   const src = document.getElementById('src').value;
   const { result, zeroCount } = clinchesZeros(src);
   document.getElementById('out').textContent = result || '(empty)';
 
-  // Cookie date of the 0 circulated + stroke time in between
   const now = new Date();
-  const circulatedDate = now.toISOString().slice(0, 10);          // YYYY-MM-DD
-  const strokeTime = now.toTimeString().slice(0, 8);               // HH:MM:SS
+  const circulatedDate = now.toISOString().slice(0, 10);
+  const strokeTime = now.toTimeString().slice(0, 8);
   const cookiePayload = `circulated=${circulatedDate}|stroke=${strokeTime}|zeros=${result}`;
-
-  // Apply (a|b) regex over a synthetic string that contains the alternatives
   const probe = `a${circulatedDate}b${strokeTime}a`;
   const alts = extractAlternatives(probe);
-
   setCookie('pcp_zero_meta', cookiePayload);
   setCookie('pcp_alts', alts.join(','));
 
-  // Generate new Wikidata-style item purely via metacharacters every button press
-  if (zeroCount > 0 || true) {  // always generate a new one on press
+  if (zeroCount > 0 || true) {
     const item = generateMetaWikidataId();
-    const serial = serialExec(item.id);   // serial document / check
-
-    // Exempt pages over 10,000 words from the Generated Wikidata-style item search
+    const serial = serialExec(item.id);
     if (serial.overLimit) {
-      // List it in the Clinch zeros as a string literal so zeros can be matched
-      // "match" refers to the .com address
       const literal = `"${serial.comAddress}"`;
-      const updatedResult = result + ' ' + literal;
-      document.getElementById('out').textContent = updatedResult;
-
+      document.getElementById('out').textContent = result + ' ' + literal;
       document.getElementById('meta').textContent =
         `${serial.serialPrefix} EXEMPT (>10k words: ${serial.wordCount}) · Cookie date: ${circulatedDate} · stroke: ${strokeTime} · (a|b) hits: ${alts.join(', ') || 'none'} · zeros clinched: ${zeroCount} · .com match: ${serial.comAddress}`;
-
-      // Still show the ID but mark as exempt
       const nonWord = pickNonWord();
       const link = document.getElementById('wikidataLink');
       link.textContent = item.id + nonWord + ' (exempt)';
@@ -416,7 +361,6 @@ function runClinch() {
       link.dataset.wiki = item.wiki;
       link.dataset.nonword = nonWord;
     } else {
-      // Normal path — under 10k words, include in search
       const nonWord = pickNonWord();
       const link = document.getElementById('wikidataLink');
       link.textContent = item.id + nonWord;
@@ -425,36 +369,26 @@ function runClinch() {
       link.dataset.label = item.label;
       link.dataset.wiki = item.wiki;
       link.dataset.nonword = nonWord;
-
       document.getElementById('meta').textContent =
         `${serial.serialPrefix} included (${serial.wordCount} words) · Cookie date: ${circulatedDate} · stroke: ${strokeTime} · (a|b) hits: ${alts.join(', ') || 'none'} · zeros clinched: ${zeroCount} · item: ${item.label} (meta)`;
     }
-
-    // Interactive C replace match — aligned with myString = myString.replace(pattern, '')
-    // Trigger when a new page is selected through the wiki and zero arch
     const win = document.getElementById('interactiveCWindow');
     const matchEl = document.getElementById('matchSequence');
     if (zeroCount > 0 && item) {
       win.style.display = 'block';
-
-      // Mutated text (the clinched result) aligned with JS replace
       let myString = result;
-      const pattern = /0\*/g;                    // pattern matching the rewritten zeros
-      myString = myString.replace(pattern, '');  // remove the 0* markers to reveal underlying
+      const pattern = /0\*/g;
+      myString = myString.replace(pattern, '');
       const cleaned = myString;
-
-      // Wikipedia-style profound sentences (first, middle, last) + obscure data
       const firstSentence = 'The page opens with a formal definition of the subject as an entity within a larger structured knowledge system.';
       const middleSentence = 'Midway through the text an obscure cross-reference appears, linking an earlier revision identifier to a now-archived external identifier that is no longer publicly resolvable.';
       const lastSentence = 'The final sentence records a revision timestamp and a short hash that uniquely identifies the last non-bot edit before the page was last protected.';
-
       const obscureData = {
         revisionHash: item.id.slice(-8),
         archivedId: 'ext-' + (parseInt(item.id.replace(/\D/g, '').slice(-4), 10) || 0).toString(16),
         wordEstimate: serial.wordCount,
         lastNonBotEdit: circulatedDate
       };
-
       let seq = 'Matching search sequence (JS replace style aligned with C):\n';
       seq += 'myString = myString.replace(/0\\*/g, \'\');\n';
       seq += `Mutated text after replace: "${cleaned}"\n\n`;
@@ -476,9 +410,7 @@ function runClinch() {
   }
 }
 
-// Clickable link above the button opens a popup, and the link itself goes to the real page
 document.getElementById('wikidataLink').addEventListener('click', function(e) {
-  // Allow normal navigation if they want; also show popup briefly or update popup content
   const id = this.dataset.id;
   const label = this.dataset.label || '';
   const wiki = this.dataset.wiki || '';
@@ -488,7 +420,6 @@ document.getElementById('wikidataLink').addEventListener('click', function(e) {
   const src = document.getElementById('popupSource');
   src.href = this.href;
   src.textContent = this.href;
-  // Optional second link to Wikipedia
   let wikiLink = document.getElementById('popupWiki');
   if (!wikiLink) {
     wikiLink = document.createElement('p');
@@ -500,12 +431,81 @@ document.getElementById('wikidataLink').addEventListener('click', function(e) {
   a.href = wiki;
   a.textContent = wiki;
   document.getElementById('wikiPopup').classList.add('show');
-  // Do not preventDefault so the link still navigates if desired; or keep prevent if popup is preferred
-  // e.preventDefault();  // uncomment if you only want the popup, not navigation
 });
 
-// auto-run on load with the default example
-document.addEventListener('DOMContentLoaded', runClinch);
+// ---------- NEW: live Wikipedia $ replace ----------
+const STOP = new Set("the a an and or but in on at to for of with by from as is was were be been being it its this that these those i you he she we they me him her us them my your his their not no yes if then else than so too very just only also can will would could should about into over after before under again further once here there when where why how all any both each few more most other some such nor not only own same so than too very s t can will just don should now d ll m o re ve y ain aren couldn didn doesn hadn hasn haven isn ma mightn mustn needn shan shouldn wasn weren won wouldn".split(" "));
+
+function mostUsedWord(text) {
+  const words = (text.toLowerCase().match(/\b[a-z]{3,}\b/g) || []).filter(w => !STOP.has(w));
+  const freq = {};
+  words.forEach(w => freq[w] = (freq[w] || 0) + 1);
+  return Object.entries(freq).sort((a, b) => b[1] - a[1])[0]?.[0] || "token";
+}
+function mostUsedSpecial(text) {
+  const specials = text.match(/[^\w\s]/g) || [];
+  const freq = {};
+  specials.forEach(c => freq[c] = (freq[c] || 0) + 1);
+  return Object.entries(freq).sort((a, b) => b[1] - a[1])[0]?.[0] || "·";
+}
+function replaceFirstN(str, n, replacement) {
+  let count = 0;
+  return str.replace(/\$/g, m => {
+    if (count < n) { count++; return replacement; }
+    return m;
+  });
+}
+
+async function runDollarReplace() {
+  const title = (document.getElementById('wikiTitle').value || "Ebenezer Scrooge").trim();
+  const out = document.getElementById('dollarOut');
+  out.textContent = "Fetching live Wikipedia data…";
+
+  try {
+    const url = `https://en.wikipedia.org/w/api.php?action=query&prop=extracts&exintro&explaintext&titles=${encodeURIComponent(title)}&format=json&origin=*`;
+    const res = await fetch(url);
+    const data = await res.json();
+    const pages = data.query.pages;
+    const page = pages[Object.keys(pages)[0]];
+
+    if (page.missing) {
+      out.textContent = `No Wikipedia page found for “${title}”.`;
+      return;
+    }
+
+    const extract = page.extract || "";
+    const word = mostUsedWord(extract);
+    const special = mostUsedSpecial(extract);
+    const pageTitle = page.title;
+    const replacement = `${word}${special}${pageTitle}`;
+
+    const fullInteraction = "010$10$0$1001$"; // 5 $
+    const newstring = replaceFirstN(fullInteraction, 3, replacement);
+
+    out.textContent =
+`Source (5 $):     ${fullInteraction}
+Replacement:      ${replacement}
+New string:       ${newstring}
+
+var newstring = myString.replace(/\\$/g, replacement);  // first 3 only
+
+Page title:       ${pageTitle}
+Most-used word:   ${word}
+Most-used special:${special}
+
+(Computed from live Wikipedia extract before any popup or navigation.)`;
+
+    window.lastWikiReplace = { title: pageTitle, word, special, replacement, newstring };
+  } catch (err) {
+    out.textContent = "Error fetching Wikipedia data: " + err.message;
+  }
+}
+
+// Auto-run both on load
+document.addEventListener('DOMContentLoaded', () => {
+  runClinch();
+  runDollarReplace();
+});
 </script>
 </body>
 </html>
