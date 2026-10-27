@@ -2,180 +2,31 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Custom PCP · Portable-Clinch-Code + Wikidata Layer</title>
+<title>C — half-coded zero handler (interactive) + Self-Learning Modulus</title>
 <style>
-  :root {
-    --bg: #ffffff;
-    --panel: #f5f5f5;
-    --border: #000000;
-    --accent: #000000;
-    --text: #000000;
-    --muted: #333333;
-    --code-bg: #eeeeee;
-  }
-  * { box-sizing: border-box; }
-  body {
-    margin: 0;
-    font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
-    background: var(--bg);
-    color: var(--text);
-    line-height: 1.55;
-  }
-  header {
-    padding: 1.5rem 1.5rem 1rem;
-    border-bottom: 1px solid var(--border);
-    background: #ffffff;
-  }
-  header h1 { margin: 0 0 .25rem; font-size: 1.6rem; font-weight: 650; }
-  header p { margin: 0; color: var(--muted); font-size: .95rem; }
-  main { max-width: 960px; margin: 0 auto; padding: 1.25rem; }
-  section {
-    background: var(--panel);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 1.1rem 1.2rem;
-    margin-bottom: 1.1rem;
-  }
-  h2 { margin: 0 0 .75rem; font-size: 1.15rem; color: var(--accent); }
-  pre, code {
-    font-family: ui-monospace, SFMono-Regular, Consolas, "Liberation Mono", monospace;
-    font-size: .84rem;
-  }
-  pre {
-    background: var(--code-bg);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: .9rem 1rem;
-    overflow-x: auto;
-    margin: .4rem 0 0;
-  }
-  .lang { color: var(--muted); font-size: .75rem; text-transform: uppercase; letter-spacing: .04em; }
-  table {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: .9rem;
-  }
-  th, td {
-    text-align: left;
-    padding: .55rem .6rem;
-    border-bottom: 1px solid var(--border);
-  }
-  th { color: var(--accent); font-weight: 600; }
-  .demo-row { display: flex; gap: .6rem; flex-wrap: wrap; align-items: center; }
-  input[type="text"] {
-    flex: 1;
-    min-width: 180px;
-    background: var(--code-bg);
-    border: 1px solid var(--border);
-    color: var(--text);
-    border-radius: 8px;
-    padding: .5rem .7rem;
-    font-family: inherit;
-  }
-  button {
-    background: #000000;
-    color: #ffffff;
-    border: 1px solid #000000;
-    border-radius: 8px;
-    padding: .5rem 1rem;
-    font-weight: 600;
-    cursor: pointer;
-  }
-  button:hover { background: #333333; }
-  #out, #dollarOut {
-    margin-top: .7rem;
-    font-family: ui-monospace, monospace;
-    background: var(--code-bg);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: .7rem 1rem;
-    min-height: 2.4rem;
-    white-space: pre-wrap;
-  }
-  .note { color: var(--muted); font-size: .85rem; margin-top: .6rem; }
-  .wikidata-layer {
-    margin-bottom: 0.8rem;
-    padding: 0.6rem 0.8rem;
-    background: #fff;
-    border: 1px dashed #000;
-    border-radius: 8px;
-    font-size: 0.9rem;
-  }
-  .wikidata-link {
-    display: inline-block;
-    color: #0645ad;
-    text-decoration: underline;
-    font-weight: 600;
-    cursor: pointer;
-  }
-  .wikidata-link:hover { color: #0b0080; }
-  #meta {
-    font-size: 0.8rem;
-    color: var(--muted);
-    margin-top: 0.4rem;
-  }
-  .popup {
-    display: none;
-    position: fixed;
-    top: 20%;
-    left: 50%;
-    transform: translateX(-50%);
-    background: #fff;
-    border: 2px solid #000;
-    border-radius: 12px;
-    padding: 1.2rem;
-    z-index: 1000;
-    max-width: 420px;
-    box-shadow: 0 8px 24px rgba(0,0,0,0.25);
-  }
-  .popup.show { display: block; }
-  .popup a { color: #0645ad; }
+  body { font-family: system-ui, sans-serif; margin: 2rem; background: #0f1115; color: #e6e6e6; }
+  .c-highlight { background: #1a1208; border: 2px solid #ffbe0b; padding: 1rem; border-radius: 8px; margin: 1rem 0; }
+  .c-highlight pre { background: #0d0a06; color: #ffd60a; margin: 0; padding: 1rem; overflow-x: auto; }
+  .fuel { border: 2px solid #3a86ff; padding: 1rem; margin: 1rem 0; border-radius: 8px; }
+  .fuel.active { border-color: #ffbe0b; background: #1a1a0f; }
+  .fuel.rest { border-color: #8338ec; opacity: 0.7; }
+  .line { margin: 0.3rem 0; padding: 0.3rem; background: #1c1f26; border-left: 3px solid #3a86ff; }
+  .line.zero { border-left-color: #ff006e; }
+  button, select { background: #3a86ff; color: white; border: none; padding: 0.5rem 1rem; margin: 0.3rem; border-radius: 4px; cursor: pointer; }
+  button:hover { background: #2667cc; }
+  #log { max-height: 300px; overflow-y: auto; font-family: monospace; font-size: 0.85rem; }
+  .id-word { color: #ffbe0b; font-weight: bold; }
+  .normal-section { opacity: 1; } /* rest of page stays fully functional */
 </style>
 </head>
 <body>
-<header>
-  <h1>Custom PCP · Portable-Clinch-Code</h1>
-  <p>Zero → 0* rewrite · $ operational token · Parent model + cookie storage · Wikidata item layer</p>
-</header>
+<h1>C — half-coded zero handler</h1>
+<p class="normal-section">Interactive version of the half-coded function. The self-learning modulus is isolated so the rest of the page continues normally.</p>
 
-<main>
-  <section>
-    <h2>Interactive Clinch Demo (JavaScript)</h2>
-
-    <div class="wikidata-layer" id="wikidataLayer">
-      <strong>Generated Wikidata-style item:</strong>
-      <a class="wikidata-link" id="wikidataLink" href="#" target="_blank">Q--------</a>
-      <div id="meta">Click the ID to open a popup with the source link.</div>
-    </div>
-
-    <div class="demo-row">
-      <input type="text" id="src" value="010$10" placeholder="enter string with 0 and $">
-      <button onclick="runClinch()">Clinch zeros</button>
-    </div>
-    <div id="out">result appears here</div>
-    <p class="note">Every <code>0</code> becomes <code>0*</code>. The <code>$</code> token is left intact. Each zero clinch also generates a new Wikidata-style item ID (inspired by the GPX2 info page).</p>
-  </section>
-
-  <section id="interactiveCWindow" style="display:none;">
-    <h2>Interactive C Replace Match</h2>
-    <div class="lang">JS-style replace matching the C zero handler</div>
-    <pre id="cReplacePreview"><code>// first 5 sets of lines from the C logic (replace view)
-if (src[i] == '0') {
-    dst[j++] = '0';
-    dst[j++] = '*';
-} else if (src[i] == op_token) {
-    dst[j++] = op_token;
-} else {
-    dst[j++] = src[i];
-}</code></pre>
-    <div id="matchSequence" style="margin-top:0.8rem; font-family:ui-monospace,monospace; background:#eee; padding:0.7rem; border-radius:8px; border:1px solid #000;"></div>
-    <p class="note">Matching search sequence for stores of values longer than 8 letters. Output appears here when the condition is met.</p>
-  </section>
-
-  <section>
-    <div class="lang">C — half-coded zero handler</div>
-    <pre><code>#include &lt;stdio.h&gt;
+<section class="c-highlight">
+  <h2>Highlighted C Source (interactive)</h2>
+  <pre id="cSource">
+#include &lt;stdio.h&gt;
 #include &lt;string.h&gt;
 #include &lt;stdlib.h&gt;
 
@@ -197,7 +48,7 @@ char *clinches_zeros(const char *src) {
             dst[j++] = src[i];
         }
     }
-    dst[j] = '\\0';
+    dst[j] = '\0';
     return dst;
 }
 
@@ -206,277 +57,202 @@ void demo(void) {
     const char *bottom = "0$1001";
     char *t = clinches_zeros(top);
     char *b = clinches_zeros(bottom);
-    printf("PCP top:    %s\\n", t);
-    printf("PCP bottom: %s\\n", b);
+    printf("PCP top:    %s\n", t);
+    printf("PCP bottom: %s\n", b);
     free(t); free(b);
-}</code></pre>
-  </section>
+}
+  </pre>
+  <button id="runDemoBtn">Run demo() — Interactive</button>
+  <div id="demoOutput" style="margin-top:0.5rem; font-family:monospace;"></div>
+</section>
 
-  <!-- $ replace box is now filled from the Clinch-generated Wikidata-style item -->
-  <section>
-    <h2>Interactive $ Replace (first 3 of 5)</h2>
-    <div class="lang">JS — myString.replace style · driven by Generated Wikidata-style item</div>
-    <div id="dollarOut">Click “Clinch zeros” to generate the item and fill this box.</div>
-    <p class="note">
-      The most-used word, special character, and replacement string are derived from the page information created by the Clinch zeros button (no predetermined list). Only the first 3 of 5 <code>$</code> are replaced. Shown before any popup.
-    </p>
-  </section>
+<section class="normal-section">
+  <h2>Manual Zero Clinch</h2>
+  <textarea id="input" rows="3" cols="60" placeholder="Enter string with 0s and $ ...">010$10</textarea><br>
+  <button id="clinchBtn">Clinch Zeros (0 → 0*)</button>
+  <div id="clinchResult"></div>
+</section>
 
-  <section>
-    <h2>Figurative analysis table</h2>
-    <table>
-      <thead>
-        <tr>
-          <th>Symbol</th>
-          <th>C treatment</th>
-          <th>Python parent model</th>
-          <th>Cookie storage</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr>
-          <td><code>0</code></td>
-          <td>rewritten to <code>0*</code></td>
-          <td>ignored (data only)</td>
-          <td><code>zeros=0*0*0*</code></td>
-        </tr>
-        <tr>
-          <td><code>$</code></td>
-          <td>left intact</td>
-          <td><code>ParentPCP.dollar</code></td>
-          <td><code>op=$</code></td>
-        </tr>
-        <tr>
-          <td>other</td>
-          <td>copied</td>
-          <td>pass-through</td>
-          <td>—</td>
-        </tr>
-      </tbody>
-    </table>
-    <p class="note">The C half implements the zero→0* rewrite and deliberately leaves $ free. The three-line Python cookie fragment stores the result; the ParentPCP / LinuxMutation pair keeps $ behaviour open for mutation. New layer: each clinched zero also stamps a generated Wikidata-style ID and a cookie date/stroke-time pair matched by the (a|b) alternative regex.</p>
-  </section>
-</main>
+<section class="normal-section">
+  <h2>Mod Switcher (IDs 0-9 as random words)</h2>
+  <label>Mode: 
+    <select id="modSelect">
+      <option value="0">nebula</option>
+      <option value="1">quantum</option>
+      <option value="2">vortex</option>
+      <option value="3">eclipse</option>
+      <option value="4">plasma</option>
+      <option value="5">horizon</option>
+      <option value="6">cascade</option>
+      <option value="7">aether</option>
+      <option value="8">rift</option>
+      <option value="9">pulsar</option>
+    </select>
+  </label>
+  <button id="applyMod">Apply Mode to Last Clinch</button>
+  <div id="modResult"></div>
+</section>
 
-<div class="popup" id="wikiPopup">
-  <h3 style="margin-top:0">Generated Item</h3>
-  <p>ID: <strong id="popupId">Q--------</strong></p>
-  <p>Source reference (GPX2 info page Wikidata item):</p>
-  <p><a id="popupSource" href="https://en.wikipedia.org/w/index.php?title=GPX2&action=info" target="_blank">https://en.wikipedia.org/w/index.php?title=GPX2&action=info</a></p>
-  <p>Example real ID from that page: <code>Q92767453</code></p>
-  <p>Non-word crawler token attached: <code id="nonWord">·</code></p>
-  <button onclick="document.getElementById('wikiPopup').classList.remove('show')">Close</button>
-</div>
+<section class="fuel rest" id="fuelBlock">
+  <h2>Self-Learning Modulus (DOM) <span id="fuelStatus">RESTING</span></h2>
+  <p>Isolated fuel block: active 3 min → rest 5 min. Only while tab is visible. Rest of page stays normal.</p>
+  <p>Timer: <span id="timerDisplay">--:--</span> | Learned lines: <span id="learnedCount">0</span></p>
+  <button id="forceFetch">Manual Fetch (demo)</button>
+  <div id="wikiInfo"></div>
+  <h3>Self-Conversation (lines starting at zero = zero)</h3>
+  <div id="log"></div>
+</section>
 
 <script>
-function setCookie(name, value, days = 7) {
-  const d = new Date();
-  d.setTime(d.getTime() + (days * 24 * 60 * 60 * 1000));
-  document.cookie = `${name}=${encodeURIComponent(value)};expires=${d.toUTCString()};path=/`;
-}
-function getCookie(name) {
-  const m = document.cookie.match(new RegExp('(?:^|; )' + name + '=([^;]*)'));
-  return m ? decodeURIComponent(m[1]) : null;
-}
-function extractAlternatives(str) {
-  const re = /(a|b)/g;
-  const matches = [];
-  let m;
-  while ((m = re.exec(str)) !== null) matches.push(m[1]);
-  return matches;
-}
-const metaPattern = /Q\d{6,9}/;
-function generateMetaWikidataId() {
-  const len = 6 + Math.floor(Math.random() * 4);
-  let digits = '';
-  for (let i = 0; i < len; i++) digits += Math.floor(Math.random() * 10);
-  const id = 'Q' + digits;
-  if (!metaPattern.test(id)) return generateMetaWikidataId();
-  return {
-    id, label: 'meta-generated',
-    url: 'https://www.wikidata.org/wiki/' + id,
-    wiki: 'https://en.wikipedia.org/wiki/Special:Search?search=' + id
-  };
-}
-const nonWordChars = ['·', '—', '…', '•', '†', '‡', '§'];
-function pickNonWord() {
-  return nonWordChars[Math.floor(Math.random() * nonWordChars.length)];
-}
-function serialExec(itemId) {
-  const seed = itemId.replace(/\D/g, '');
-  const simulatedWordCount = (parseInt(seed.slice(-6), 10) || 0) % 25000;
-  const overLimit = simulatedWordCount > 10000;
-  return {
-    overLimit, wordCount: simulatedWordCount,
-    serialPrefix: 'serial document /',
-    comAddress: overLimit ? `https://${itemId.toLowerCase()}.com` : null
-  };
-}
+// Exact port of the C clinches_zeros
 function clinchesZeros(src) {
-  let out = '', zeroCount = 0;
-  for (let i = 0; i < src.length; i++) {
-    const ch = src[i];
-    if (ch === '0') { out += '0*'; zeroCount++; }
-    else out += ch;
-  }
-  return { result: out, zeroCount };
-}
-
-// helpers for deriving word / special from the generated page text (no predetermined bank)
-const STOP = new Set("the a an and or but in on at to for of with by from as is was were be been being it its this that these those i you he she we they me him her us them my your his their not no yes if then else than so too very just only also can will would could should about into over after before under again further once here there when where why how all any both each few more most other some such".split(" "));
-function mostUsedWord(text) {
-  const words = (text.toLowerCase().match(/\b[a-z]{3,}\b/g) || []).filter(w => !STOP.has(w));
-  const freq = {};
-  words.forEach(w => freq[w] = (freq[w] || 0) + 1);
-  return Object.entries(freq).sort((a, b) => b[1] - a[1])[0]?.[0] || "token";
-}
-function mostUsedSpecial(text) {
-  const specials = text.match(/[^\w\s]/g) || [];
-  const freq = {};
-  specials.forEach(c => freq[c] = (freq[c] || 0) + 1);
-  return Object.entries(freq).sort((a, b) => b[1] - a[1])[0]?.[0] || "·";
-}
-function replaceFirstN(str, n, replacement) {
-  let count = 0;
-  return str.replace(/\$/g, m => {
-    if (count < n) { count++; return replacement; }
-    return m;
-  });
-}
-
-function runClinch() {
-  const src = document.getElementById('src').value;
-  const { result, zeroCount } = clinchesZeros(src);
-  document.getElementById('out').textContent = result || '(empty)';
-
-  const now = new Date();
-  const circulatedDate = now.toISOString().slice(0, 10);
-  const strokeTime = now.toTimeString().slice(0, 8);
-  const cookiePayload = `circulated=${circulatedDate}|stroke=${strokeTime}|zeros=${result}`;
-  const probe = `a${circulatedDate}b${strokeTime}a`;
-  const alts = extractAlternatives(probe);
-  setCookie('pcp_zero_meta', cookiePayload);
-  setCookie('pcp_alts', alts.join(','));
-
-  if (zeroCount > 0 || true) {
-    const item = generateMetaWikidataId();
-    const serial = serialExec(item.id);
-
-    // page information generated by the clinch (the “Wikipedia-style” content)
-    const firstSentence = 'The page opens with a formal definition of the subject as an entity within a larger structured knowledge system.';
-    const middleSentence = 'Midway through the text an obscure cross-reference appears, linking an earlier revision identifier to a now-archived external identifier that is no longer publicly resolvable.';
-    const lastSentence = 'The final sentence records a revision timestamp and a short hash that uniquely identifies the last non-bot edit before the page was last protected.';
-    const pageText = firstSentence + ' ' + middleSentence + ' ' + lastSentence;
-
-    // derive word + special from that generated page text
-    const word = mostUsedWord(pageText);
-    const special = mostUsedSpecial(pageText);
-    const pageTitle = item.id; // the generated Wikidata-style item itself
-    const replacement = `${word}${special}${pageTitle}`;
-
-    // apply to first 3 of 5 $
-    const fullInteraction = "010$10$0$1001$";
-    const newstring = replaceFirstN(fullInteraction, 3, replacement);
-
-    // fill the $ replace box BEFORE any popup
-    document.getElementById('dollarOut').textContent =
-`Source (5 $):     ${fullInteraction}
-Replacement:      ${replacement}
-New string:       ${newstring}
-
-var newstring = myString.replace(/\\$/g, replacement);  // first 3 only
-
-Generated item:   ${item.id}
-Most-used word:   ${word}
-Most-used special:${special}
-
-(Derived from the page information created by the Clinch zeros button.)`;
-
-    if (serial.overLimit) {
-      const literal = `"${serial.comAddress}"`;
-      document.getElementById('out').textContent = result + ' ' + literal;
-      document.getElementById('meta').textContent =
-        `${serial.serialPrefix} EXEMPT (>10k words: ${serial.wordCount}) · Cookie date: ${circulatedDate} · stroke: ${strokeTime} · (a|b) hits: ${alts.join(', ') || 'none'} · zeros clinched: ${zeroCount} · .com match: ${serial.comAddress}`;
-      const nonWord = pickNonWord();
-      const link = document.getElementById('wikidataLink');
-      link.textContent = item.id + nonWord + ' (exempt)';
-      link.href = serial.comAddress || item.url;
-      link.dataset.id = item.id;
-      link.dataset.label = 'exempt-' + item.label;
-      link.dataset.wiki = item.wiki;
-      link.dataset.nonword = nonWord;
+  const op_token = '$';
+  let dst = '';
+  for (let i = 0; i < src.length && dst.length < 254; i++) {
+    if (src[i] === '0') {
+      dst += '0*';
+    } else if (src[i] === op_token) {
+      dst += op_token;
     } else {
-      const nonWord = pickNonWord();
-      const link = document.getElementById('wikidataLink');
-      link.textContent = item.id + nonWord;
-      link.href = item.url;
-      link.dataset.id = item.id;
-      link.dataset.label = item.label;
-      link.dataset.wiki = item.wiki;
-      link.dataset.nonword = nonWord;
-      document.getElementById('meta').textContent =
-        `${serial.serialPrefix} included (${serial.wordCount} words) · Cookie date: ${circulatedDate} · stroke: ${strokeTime} · (a|b) hits: ${alts.join(', ') || 'none'} · zeros clinched: ${zeroCount} · item: ${item.label} (meta)`;
-    }
-
-    const win = document.getElementById('interactiveCWindow');
-    const matchEl = document.getElementById('matchSequence');
-    if (zeroCount > 0 && item) {
-      win.style.display = 'block';
-      let myString = result;
-      const pattern = /0\*/g;
-      myString = myString.replace(pattern, '');
-      const cleaned = myString;
-      const obscureData = {
-        revisionHash: item.id.slice(-8),
-        archivedId: 'ext-' + (parseInt(item.id.replace(/\D/g, '').slice(-4), 10) || 0).toString(16),
-        wordEstimate: serial.wordCount,
-        lastNonBotEdit: circulatedDate
-      };
-      let seq = 'Matching search sequence (JS replace style aligned with C):\n';
-      seq += 'myString = myString.replace(/0\\*/g, \'\');\n';
-      seq += `Mutated text after replace: "${cleaned}"\n\n`;
-      seq += 'First 5 sets of lines from the C logic (replace view) remain visible above.\n\n';
-      seq += 'Profound information about the Wikipedia page:\n';
-      seq += `  First sentence: ${firstSentence}\n`;
-      seq += `  Middle sentence: ${middleSentence}\n`;
-      seq += `  Last sentence: ${lastSentence}\n\n`;
-      seq += 'Obscure data:\n';
-      seq += `  revisionHash: ${obscureData.revisionHash}\n`;
-      seq += `  archivedId: ${obscureData.archivedId}\n`;
-      seq += `  wordEstimate: ${obscureData.wordEstimate}\n`;
-      seq += `  lastNonBotEdit: ${obscureData.lastNonBotEdit}\n\n`;
-      seq += 'C logic and JS replace now communicate inside this box.';
-      matchEl.textContent = seq;
-    } else {
-      win.style.display = 'none';
+      dst += src[i];
     }
   }
+  return dst;
 }
 
-document.getElementById('wikidataLink').addEventListener('click', function(e) {
-  const id = this.dataset.id;
-  const label = this.dataset.label || '';
-  const wiki = this.dataset.wiki || '';
-  const nw = this.dataset.nonword || '·';
-  document.getElementById('popupId').textContent = id + ' — ' + label;
-  document.getElementById('nonWord').textContent = nw;
-  const src = document.getElementById('popupSource');
-  src.href = this.href;
-  src.textContent = this.href;
-  let wikiLink = document.getElementById('popupWiki');
-  if (!wikiLink) {
-    wikiLink = document.createElement('p');
-    wikiLink.id = 'popupWiki';
-    wikiLink.innerHTML = 'Wikipedia: <a id="popupWikiA" href="#" target="_blank"></a>';
-    document.getElementById('wikiPopup').appendChild(wikiLink);
-  }
-  const a = document.getElementById('popupWikiA');
-  a.href = wiki;
-  a.textContent = wiki;
-  document.getElementById('wikiPopup').classList.add('show');
+const randomWords = ['nebula','quantum','vortex','eclipse','plasma','horizon','cascade','aether','rift','pulsar'];
+
+let learned = [];
+let lastClinch = '';
+let fuelActive = false;
+let phaseDuration = 5 * 60 * 1000;
+let visibleAccum = 0;
+let lastTick = Date.now();
+
+const fuelBlock = document.getElementById('fuelBlock');
+const fuelStatus = document.getElementById('fuelStatus');
+const timerDisplay = document.getElementById('timerDisplay');
+const learnedCount = document.getElementById('learnedCount');
+const logEl = document.getElementById('log');
+const wikiInfo = document.getElementById('wikiInfo');
+
+function addLog(html) {
+  const div = document.createElement('div');
+  div.className = 'line';
+  div.innerHTML = html;
+  logEl.prepend(div);
+  if (logEl.children.length > 40) logEl.lastChild.remove();
+}
+
+document.addEventListener('visibilitychange', () => {
+  const now = Date.now();
+  if (document.visibilityState === 'visible') lastTick = now;
+  else visibleAccum += now - lastTick;
 });
 
-document.addEventListener('DOMContentLoaded', runClinch);
+function tick() {
+  const now = Date.now();
+  if (document.visibilityState === 'visible') visibleAccum += now - lastTick;
+  lastTick = now;
+
+  const remaining = Math.max(0, phaseDuration - visibleAccum);
+  const mins = Math.floor(remaining / 60000);
+  const secs = Math.floor((remaining % 60000) / 1000);
+  timerDisplay.textContent = `${mins}:${secs.toString().padStart(2,'0')}`;
+
+  if (visibleAccum >= phaseDuration) {
+    fuelActive = !fuelActive;
+    visibleAccum = 0;
+    phaseDuration = fuelActive ? 3 * 60 * 1000 : 5 * 60 * 1000;
+    fuelBlock.className = fuelActive ? 'fuel active' : 'fuel rest';
+    fuelStatus.textContent = fuelActive ? 'ACTIVE — LEARNING' : 'RESTING';
+    if (fuelActive) {
+      addLog('<span class="id-word">SYSTEM</span>: Fuel active. Self-learning modulus online.');
+      fetchAndLearn();
+    } else {
+      addLog('<span class="id-word">SYSTEM</span>: Resting. Rest of page continues normally.');
+    }
+  }
+  if (fuelActive && Math.random() < 0.05) selfTalk();
+}
+setInterval(tick, 1000);
+
+async function fetchAndLearn() {
+  try {
+    const res = await fetch('https://en.wikipedia.org/api/rest_v1/page/random/summary');
+    const data = await res.json();
+    const title = data.title || 'Unknown';
+    const extract = data.extract || '';
+    wikiInfo.innerHTML = `<strong>Source:</strong> <a href="${data.content_urls?.desktop?.page || '#'}" target="_blank">${title}</a>`;
+    const lines = extract.split(/\n+/).filter(l => l.trim().length > 10).slice(0, 12);
+    addLog(`<span class="id-word">FETCH</span>: ${title} — ${lines.length} lines`);
+    lines.forEach((line, idx) => {
+      const wordId = randomWords[idx % 10];
+      const isZeroLine = idx === 0 || line.includes('0');
+      const clinched = clinchesZeros(line.slice(0, 80));
+      addLog(`<span class="id-word">${wordId}</span> [${idx}] ${isZeroLine ? 'ZERO' : 'line'}: ${clinched}`);
+      if (isZeroLine) {
+        learned.push({ word: wordId, line: clinched, title, ts: Date.now() });
+        learnedCount.textContent = learned.length;
+      }
+    });
+    selfTalk(title);
+  } catch (e) {
+    addLog('<span class="id-word">ERROR</span>: ' + e.message);
+  }
+}
+
+function selfTalk(title = 'self') {
+  if (learned.length === 0) return;
+  const a = learned[Math.floor(Math.random() * learned.length)];
+  const b = learned[Math.floor(Math.random() * learned.length)];
+  const mode = document.getElementById('modSelect').value;
+  addLog(`<span class="id-word">CONV</span> [${randomWords[mode]}]: "${a.word}" ↔ "${b.word}" on ${title}`);
+}
+
+document.getElementById('runDemoBtn').onclick = () => {
+  const top = clinchesZeros('010$10');
+  const bottom = clinchesZeros('0$1001');
+  document.getElementById('demoOutput').innerHTML =
+    `PCP top:    ${top}<br>PCP bottom: ${bottom}`;
+  lastClinch = top;
+  learned.push({ word: 'demo', line: top, title: 'C-demo', ts: Date.now() });
+  learned.push({ word: 'demo', line: bottom, title: 'C-demo', ts: Date.now() });
+  learnedCount.textContent = learned.length;
+  addLog('<span class="id-word">C-DEMO</span>: ran demo() — fed self-learning modulus');
+  if (fuelActive) selfTalk('C-demo');
+};
+
+document.getElementById('clinchBtn').onclick = () => {
+  const src = document.getElementById('input').value;
+  lastClinch = clinchesZeros(src);
+  document.getElementById('clinchResult').innerHTML = `<strong>Clenched:</strong> ${lastClinch}`;
+  learned.push({ word: 'user-clinch', line: lastClinch, title: 'input', ts: Date.now() });
+  learnedCount.textContent = learned.length;
+  addLog(`<span class="id-word">CLINCH</span>: ${src.slice(0,40)} → ${lastClinch.slice(0,60)}`);
+  if (fuelActive) selfTalk('user-clinch');
+};
+
+document.getElementById('applyMod').onclick = () => {
+  const mode = parseInt(document.getElementById('modSelect').value, 10);
+  let result = lastClinch || '(no clinch yet)';
+  if (mode === 0) result = 'nebula-filter: ' + result.replace(/0\*/g, '0~');
+  else if (mode === 1) result = 'quantum-super: ' + result.toUpperCase();
+  else if (mode === 2) result = 'vortex-spin: ' + result.split('').reverse().join('');
+  else if (mode === 3) result = 'eclipse-mask: ' + result.replace(/\$/g, '[OP]');
+  else if (mode === 4) result = 'plasma-heat: ' + result + ' *' + learned.length;
+  else if (mode === 5) result = 'horizon-limit: ' + result.slice(0, 20);
+  else if (mode === 6) result = 'cascade-flow: ' + result.replace(/0/g, '00');
+  else if (mode === 7) result = 'aether-float: ' + result.split('*').join(' * ');
+  else if (mode === 8) result = 'rift-break: ' + result.replace(/./g, c => c === '0' ? '0*' : c);
+  else if (mode === 9) result = 'pulsar-beat: ' + result + ' | learned:' + learned.length;
+  document.getElementById('modResult').innerHTML = `<strong>${randomWords[mode]} mode:</strong> ${result}`;
+  addLog(`<span class="id-word">MOD</span>: ${randomWords[mode]} applied`);
+};
+
+document.getElementById('forceFetch').onclick = fetchAndLearn;
+
+addLog('<span class="id-word">SYSTEM</span>: Module loaded. C demo button is live. Fuel starts resting.');
 </script>
 </body>
 </html>
