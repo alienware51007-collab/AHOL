@@ -6,7 +6,7 @@
 <style>
   body { font-family: system-ui, sans-serif; margin: 2rem; background: #0f1115; color: #e6e6e6; }
   .c-highlight { background: #1a1208; border: 2px solid #ffbe0b; padding: 1rem; border-radius: 8px; margin: 1rem 0; position: relative; }
-  .c-highlight pre { background: #0d0a06; color: #ffd60a; margin: 0; padding: 1rem; overflow-x: auto; font-size: 0.85rem; }
+  .c-highlight pre { background: #0d0a06; color: #ffd60a; margin: 0; padding: 1rem; overflow-x: auto; font-size: 0.85rem; position: relative; }
   .php-analysis { background: #0f1a12; border: 2px solid #06d6a0; padding: 1rem; border-radius: 8px; margin: 1rem 0; }
   .fuel { border: 2px solid #3a86ff; padding: 1rem; margin: 1rem 0; border-radius: 8px; }
   .fuel.active { border-color: #ffbe0b; background: #1a1a0f; }
@@ -20,7 +20,6 @@
   .product-id { color: #06d6a0; font-weight: bold; }
   pre { white-space: pre-wrap; }
 
-  /* Special hover button that hangs in the C source area */
   #letterNumHover {
     position: absolute;
     top: 8px;
@@ -34,18 +33,44 @@
     cursor: pointer;
     opacity: 0.85;
     transition: all 0.2s;
-    z-index: 10;
+    z-index: 20;
     box-shadow: 0 2px 8px rgba(255,0,110,0.4);
   }
-  #letterNumHover:hover {
-    opacity: 1;
-    transform: scale(1.08);
-    background: #ff4d8d;
+  #letterNumHover:hover { opacity: 1; transform: scale(1.08); background: #ff4d8d; }
+  #letterNumHover.has-data { background: #06d6a0; box-shadow: 0 2px 8px rgba(6,214,160,0.5); }
+
+  #codeOverlay {
+    position: absolute;
+    left: 1rem;
+    top: 9.2rem;
+    width: calc(100% - 2rem);
+    pointer-events: none;
+    font-family: monospace;
+    font-size: 0.85rem;
+    line-height: 1.4;
+    color: #00f5ff;
+    -webkit-text-stroke: 1px #ff00aa;
+    text-stroke: 1px #ff00aa;
+    opacity: 0.75;
+    mix-blend-mode: screen;
+    white-space: pre;
+    z-index: 5;
+    transition: opacity 0.3s;
   }
-  #letterNumHover.has-data {
-    background: #06d6a0;
-    box-shadow: 0 2px 8px rgba(6,214,160,0.5);
+  #codeOverlay.active { opacity: 0.9; }
+
+  #seqBind {
+    display: inline-block;
+    margin-top: 0.5rem;
+    padding: 0.4rem 0.8rem;
+    background: #8338ec;
+    color: white;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.85rem;
+    font-family: monospace;
   }
+  #seqBind:hover { background: #6a2bc0; }
 </style>
 </head>
 <body>
@@ -55,7 +80,7 @@
 <section class="c-highlight">
   <button id="letterNumHover" title="Click to open letter–number combination on Google">Letter–Number</button>
   <h2>Highlighted C Source</h2>
-  <pre>
+  <pre id="cSourcePre">
 #include &lt;stdio.h&gt;
 #include &lt;string.h&gt;
 #include &lt;stdlib.h&gt;
@@ -87,13 +112,15 @@ void demo(void) {
     const char *bottom = "0$1001";
     char *t = clinches_zeros(top);
     char *b = clinches_zeros(bottom);
-    printf("PCP top:    %s\n", t);
-    printf("PCP bottom: %s\n", b);
+    printf("top:    %s\n", t);
+    printf("bottom: %s\n", b);
     free(t); free(b);
 }
   </pre>
+  <div id="codeOverlay"></div>
   <button id="runDemoBtn">Run demo()</button>
   <div id="demoOutput" style="margin-top:0.5rem; font-family:monospace;"></div>
+  <div id="seqBind">—</div>
 </section>
 
 <section class="php-analysis">
@@ -174,13 +201,58 @@ $raw = "${seq}";
   };
 }
 
-// Generate a random letter–number combination from PRODUCT id (for Category:Letter–number combination disambiguation)
 function letterNumberCombo(productId) {
   const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
   const seed = parseInt(productId, 10) || Date.now();
   const letter = letters[seed % 26];
   const number = (seed % 99) + 1;
-  return letter + number; // e.g. "A7", "K23"
+  return letter + number;
+}
+
+function onlyLettersAndNumbers(str) {
+  return (str || '').replace(/[^a-zA-Z0-9]/g, '');
+}
+
+// Anonymous callback that returns a mouse-event binding for Google Images search
+function createImageCallback(termSequence) {
+  return function (event) {
+    event.preventDefault();
+    const clean = onlyLettersAndNumbers(termSequence);
+    if (!clean) return;
+    const query = encodeURIComponent(clean);
+    window.open(`https://www.google.com/search?tbm=isch&q=${query}`, '_blank');
+  };
+}
+
+function grabAndAppendOverlay(letterNum) {
+  const letter = letterNum.charAt(0);
+  const num = parseInt(letterNum.slice(1), 10) || 1;
+  const overlay = document.getElementById('codeOverlay');
+
+  const modifiedLoop = `    for (int i = 0; src[i] && j < MAX-${num % 5 + 1}; i++) {
+        if (src[i] == '${letter}') {
+            dst[j++] = '${letter}';
+            dst[j++] = '*';`;
+
+  overlay.textContent = modifiedLoop;
+  overlay.classList.add('active');
+
+  const demoTop = letter + '0' + (num % 10) + '$' + letter.toLowerCase();
+  const demoBottom = '0$' + num + letter;
+  const topResult = clinchesZeros(demoTop);
+  const bottomResult = clinchesZeros(demoBottom);
+
+  document.getElementById('demoOutput').innerHTML =
+    `top:    ${topResult}<br>bottom: ${bottomResult}`;
+
+  // Bind anonymous mouse event — shows only the clean sequence, no "image" word
+  const seqBind = document.getElementById('seqBind');
+  const termSequence = topResult + bottomResult + letterNum;
+  const clean = onlyLettersAndNumbers(termSequence);
+  seqBind.onclick = createImageCallback(termSequence);
+  seqBind.textContent = clean || '—';
+
+  return { modifiedLoop, demoTop, demoBottom, termSequence };
 }
 
 const randomWords = ['nebula','quantum','vortex','eclipse','plasma','horizon','cascade','aether','rift','pulsar'];
@@ -284,7 +356,6 @@ function selfTalk(title = 'self') {
   addLog(`<span class="id-word">CONV</span> [${randomWords[mode]}]: PRODUCT ${a.product || '?'} ↔ ${b.product || '?'}`);
 }
 
-// Hover button: open Google for the letter–number combination + Wikipedia category
 letterNumHover.onclick = () => {
   if (!lastLetterNum) {
     alert('No letter–number combination yet. Click Clinch Zeros first.');
@@ -297,9 +368,13 @@ letterNumHover.onclick = () => {
 document.getElementById('runDemoBtn').onclick = () => {
   const top = clinchesZeros('010$10');
   const bottom = clinchesZeros('0$1001');
-  document.getElementById('demoOutput').innerHTML = `PCP top:    ${top}<br>PCP bottom: ${bottom}`;
+  document.getElementById('demoOutput').innerHTML = `top:    ${top}<br>bottom: ${bottom}`;
   lastClinch = top;
-  addLog('<span class="id-word">C-DEMO</span>: ran fixed demo()');
+  const seqBind = document.getElementById('seqBind');
+  const clean = onlyLettersAndNumbers(top + bottom);
+  seqBind.onclick = createImageCallback(top + bottom);
+  seqBind.textContent = clean || '—';
+  addLog('<span class="id-word">DEMO</span>: ran fixed demo()');
 };
 
 document.getElementById('clinchBtn').onclick = async () => {
@@ -319,11 +394,13 @@ document.getElementById('clinchBtn').onclick = async () => {
 
     if (!src || src === '010$10') src = php.sequence;
 
-    // Capture letter–number combination for the hover button
     lastLetterNum = letterNumberCombo(productId);
     letterNumHover.textContent = lastLetterNum;
     letterNumHover.classList.add('has-data');
     letterNumHover.title = `Open "${lastLetterNum}" + Category:Letter–number combination disambiguation on Google`;
+
+    const overlayResult = grabAndAppendOverlay(lastLetterNum);
+    addLog(`<span class="id-word">OVERLAY</span>: stroke cover-change for <strong>${lastLetterNum}</strong> → seq "${onlyLettersAndNumbers(overlayResult.termSequence)}"`);
 
     addLog(`<span class="id-word">PHP</span>: PRODUCT ${productId} → sequence "${php.sequence}" · letter-num <strong>${lastLetterNum}</strong>`);
   } catch (e) {
@@ -358,7 +435,7 @@ document.getElementById('applyMod').onclick = () => {
 
 document.getElementById('forceFetch').onclick = fetchAndLearn;
 
-addLog('<span class="id-word">SYSTEM</span>: Ready. Clinch Zeros pulls Wikipedia PRODUCT id, runs PHP analysis, and arms the letter–number hover button.');
+addLog('<span class="id-word">SYSTEM</span>: Ready. Clinch Zeros pulls Wikipedia PRODUCT id, runs PHP analysis, arms letter–number button, applies stroke overlay, and binds sequence click to Google Images.');
 </script>
 </body>
 </html>
