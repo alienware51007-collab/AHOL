@@ -5,7 +5,7 @@
 <title>C — half-coded zero handler + PHP Analysis + Wiki PRODUCT</title>
 <style>
   body { font-family: system-ui, sans-serif; margin: 2rem; background: #0f1115; color: #e6e6e6; }
-  .c-highlight { background: #1a1208; border: 2px solid #ffbe0b; padding: 1rem; border-radius: 8px; margin: 1rem 0; }
+  .c-highlight { background: #1a1208; border: 2px solid #ffbe0b; padding: 1rem; border-radius: 8px; margin: 1rem 0; position: relative; }
   .c-highlight pre { background: #0d0a06; color: #ffd60a; margin: 0; padding: 1rem; overflow-x: auto; font-size: 0.85rem; }
   .php-analysis { background: #0f1a12; border: 2px solid #06d6a0; padding: 1rem; border-radius: 8px; margin: 1rem 0; }
   .fuel { border: 2px solid #3a86ff; padding: 1rem; margin: 1rem 0; border-radius: 8px; }
@@ -19,6 +19,33 @@
   .id-word { color: #ffbe0b; font-weight: bold; }
   .product-id { color: #06d6a0; font-weight: bold; }
   pre { white-space: pre-wrap; }
+
+  /* Special hover button that hangs in the C source area */
+  #letterNumHover {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    background: #ff006e;
+    color: white;
+    border: none;
+    padding: 0.4rem 0.8rem;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    cursor: pointer;
+    opacity: 0.85;
+    transition: all 0.2s;
+    z-index: 10;
+    box-shadow: 0 2px 8px rgba(255,0,110,0.4);
+  }
+  #letterNumHover:hover {
+    opacity: 1;
+    transform: scale(1.08);
+    background: #ff4d8d;
+  }
+  #letterNumHover.has-data {
+    background: #06d6a0;
+    box-shadow: 0 2px 8px rgba(6,214,160,0.5);
+  }
 </style>
 </head>
 <body>
@@ -26,6 +53,7 @@
 <p>Interactive module with manual PHP analysis for the random 0 &amp; $ sequence, driven by Wikipedia PRODUCT id on Clinch.</p>
 
 <section class="c-highlight">
+  <button id="letterNumHover" title="Click to open letter–number combination on Google">Letter–Number</button>
   <h2>Highlighted C Source</h2>
   <pre>
 #include &lt;stdio.h&gt;
@@ -124,7 +152,6 @@ function clinchesZeros(src) {
   return dst;
 }
 
-// Simulated PHP analysis: builds a random 0/$ sequence from a seed (PRODUCT id)
 function phpAnalysis(productId) {
   const seed = parseInt(productId, 10) || Date.now() % 10000;
   let seq = '';
@@ -132,7 +159,6 @@ function phpAnalysis(productId) {
   for (let i = 0; i < 8 + (seed % 6); i++) {
     seq += chars[(seed + i * 7) % chars.length];
   }
-  // Ensure at least one 0 and one $
   if (!seq.includes('0')) seq = '0' + seq;
   if (!seq.includes('$')) seq += '$';
   return {
@@ -148,10 +174,20 @@ $raw = "${seq}";
   };
 }
 
+// Generate a random letter–number combination from PRODUCT id (for Category:Letter–number combination disambiguation)
+function letterNumberCombo(productId) {
+  const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+  const seed = parseInt(productId, 10) || Date.now();
+  const letter = letters[seed % 26];
+  const number = (seed % 99) + 1;
+  return letter + number; // e.g. "A7", "K23"
+}
+
 const randomWords = ['nebula','quantum','vortex','eclipse','plasma','horizon','cascade','aether','rift','pulsar'];
 let learned = [];
 let lastClinch = '';
 let lastProductId = null;
+let lastLetterNum = null;
 let fuelActive = false;
 let phaseDuration = 5 * 60 * 1000;
 let visibleAccum = 0;
@@ -165,6 +201,7 @@ const logEl = document.getElementById('log');
 const wikiInfo = document.getElementById('wikiInfo');
 const phpOutput = document.getElementById('phpOutput');
 const wikiProduct = document.getElementById('wikiProduct');
+const letterNumHover = document.getElementById('letterNumHover');
 
 function addLog(html) {
   const div = document.createElement('div');
@@ -211,7 +248,7 @@ async function fetchWiki() {
   return {
     title: data.title || 'Unknown',
     extract: data.extract || '',
-    pageid: data.pageid || data.titles?.normalized || Math.floor(Math.random() * 90000 + 10000),
+    pageid: data.pageid || Math.floor(Math.random() * 90000 + 10000),
     url: data.content_urls?.desktop?.page || '#'
   };
 }
@@ -247,6 +284,16 @@ function selfTalk(title = 'self') {
   addLog(`<span class="id-word">CONV</span> [${randomWords[mode]}]: PRODUCT ${a.product || '?'} ↔ ${b.product || '?'}`);
 }
 
+// Hover button: open Google for the letter–number combination + Wikipedia category
+letterNumHover.onclick = () => {
+  if (!lastLetterNum) {
+    alert('No letter–number combination yet. Click Clinch Zeros first.');
+    return;
+  }
+  const query = encodeURIComponent(`"${lastLetterNum}" Category:Letter–number combination disambiguation`);
+  window.open(`https://www.google.com/search?q=${query}`, '_blank');
+};
+
 document.getElementById('runDemoBtn').onclick = () => {
   const top = clinchesZeros('010$10');
   const bottom = clinchesZeros('0$1001');
@@ -260,7 +307,6 @@ document.getElementById('clinchBtn').onclick = async () => {
   let productId = lastProductId;
   let title = 'manual';
 
-  // Always pull a fresh Wikipedia page for PRODUCT id on clinch
   try {
     const wiki = await fetchWiki();
     productId = wiki.pageid;
@@ -271,10 +317,15 @@ document.getElementById('clinchBtn').onclick = async () => {
     const php = phpAnalysis(productId);
     phpOutput.innerHTML = `<pre>${php.analysis}</pre><strong>Generated sequence:</strong> ${php.sequence}`;
 
-    // If user left the textarea at default or empty, use the PHP sequence
     if (!src || src === '010$10') src = php.sequence;
 
-    addLog(`<span class="id-word">PHP</span>: PRODUCT ${productId} activated sequence "${php.sequence}"`);
+    // Capture letter–number combination for the hover button
+    lastLetterNum = letterNumberCombo(productId);
+    letterNumHover.textContent = lastLetterNum;
+    letterNumHover.classList.add('has-data');
+    letterNumHover.title = `Open "${lastLetterNum}" + Category:Letter–number combination disambiguation on Google`;
+
+    addLog(`<span class="id-word">PHP</span>: PRODUCT ${productId} → sequence "${php.sequence}" · letter-num <strong>${lastLetterNum}</strong>`);
   } catch (e) {
     phpOutput.textContent = 'PHP analysis failed: ' + e.message;
     if (!src) src = '010$10';
@@ -282,7 +333,7 @@ document.getElementById('clinchBtn').onclick = async () => {
 
   lastClinch = clinchesZeros(src);
   document.getElementById('clinchResult').innerHTML = `<strong>Clenched:</strong> ${lastClinch}`;
-  learned.push({ word: 'user-clinch', line: lastClinch, title, product: productId, ts: Date.now() });
+  learned.push({ word: 'user-clinch', line: lastClinch, title, product: productId, letterNum: lastLetterNum, ts: Date.now() });
   learnedCount.textContent = learned.length;
   addLog(`<span class="id-word">CLINCH</span>: PRODUCT ${productId} → ${lastClinch.slice(0, 70)}`);
   if (fuelActive) selfTalk(title);
@@ -307,7 +358,7 @@ document.getElementById('applyMod').onclick = () => {
 
 document.getElementById('forceFetch').onclick = fetchAndLearn;
 
-addLog('<span class="id-word">SYSTEM</span>: Ready. Clinch Zeros pulls Wikipedia PRODUCT id and runs PHP analysis.');
+addLog('<span class="id-word">SYSTEM</span>: Ready. Clinch Zeros pulls Wikipedia PRODUCT id, runs PHP analysis, and arms the letter–number hover button.');
 </script>
 </body>
 </html>
